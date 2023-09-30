@@ -1,0 +1,73 @@
+[versions]
+#Application
+packageName = "com.project" # TODO
+minSdk = "23"
+targetSdk = "34"
+
+#Kotlin
+parcelizePluginName = "kotlin-parcelize"
+kotlin = "1.8.22"
+coroutines = "1.7.2"
+
+#Android
+gradlePlugin = "8.1.2"
+
+#AndroidX
+androidxCore = "1.12.0"
+androidxAnnotations = "1.7.0"
+
+#Compose
+composeCompiler = "1.4.8"
+composeBom = "2023.09.02"
+accompanist = "0.31.5-beta"
+navigationReimagined = "1.4.0"
+
+#Detekt
+detekt = "1.23.0"
+
+#AndroidVersionGit
+androidVersionGit = "0.4.14"
+
+#Koin
+koin = "3.4.2" # currently 3.4.5 does not work
+
+[libraries]
+#Kotlin
+coroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+
+#AndroidX
+androidxCore = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
+androidxAnnotations = { module = "androidx.annotation:annotation", version.ref = "androidxAnnotations" }
+
+#Compose
+composeBom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+composeFoundation = { module = "androidx.compose.foundation:foundation" }
+composeActivity = { module = "androidx.activity:activity-compose" }
+composeUi = { module = "androidx.compose.ui:ui" }
+composeUiTooling = { module = "androidx.compose.ui:ui-tooling" }
+composeUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
+composeMaterial = { module = "androidx.compose.material:material" }
+composeViewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose" }
+systemUiController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
+navigationReimagined = { module = "dev.olshevski.navigation:reimagined", version.ref = "navigationReimagined" }
+
+#Koin
+koinCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+koinAndroid = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koinCore = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+
+[plugins]
+#Kotlin
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+#Android
+application = { id = "com.android.application", version.ref = "gradlePlugin" }
+library = { id = "com.android.library", version.ref = "gradlePlugin" }
+
+#Detekt
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detektFormatting = { id = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+
+#AndroidVersionGit
+androidVersionGit = { id = "com.gladed.androidgitversion", version.ref = "androidVersionGit" }

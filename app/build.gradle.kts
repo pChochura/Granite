@@ -1,12 +1,13 @@
+@file:Suppress("UnstableApiUsage")
+
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import java.io.FileInputStream
 import java.util.*
 
 plugins {
-    id(Android.applicationPlugin)
-    id(Kotlin.androidPlugin)
-    id(Kotlin.parcelizePlugin)
-    id(AndroidGitVersion.plugin).version(AndroidGitVersion.version)
+    alias(libs.plugins.application)
+    alias(libs.plugins.androidVersionGit)
+    alias(libs.plugins.kotlin)
+    id(libs.versions.parcelizePluginName.get())
 }
 
 androidGitVersion {
@@ -14,57 +15,54 @@ androidGitVersion {
     codeFormat = "MMNNPPBBB"
 }
 
-val keystorePropertiesFile = rootProject.file("keystore.properties")
-val keystoreProperties = Properties()
-try {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-} catch (e: java.io.FileNotFoundException) {
-    keystoreProperties.setProperty("keyAlias", "")
-    keystoreProperties.setProperty("keyPassword", "")
-    keystoreProperties.setProperty("storeFile", "/")
-    keystoreProperties.setProperty("storePassword", "")
-}
-
 android {
-    compileSdk = Application.targetSdk
+    namespace = libs.versions.packageName.get()
+    compileSdk = libs.versions.targetSdk.get().toInt()
 
     defaultConfig {
-        applicationId = Application.packageName
-        minSdk = Application.minSdk
-        targetSdk = Application.targetSdk
+        applicationId = libs.versions.packageName.get()
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = androidGitVersion.code().takeIf { it > 0 } ?: 1
         versionName = androidGitVersion.name().takeIf { it.isNotEmpty() } ?: "1.0"
     }
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
+            val properties = Properties().apply {
+                rootProject.file("keystore.properties").inputStream().use(::load)
+            }
+
+            storeFile = file(properties.getProperty("storeFile"))
+            storePassword = properties.getProperty("storePassword")
+            keyAlias = properties.getProperty("keyAlias")
+            keyPassword = properties.getProperty("keyPassword")
         }
     }
 
     buildTypes {
-
-        getByName("release") {
+        release {
+            isShrinkResources = true
             isMinifyEnabled = true
-            proguardFiles("proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             signingConfig = signingConfigs.getByName("release")
         }
 
-        getByName("debug") {
+        debug {
             applicationIdSuffix = ".debug"
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     buildFeatures {
@@ -72,16 +70,14 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = Compose.version
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
     applicationVariants.all {
         outputs.all {
             val nameBuilder = StringBuilder()
             nameBuilder.append(applicationId)
-            if (!name.toLowerCase().contains("release")) {
-                nameBuilder.append("_$name")
-            }
+            nameBuilder.append("_$name")
             nameBuilder.append("_$versionName")
             nameBuilder.append("_$versionCode")
             nameBuilder.append(".apk")
@@ -92,18 +88,20 @@ android {
 }
 
 dependencies {
-    implementation(AndroidX.core)
+    implementation(libs.androidxCore)
 
-    implementation(Compose.ActivityCompose)
-    implementation(Compose.ViewModel)
-    implementation(Compose.Material)
-    implementation(Compose.Ui)
-    implementation(Compose.UiToolingPreview)
-    debugImplementation(Compose.UiTooling)
+    implementation(platform(libs.composeBom))
+    implementation(libs.composeActivity)
+    implementation(libs.composeViewModel)
+    implementation(libs.composeMaterial)
+    implementation(libs.composeUi)
+    implementation(libs.composeUiToolingPreview)
+    implementation(libs.navigationReimagined)
 
-    implementation(Koin.compose)
+    implementation(libs.systemUiController)
+    debugImplementation(libs.composeUiTooling)
 
-    implementation(Compose.NavigationReimagined)
+    implementation(libs.koinCompose)
 
-    implementation(project(":domain"))
+    implementation(projects.domain)
 }

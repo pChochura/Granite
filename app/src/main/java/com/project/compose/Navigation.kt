@@ -16,7 +16,7 @@ internal fun NavHost(
         startDestination = Route.Home,
     ),
 ) {
-    NavBackHandler(navController = navController)
+    NavBackHandler(controller = navController)
     AnimatedNavHost(controller = navController) {
         when (it) {
             Route.Home -> HomeScreen()

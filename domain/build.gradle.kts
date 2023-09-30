@@ -1,14 +1,26 @@
 plugins {
-    id(Java.libraryPlugin)
-    id(Kotlin.javaPlugin)
+    alias(libs.plugins.library)
+    alias(libs.plugins.kotlin)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+android {
+    compileSdk = libs.versions.targetSdk.get().toInt()
+    namespace = "${libs.versions.packageName.get()}.domain"
+
+    defaultConfig {
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
+    }
 }
 
 dependencies {
-    implementation(Koin.core)
-    implementation(Kotlin.Coroutines.core)
+    implementation(libs.koinCore)
 }
