@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.application) apply false
     alias(libs.plugins.library) apply false
     alias(libs.plugins.kotlin) apply false
+    alias(libs.plugins.kotlinComposeCompiler) apply false
     alias(libs.plugins.detekt)
 }
 
@@ -11,9 +12,9 @@ detekt {
     debug = true
     buildUponDefaultConfig = true
     ignoreFailures = true
-    config = files("$rootDir/config/detekt.yml")
+    config.setFrom("$rootDir/config/detekt.yml")
     dependencies {
-        detektPlugins(libs.plugins.detektFormatting.get().pluginId)
+        detektPlugins(libs.versions.detektFormattingPlugin.get())
     }
 }
 
@@ -27,5 +28,5 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 }
 
 task("clean", Delete::class) {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }

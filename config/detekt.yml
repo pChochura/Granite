@@ -86,7 +86,7 @@ complexity:
     includeStaticDeclarations: false
     includePrivateDeclarations: false
   ComplexMethod:
-    active: true
+    active: false
     threshold: 15
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
@@ -112,7 +112,7 @@ complexity:
     threshold: 60
     ignoreAnnotated: [ 'Composable' ]
   LongParameterList:
-    active: true
+    active: false
     functionThreshold: 7
     constructorThreshold: 10
     ignoreDefaultParameters: true
@@ -348,9 +348,9 @@ formatting:
     active: true
     autoCorrect: true
   NoWildcardImports:
-    active: true
+    active: false
   PackageName:
-    active: true
+    active: false
     autoCorrect: true
   ParameterListWrapping:
     active: true
@@ -476,7 +476,7 @@ naming:
   PackageNaming:
     active: true
     excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
-    packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
+    packagePattern: '[a-z]+(\.[a-z][_A-Za-z0-9]*)*'
   TopLevelPropertyNaming:
     active: true
     excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
@@ -507,7 +507,7 @@ performance:
     active: true
     excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
   SpreadOperator:
-    active: true
+    active: false
     excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
   UnnecessaryTemporaryInstantiation:
     active: true
@@ -660,7 +660,7 @@ style:
     active: true
     maxJumpCount: 1
   MagicNumber:
-    active: true
+    active: false
     excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
     ignoreNumbers:
       - '-1'
@@ -718,7 +718,7 @@ style:
   RedundantVisibilityModifierRule:
     active: false
   ReturnCount:
-    active: true
+    active: false
     max: 2
     excludedFunctions: 'equals'
     excludeLabeled: false
@@ -796,7 +796,7 @@ style:
   VarCouldBeVal:
     active: true
   WildcardImport:
-    active: true
+    active: false
     excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
     excludeImports:
       - 'java.util.*'

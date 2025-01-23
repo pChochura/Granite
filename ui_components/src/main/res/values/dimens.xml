@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<dimen name="small_rounded_corners">4dp</dimen>
+	<dimen name="medium_rounded_corners">10dp</dimen>
+	<dimen name="large_rounded_corners">16dp</dimen>
+
+	<dimen name="button_size_big">100dp</dimen>
+	<dimen name="button_icon_size_big">48dp</dimen>
+	<dimen name="button_size_medium">50dp</dimen>
+	<dimen name="button_icon_size_medium">24dp</dimen>
+	<dimen name="button_size_small">32dp</dimen>
+	<dimen name="button_icon_size_small">24dp</dimen>
+
+	<dimen name="input_button_border_width">2dp</dimen>
+	<dimen name="input_button_icon_size">32dp</dimen>
+
+	<dimen name="icon_button_border_width">1dp</dimen>
+
+	<dimen name="chip_border_width">1dp</dimen>
+	<dimen name="chip_icon_size">16dp</dimen>
+
+	<dimen name="progress_indicator_size">48dp</dimen>
+
+	<dimen name="button_icon_size">24dp</dimen>
+	<dimen name="caption_icon_size">16dp</dimen>
+	<dimen name="dialog_icon_size">24dp</dimen>
+	<dimen name="dialog_item_icon_size">16dp</dimen>
+	<dimen name="placeholder_icon_size">64dp</dimen>
+
+	<dimen name="margin_nano">4dp</dimen>
+	<dimen name="margin_tiny">8dp</dimen>
+	<dimen name="margin_small">10dp</dimen>
+	<dimen name="margin_medium">16dp</dimen>
+	<dimen name="margin_semi_big">24dp</dimen>
+	<dimen name="margin_big">32dp</dimen>
+	<dimen name="margin_huge">48dp</dimen>
+</resources>

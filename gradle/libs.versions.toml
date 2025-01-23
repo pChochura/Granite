@@ -1,65 +1,72 @@
 [versions]
 #Application
-packageName = "com.project" # TODO
-minSdk = "23"
-targetSdk = "34"
+packageName = "com.project"
+minSdk = "26"
+targetSdk = "35"
 
 #Kotlin
 parcelizePluginName = "kotlin-parcelize"
-kotlin = "1.8.22"
-coroutines = "1.7.2"
+kotlinSerialization = "2.0.20"
+kotlinSerializationJson = "1.7.3"
+kotlin = "2.0.20"
+coroutines = "1.9.0"
 
 #Android
-gradlePlugin = "8.1.2"
+gradlePlugin = "8.6.1"
 
 #AndroidX
-androidxCore = "1.12.0"
-androidxAnnotations = "1.7.0"
+androidxCore = "1.15.0"
+androidxNavigation = "2.8.5"
+androidxSplashscreen = "1.0.1"
+androidxDatastore = "1.1.2"
 
 #Compose
-composeCompiler = "1.4.8"
-composeBom = "2023.09.02"
-accompanist = "0.31.5-beta"
-navigationReimagined = "1.4.0"
+composeCompiler = "1.5.15"
+composeBom = "2025.01.00"
+composeRuntime = "1.7.6"
 
 #Detekt
 detekt = "1.23.0"
+detektFormattingPlugin = "io.gitlab.arturbosch.detekt:detekt-formatting"
 
 #AndroidVersionGit
 androidVersionGit = "0.4.14"
 
 #Koin
-koin = "3.4.2" # currently 3.4.5 does not work
+koin = "4.0.0"
 
 [libraries]
 #Kotlin
 coroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 coroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerializationJson" }
 
 #AndroidX
 androidxCore = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
-androidxAnnotations = { module = "androidx.annotation:annotation", version.ref = "androidxAnnotations" }
+androidxNavigationCompose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigation" }
+androidxSplashscreen = { module = "androidx.core:core-splashscreen", version.ref = "androidxSplashscreen" }
+androidxDatastore = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidxDatastore" }
 
 #Compose
 composeBom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
-composeFoundation = { module = "androidx.compose.foundation:foundation" }
 composeActivity = { module = "androidx.activity:activity-compose" }
 composeUi = { module = "androidx.compose.ui:ui" }
 composeUiTooling = { module = "androidx.compose.ui:ui-tooling" }
 composeUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
-composeMaterial = { module = "androidx.compose.material:material" }
+composeMaterial = { module = "androidx.compose.material3:material3" }
 composeViewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose" }
-systemUiController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
-navigationReimagined = { module = "dev.olshevski.navigation:reimagined", version.ref = "navigationReimagined" }
+composeRuntime = { module = "androidx.compose.runtime:runtime", version.ref = "composeRuntime" }
 
 #Koin
 koinCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
-koinAndroid = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koinCore = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koinAndroid = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 
 [plugins]
 #Kotlin
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
+kotlinComposeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 #Android
 application = { id = "com.android.application", version.ref = "gradlePlugin" }
@@ -67,7 +74,6 @@ library = { id = "com.android.library", version.ref = "gradlePlugin" }
 
 #Detekt
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-detektFormatting = { id = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 
 #AndroidVersionGit
 androidVersionGit = { id = "com.gladed.androidgitversion", version.ref = "androidVersionGit" }

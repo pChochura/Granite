@@ -1,12 +1,12 @@
-@file:Suppress("UnstableApiUsage")
-
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import java.util.*
 
 plugins {
     alias(libs.plugins.application)
     alias(libs.plugins.androidVersionGit)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinComposeCompiler)
     id(libs.versions.parcelizePluginName.get())
 }
 
@@ -67,6 +67,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -89,6 +90,8 @@ android {
 
 dependencies {
     implementation(libs.androidxCore)
+    implementation(libs.androidxNavigationCompose)
+    implementation(libs.androidxSplashscreen)
 
     implementation(platform(libs.composeBom))
     implementation(libs.composeActivity)
@@ -96,12 +99,12 @@ dependencies {
     implementation(libs.composeMaterial)
     implementation(libs.composeUi)
     implementation(libs.composeUiToolingPreview)
-    implementation(libs.navigationReimagined)
 
-    implementation(libs.systemUiController)
     debugImplementation(libs.composeUiTooling)
 
     implementation(libs.koinCompose)
+    implementation(libs.kotlinSerializationJson)
 
     implementation(projects.domain)
+    implementation(projects.uiComponents)
 }

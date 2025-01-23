@@ -23,4 +23,5 @@ include(
     ":app",
     ":domain",
     ":datasource",
+    ":ui_components",
 )
