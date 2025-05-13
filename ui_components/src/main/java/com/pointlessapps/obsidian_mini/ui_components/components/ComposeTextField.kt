@@ -101,7 +101,7 @@ private fun composeTextFieldKeyboardActions(onAny: KeyboardActionScope.(ImeActio
         onNext = { onAny(ImeAction.Next) },
         onPrevious = { onAny(ImeAction.Previous) },
         onSearch = { onAny(ImeAction.Search) },
-        onSend = { onAny(ImeAction.Search) },
+        onSend = { onAny(ImeAction.Send) },
     )
 
 @Composable
