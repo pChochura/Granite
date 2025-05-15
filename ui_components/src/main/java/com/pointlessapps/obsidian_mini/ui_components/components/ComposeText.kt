@@ -1,4 +1,4 @@
-package com.project.ui_components.components
+package com.pointlessapps.obsidian_mini.ui_components.components
 
 import android.text.Html
 import androidx.compose.material3.MaterialTheme
@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import com.project.ui_components.R
-import com.project.ui_components.utils.toAnnotatedString
+import com.pointlessapps.obsidian_mini.ui_components.utils.toAnnotatedString
 
 @Composable
 fun ComposeText(

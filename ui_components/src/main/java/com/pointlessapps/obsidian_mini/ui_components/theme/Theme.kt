@@ -1,4 +1,4 @@
-package com.project.ui_components.theme
+package com.pointlessapps.obsidian_mini.ui_components.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

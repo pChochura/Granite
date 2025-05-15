@@ -1,4 +1,4 @@
-package com.project.ui_components.components
+package com.pointlessapps.obsidian_mini.ui_components.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background

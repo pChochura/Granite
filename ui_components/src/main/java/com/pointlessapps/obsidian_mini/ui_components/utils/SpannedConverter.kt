@@ -1,4 +1,4 @@
-package com.project.ui_components.utils
+package com.pointlessapps.obsidian_mini.ui_components.utils
 
 import android.graphics.Typeface
 import android.text.Spanned

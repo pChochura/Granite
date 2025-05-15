@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-rootProject.name = "project-template" // TODO
+rootProject.name = "obsidian-mini"
 
 include(
     ":app",

@@ -1,4 +1,4 @@
-package com.project.navigation
+package com.pointlessapps.obsidian_mini.navigation
 
 import kotlinx.serialization.Serializable
 

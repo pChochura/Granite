@@ -1,4 +1,4 @@
-package com.project.ui_components.components
+package com.pointlessapps.obsidian_mini.ui_components.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
@@ -21,7 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.Role
-import com.project.ui_components.R
+import com.pointlessapps.obsidian_mini.ui_components.R
 
 @Composable
 fun ComposeChip(

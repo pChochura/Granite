@@ -1,4 +1,4 @@
-package com.project
+package com.pointlessapps.obsidian_mini
 
 import android.content.Context
 import android.os.Bundle
@@ -17,10 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
-import com.project.navigation.Navigation
-import com.project.di.applicationModules
+import com.pointlessapps.obsidian_mini.navigation.Navigation
+import com.pointlessapps.obsidian_mini.di.applicationModules
 import com.project.domain.di.domainModules
-import com.project.ui_components.theme.ProjectTheme
+import com.pointlessapps.obsidian_mini.ui_components.theme.ProjectTheme
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.compose.KoinApplication
