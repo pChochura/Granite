@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
-import com.project.ui_components.R
+import com.pointlessapps.obsidian_mini.ui_components.R
 
 @Composable
 fun ComposeSnackbar(

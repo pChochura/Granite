@@ -1,12 +1,13 @@
 plugins {
     alias(libs.plugins.library)
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.kotlinComposeCompiler)
 }
 
 android {
     compileSdk = libs.versions.targetSdk.get().toInt()
-    namespace = "${libs.versions.packageName.get()}.ui_components"
+    namespace = "${libs.versions.packageName.get()}.markdown_renderer"
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -33,7 +34,6 @@ android {
 dependencies {
     implementation(platform(libs.composeBom))
     implementation(libs.composeUi)
-    implementation(libs.composeMaterial)
 
-    implementation(projects.markdownRenderer)
+    implementation(libs.markdown)
 }

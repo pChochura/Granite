@@ -1,4 +1,5 @@
 <resources>
 	<!--	TODO-->
 	<string name="app_name">Project</string>
+    <string name="title_note">Note</string>
 </resources>

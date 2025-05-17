@@ -28,7 +28,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.toSize
-import com.project.ui_components.R
+import com.pointlessapps.obsidian_mini.ui_components.R
 
 @Composable
 fun ComposeIconButton(

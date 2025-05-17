@@ -31,7 +31,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.toSize
-import com.project.ui_components.R
+import com.pointlessapps.obsidian_mini.ui_components.R
 
 @Composable
 fun ComposeButton(

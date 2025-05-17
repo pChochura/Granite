@@ -13,7 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import com.project.ui_components.R
+import com.pointlessapps.obsidian_mini.ui_components.R
 import com.pointlessapps.obsidian_mini.ui_components.utils.toAnnotatedString
 
 @Composable

@@ -18,7 +18,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import com.project.ui_components.R
+import com.pointlessapps.obsidian_mini.ui_components.R
 
 private val fontFamily = FontFamily(
     Font(

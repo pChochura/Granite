@@ -1,5 +1,5 @@
 package com.pointlessapps.obsidian_mini.di
 
-import org.koin.core.module.Module
+import com.pointlessapps.obsidian_mini.home.di.homeModule
 
-val applicationModules = emptyList<Module>()
+val applicationModules = listOf(homeModule)

@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.project.ui_components.R
+import com.pointlessapps.obsidian_mini.ui_components.R
 
 @Composable
 fun ComposeDialog(

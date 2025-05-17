@@ -100,8 +100,6 @@ dependencies {
     implementation(libs.composeUi)
     implementation(libs.composeUiToolingPreview)
 
-    implementation(libs.composeRichText)
-
     debugImplementation(libs.composeUiTooling)
 
     implementation(libs.koinCompose)
@@ -109,4 +107,5 @@ dependencies {
 
     implementation(projects.domain)
     implementation(projects.uiComponents)
+    implementation(projects.markdownRenderer)
 }
