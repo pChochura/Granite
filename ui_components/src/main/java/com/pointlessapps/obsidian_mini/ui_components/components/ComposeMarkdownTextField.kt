@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import com.pointlessapps.obsidian_mini.markdown_renderer.MarkdownTransformation
+import com.pointlessapps.obsidian_mini.MarkdownTransformation
 
 @Composable
 fun ComposeMarkdownTextField(
