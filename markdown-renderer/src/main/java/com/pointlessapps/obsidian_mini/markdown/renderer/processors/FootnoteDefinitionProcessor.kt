@@ -1,6 +1,7 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
 import androidx.compose.ui.util.fastMapNotNull
+import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
@@ -35,32 +36,25 @@ internal class FootnoteDefinitionProcessor(
     }
 
     override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
-        val openingMarkers = node.children.takeWhile {
-            it.type in listOf(MarkdownTokenTypes.LBRACKET, ObsidianTokenTypes.CARET)
-        }
-        val closingMarkers = node.children.filter {
-            it.type in listOf(
-                MarkdownTokenTypes.RBRACKET,
-                MarkdownTokenTypes.COLON,
-            )
-        }
+        val idMarker = node.children.find { it.type == ObsidianElementTypes.FOOTNOTE_ID }
+        val contentMarker = node.children.find { it.type == ObsidianElementTypes.FOOTNOTE_DEFINITION_TEXT }
 
-        if (openingMarkers.isEmpty() || closingMarkers.isEmpty()) {
+        if (idMarker == null || contentMarker == null) {
             throw IllegalStateException("FootnoteDefinitionProcessor encountered unbalanced amount of markers.")
         }
 
         return styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(
-            startOffset = openingMarkers.maxOf { it.endOffset },
-            endOffset = closingMarkers.minOf { it.startOffset },
+            startOffset = idMarker.startOffset,
+            endOffset = idMarker.endOffset,
         ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
-            startOffset = openingMarkers.minOf { it.startOffset },
-            endOffset = openingMarkers.maxOf { it.endOffset },
+            startOffset = node.startOffset,
+            endOffset = idMarker.startOffset,
         ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
-            startOffset = closingMarkers.minOf { it.startOffset },
-            endOffset = closingMarkers.maxOf { it.endOffset } + 1,
+            startOffset = idMarker.endOffset,
+            endOffset = contentMarker.startOffset,
         ) + styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
-            startOffset = closingMarkers.maxOf { it.endOffset } + 1,
-            endOffset = node.endOffset,
+            startOffset = contentMarker.startOffset,
+            endOffset = contentMarker.endOffset,
         )
     }
 

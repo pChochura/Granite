@@ -3,10 +3,10 @@ package com.pointlessapps.obsidian_mini.markdown.renderer.providers
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.LABEL
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.DECORATION
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.DECORATION
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.LABEL
 import org.intellij.markdown.IElementType
 
 object FootnoteDefinitionStyleProvider : ProcessorStyleProvider {

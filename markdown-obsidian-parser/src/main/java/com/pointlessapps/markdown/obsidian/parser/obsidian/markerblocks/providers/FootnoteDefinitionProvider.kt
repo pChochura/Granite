@@ -119,26 +119,20 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             if (start >= text.length) return null
 
             var offset = start
-            var newLinePassed = false
             while (offset < text.length) {
-                if (text[offset] == '\n') {
-                    if (newLinePassed) {
-                        // Allow only one newline
-                        break
-                    }
-
-                    newLinePassed = true
+                if (text[offset] == '\n' && text.getOrNull(offset + 1) in listOf('\n', null)) {
+                    break
                 }
+
                 offset++
             }
 
             // There's no content
-            if (start >= offset - 1) {
+            if (start >= offset) {
                 return null
             }
 
-            // Ignore the newline character
-            return IntRange(start, offset - 1)
+            return IntRange(start, offset)
         }
 
         private fun passSpacesAndNewLine(text: CharSequence, start: Int): Int {
