@@ -1,35 +1,39 @@
 package com.pointlessapps.obsidian_mini.processors
 
+import com.pointlessapps.obsidian_mini.NodeProcessor
+import com.pointlessapps.obsidian_mini.ProcessorStyleProvider
+import com.pointlessapps.obsidian_mini.flavours.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.models.NodeElement
 import com.pointlessapps.obsidian_mini.models.NodeMarker
-import com.pointlessapps.obsidian_mini.NodeProcessor
 import com.pointlessapps.obsidian_mini.models.NodeStyle
-import com.pointlessapps.obsidian_mini.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.models.toNodeStyles
+import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
+import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
-internal class BoldProcessor(
+internal open class DelimiterProcessor(
+    private val delimiter: IElementType,
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
     override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
-        val openingMarkers = node.children.takeWhile { it.type == MarkdownTokenTypes.EMPH }
-        val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.EMPH }
+        val openingMarkers = node.children.takeWhile { it.type == delimiter }
+        val closingMarkers = node.children.takeLastWhile { it.type == delimiter }
 
         if (openingMarkers.isEmpty() || closingMarkers.isEmpty() || openingMarkers.size != closingMarkers.size) {
-            throw IllegalStateException("BoldProcessor encountered unbalanced amount of markers.")
+            throw IllegalStateException("DelimiterProcessor encountered unbalanced amount of markers.")
         }
 
         // Flatten multiple subsequent markers into one
         return listOf(
             NodeMarker(
-                element = MarkdownTokenTypes.EMPH,
+                element = delimiter,
                 startOffset = openingMarkers.minOf { it.startOffset },
                 endOffset = openingMarkers.maxOf { it.endOffset },
             ),
             NodeMarker(
-                element = MarkdownTokenTypes.EMPH,
+                element = delimiter,
                 startOffset = closingMarkers.minOf { it.startOffset },
                 endOffset = closingMarkers.maxOf { it.endOffset },
             ),
@@ -37,11 +41,11 @@ internal class BoldProcessor(
     }
 
     override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
-        val openingMarkers = node.children.takeWhile { it.type == MarkdownTokenTypes.EMPH }
-        val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.EMPH }
+        val openingMarkers = node.children.takeWhile { it.type == delimiter }
+        val closingMarkers = node.children.takeLastWhile { it.type == delimiter }
 
         if (openingMarkers.isEmpty() || closingMarkers.isEmpty() || openingMarkers.size != closingMarkers.size) {
-            throw IllegalStateException("BoldProcessor encountered unbalanced amount of markers.")
+            throw IllegalStateException("DelimiterProcessor encountered unbalanced amount of markers.")
         }
 
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
@@ -58,3 +62,19 @@ internal class BoldProcessor(
 
     override fun shouldProcessChildren() = true
 }
+
+internal class BoldProcessor(
+    styleProvider: ProcessorStyleProvider,
+) : DelimiterProcessor(MarkdownTokenTypes.EMPH, styleProvider)
+
+internal class HighlightProcessor(
+    styleProvider: ProcessorStyleProvider,
+) : DelimiterProcessor(ObsidianTokenTypes.EQ, styleProvider)
+
+internal class ItalicProcessor(
+    styleProvider: ProcessorStyleProvider,
+) : DelimiterProcessor(MarkdownTokenTypes.EMPH, styleProvider)
+
+internal class StrikethroughProcessor(
+    styleProvider: ProcessorStyleProvider,
+) : DelimiterProcessor(GFMTokenTypes.TILDE, styleProvider)

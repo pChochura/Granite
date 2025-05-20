@@ -8,8 +8,8 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.pointlessapps.obsidian_mini.flavours.obsidian.ObsidianElementTypes
 import com.pointlessapps.obsidian_mini.flavours.obsidian.ObsidianFlavourDescriptor
+import com.pointlessapps.obsidian_mini.models.MarkdownParsingResult
 import com.pointlessapps.obsidian_mini.models.NodeMarker
-import com.pointlessapps.obsidian_mini.models.NodeProcessorResult
 import com.pointlessapps.obsidian_mini.models.NodeStyle
 import com.pointlessapps.obsidian_mini.processors.BlockQuoteProcessor
 import com.pointlessapps.obsidian_mini.processors.BoldProcessor
@@ -41,12 +41,10 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.parser.MarkdownParser
 
-class MarkdownTransformation(
-    // TODO: Optimize this to omit parsing when moving the cursor
-    private val currentCursorPosition: TextRange,
-) : VisualTransformation {
+class MarkdownTransformation(private val currentCursorPosition: TextRange) : VisualTransformation {
 
     private val parser = MarkdownParser(ObsidianFlavourDescriptor())
+    private var markdownParsingResult: MarkdownParsingResult? = null
 
     private val footnoteDefinitionProcessor =
         FootnoteDefinitionProcessor(FootnoteDefinitionStyleProvider)
@@ -97,13 +95,11 @@ class MarkdownTransformation(
                 false
             }
 
-            val result = node.type
-                .toNodeProcessor()
-                .processNode(
-                    node = node,
-                    textContent = nodeTextContent,
-                    hideMarkers = hideNodeMarkers,
-                )
+            val result = node.type.toNodeProcessor().processNode(
+                node = node,
+                textContent = nodeTextContent,
+                hideMarkers = hideNodeMarkers,
+            )
             styles.addAll(result.styles)
             markers.addAll(result.markers)
             if (result.processChildren) node.children.forEach(::processNode)
@@ -114,8 +110,14 @@ class MarkdownTransformation(
     }
 
     override fun filter(text: AnnotatedString): TransformedText {
-        val rootNode = parser.buildMarkdownTreeFromString(text.text)
-        val (styles, markers) = rootNode.getStylesAndMarkers(text.text)
+        if (markdownParsingResult?.textContent != text.text) {
+            markdownParsingResult = MarkdownParsingResult(
+                rootNode = parser.buildMarkdownTreeFromString(text.text),
+                textContent = text.text,
+            )
+        }
+
+        val (styles, markers) = markdownParsingResult!!.rootNode.getStylesAndMarkers(text.text)
 
         val originalText = text.text
         val transformedTextBuilder = StringBuilder()
