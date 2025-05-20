@@ -24,5 +24,6 @@ include(
     ":domain",
     ":datasource",
     ":ui_components",
-    ":markdown_renderer"
+    ":markdown-renderer",
+    ":markdown-obsidian-parser",
 )
