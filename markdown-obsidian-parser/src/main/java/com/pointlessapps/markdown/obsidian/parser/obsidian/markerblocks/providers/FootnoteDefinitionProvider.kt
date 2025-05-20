@@ -52,14 +52,14 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
                         else -> throw IllegalStateException("Unexpected group in footnote regex")
                     }
                 )
-            }
+            },
         )
 
         return listOf(
             FootnoteDefinitionMarkerBlock(
                 myConstraints = stateInfo.currentConstraints,
                 marker = productionHolder.mark(),
-                endPosition = matchResult.last().last + 1,
+                endPosition = matchResult.last().last,
             ),
         )
     }
@@ -73,12 +73,12 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
         fun matchFootnoteDefinition(text: CharSequence, startOffset: Int): List<IntRange>? {
             var offset = MarkerBlockProvider.passSmallIndent(text, startOffset)
 
-            if (offset + 1 >= text.length) return null
+            if (offset + 1 > text.length) return null
             val lBracketMatch = IntRange(offset, offset + 1)
-                .takeIf {text[offset] == '[' } ?: return null
+                .takeIf { text[offset] == '[' } ?: return null
             offset++
 
-            if (offset + 1 >= text.length) return null
+            if (offset + 1 > text.length) return null
             val caretMatch = IntRange(offset, offset + 1)
                 .takeIf { text[offset] == '^' } ?: return null
             offset++
@@ -86,18 +86,18 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             val labelMatch = matchFootnoteLabel(text, offset) ?: return null
             offset = labelMatch.last
 
-            if (offset + 1 >= text.length) return null
+            if (offset + 1 > text.length) return null
             val rBracketMatch = IntRange(offset, offset + 1)
                 .takeIf { text[offset] == ']' } ?: return null
             offset++
 
-            if (offset + 1 >= text.length) return null
+            if (offset + 1 > text.length) return null
             val colonMatch = IntRange(offset, offset + 1)
                 .takeIf { text[offset] == ':' } ?: return null
             offset++
 
             // Skip spaces before the content
-            offset = passSpaces(text, offset)
+            offset = passSpacesAndNewLine(text, offset)
 
             val contentMatch = matchFootnoteContent(text, offset) ?: return null
 
@@ -119,22 +119,44 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             if (start >= text.length) return null
 
             var offset = start
-            while (offset < text.length && text[offset] != '\n') {
+            var newLinePassed = false
+            while (offset < text.length) {
+                if (text[offset] == '\n') {
+                    if (newLinePassed) {
+                        // Allow only one newline
+                        break
+                    }
+
+                    newLinePassed = true
+                }
                 offset++
+            }
+
+            // There's no content
+            if (start >= offset - 1) {
+                return null
             }
 
             // Ignore the newline character
             return IntRange(start, offset - 1)
         }
 
-        private fun passSpaces(text: CharSequence, start: Int): Int {
+        private fun passSpacesAndNewLine(text: CharSequence, start: Int): Int {
             var offset = start
+            var newLinePassed = false
             while (offset < text.length && text[offset].isWhitespace()) {
+                if (text[offset] == '\n') {
+                    if (newLinePassed) {
+                        // Allow only one newline
+                        return offset
+                    }
+
+                    newLinePassed = true
+                }
                 offset++
             }
 
             return offset
         }
-
     }
 }
