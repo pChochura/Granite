@@ -6,7 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.pointlessapps.obsidian_mini.NodeElement
+import com.pointlessapps.obsidian_mini.models.NodeElement
 import com.pointlessapps.obsidian_mini.ProcessorStyleProvider
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes

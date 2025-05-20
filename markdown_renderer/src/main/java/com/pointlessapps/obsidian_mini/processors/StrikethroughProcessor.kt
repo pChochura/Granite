@@ -1,11 +1,11 @@
 package com.pointlessapps.obsidian_mini.processors
 
-import com.pointlessapps.obsidian_mini.NodeElement
-import com.pointlessapps.obsidian_mini.NodeMarker
+import com.pointlessapps.obsidian_mini.models.NodeElement
+import com.pointlessapps.obsidian_mini.models.NodeMarker
 import com.pointlessapps.obsidian_mini.NodeProcessor
-import com.pointlessapps.obsidian_mini.NodeStyle
+import com.pointlessapps.obsidian_mini.models.NodeStyle
 import com.pointlessapps.obsidian_mini.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.toNodeStyles
+import com.pointlessapps.obsidian_mini.models.toNodeStyles
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 

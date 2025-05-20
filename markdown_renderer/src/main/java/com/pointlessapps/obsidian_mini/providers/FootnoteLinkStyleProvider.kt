@@ -4,7 +4,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.em
-import com.pointlessapps.obsidian_mini.NodeElement
+import com.pointlessapps.obsidian_mini.models.NodeElement
 import com.pointlessapps.obsidian_mini.ProcessorStyleProvider
 import org.intellij.markdown.IElementType
 

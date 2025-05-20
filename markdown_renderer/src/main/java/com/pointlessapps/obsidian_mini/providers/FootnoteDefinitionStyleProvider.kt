@@ -3,9 +3,9 @@ package com.pointlessapps.obsidian_mini.providers
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
-import com.pointlessapps.obsidian_mini.NodeElement
-import com.pointlessapps.obsidian_mini.NodeElement.LABEL
-import com.pointlessapps.obsidian_mini.NodeElement.DECORATION
+import com.pointlessapps.obsidian_mini.models.NodeElement
+import com.pointlessapps.obsidian_mini.models.NodeElement.LABEL
+import com.pointlessapps.obsidian_mini.models.NodeElement.DECORATION
 import com.pointlessapps.obsidian_mini.ProcessorStyleProvider
 import org.intellij.markdown.IElementType
 

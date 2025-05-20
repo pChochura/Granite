@@ -1,4 +1,4 @@
-package com.pointlessapps.obsidian_mini
+package com.pointlessapps.obsidian_mini.models
 
 import androidx.compose.ui.text.AnnotatedString
 
