@@ -341,6 +341,7 @@ FOOTNOTE_DEFINITION = "[^" {FOOTNOTE_IDENTIFIER} "]:" {WHITE_SPACE}* [^\n\r]*
   "!" { return MarkdownTokenTypes.EXCLAMATION_MARK; }
   "^" { return ObsidianTokenTypes.CARET; }
   "|" { return ObsidianTokenTypes.PIPE; }
+  "%" { return ObsidianTokenTypes.PERCENT; }
 
   \\ / {EOL} {
     return MarkdownTokenTypes.HARD_LINE_BREAK;

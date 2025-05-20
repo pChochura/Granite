@@ -1,6 +1,7 @@
 package com.pointlessapps.markdown.obsidian.parser.obsidian
 
 import com.pointlessapps.markdown.obsidian.parser.obsidian.lexer._ObsidianLexer
+import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.CommentDelimiterParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.FootnoteParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.HighlightDelimiterParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.InternalLinkParser
@@ -39,6 +40,7 @@ class ObsidianFlavourDescriptor(
             InternalLinkParser(),
             InlineLinkParser(),
             EmphasisLikeParser(
+                CommentDelimiterParser(),
                 EmphStrongDelimiterParser(),
                 StrikeThroughDelimiterParser(),
                 HighlightDelimiterParser(),

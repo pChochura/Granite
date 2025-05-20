@@ -13,11 +13,14 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
 internal open class DelimiterProcessor(
-    private val delimiter: IElementType,
     styleProvider: ProcessorStyleProvider,
+    private val delimiter: IElementType,
+    private val alwaysShowMarkers: Boolean = false,
 ) : NodeProcessor(styleProvider) {
 
     override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
+        if (alwaysShowMarkers) return emptyList()
+
         val openingMarkers = node.children.takeWhile { it.type == delimiter }
         val closingMarkers = node.children.takeLastWhile { it.type == delimiter }
 
@@ -65,16 +68,20 @@ internal open class DelimiterProcessor(
 
 internal class BoldProcessor(
     styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(MarkdownTokenTypes.EMPH, styleProvider)
+) : DelimiterProcessor(styleProvider, MarkdownTokenTypes.EMPH)
 
 internal class HighlightProcessor(
     styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(ObsidianTokenTypes.EQ, styleProvider)
+) : DelimiterProcessor(styleProvider, ObsidianTokenTypes.EQ)
 
 internal class ItalicProcessor(
     styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(MarkdownTokenTypes.EMPH, styleProvider)
+) : DelimiterProcessor(styleProvider, MarkdownTokenTypes.EMPH)
 
 internal class StrikethroughProcessor(
     styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(GFMTokenTypes.TILDE, styleProvider)
+) : DelimiterProcessor(styleProvider, GFMTokenTypes.TILDE)
+
+internal class CommentProcessor(
+    styleProvider: ProcessorStyleProvider,
+) : DelimiterProcessor(styleProvider, ObsidianTokenTypes.PERCENT, alwaysShowMarkers = true)
