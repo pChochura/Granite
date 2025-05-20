@@ -1,5 +1,6 @@
 package com.pointlessapps.markdown.obsidian.parser.obsidian
 
+import com.pointlessapps.markdown.obsidian.parser.obsidian.markerblocks.providers.CommentBlockProvider
 import com.pointlessapps.markdown.obsidian.parser.obsidian.markerblocks.providers.FootnoteDefinitionProvider
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.flavours.commonmark.CommonMarkMarkerProcessor
@@ -35,6 +36,7 @@ internal class ObsidianMarkerProcessor(
     override fun getMarkerBlockProviders() = listOf(
         CodeBlockProvider(),
         HorizontalRuleProvider(),
+        CommentBlockProvider(),
         CodeFenceProvider(),
         SetextHeaderProvider(),
         BlockQuoteProvider(),

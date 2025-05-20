@@ -28,6 +28,12 @@ object ObsidianElementTypes {
     val COMMENT: IElementType = MarkdownElementType("COMMENT")
 
     @JvmField
+    val COMMENT_BLOCK: IElementType = MarkdownElementType("COMMENT_BLOCK")
+
+    @JvmField
+    val COMMENT_BLOCK_CONTENT: IElementType = MarkdownElementType("COMMENT_BLOCK_CONTENT")
+
+    @JvmField
     val INTERNAL_LINK: IElementType = MarkdownElementType("INTERNAL_LINK")
 
     @JvmField
