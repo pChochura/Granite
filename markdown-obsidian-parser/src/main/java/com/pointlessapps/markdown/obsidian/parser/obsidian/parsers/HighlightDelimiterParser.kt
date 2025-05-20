@@ -10,6 +10,7 @@ import org.intellij.markdown.parser.sequentialparsers.impl.EmphStrongDelimiterPa
 /**
  * Parses a structure called [ObsidianElementTypes.HIGHLIGHT] that is represented by a text
  * surrounded by two or more equals signs (=).
+ *
  * It can be inserted at any position in the markdown.
  */
 internal class HighlightDelimiterParser : DelimiterParser() {

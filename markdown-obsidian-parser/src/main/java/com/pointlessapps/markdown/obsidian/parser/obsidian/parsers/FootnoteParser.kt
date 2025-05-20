@@ -11,6 +11,7 @@ import org.intellij.markdown.parser.sequentialparsers.TokensCache
 /**
  * Parses a structure called [ObsidianElementTypes.FOOTNOTE_LINK] that is represented by
  * an id ([ObsidianElementTypes.FOOTNOTE_ID]) encapsulated in a `[^ID]` block.
+ *
  * It can be inserted at any position in the markdown.
  */
 internal class FootnoteParser : SequentialParser {

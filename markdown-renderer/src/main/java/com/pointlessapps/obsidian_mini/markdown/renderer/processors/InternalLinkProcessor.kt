@@ -1,11 +1,12 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
@@ -44,6 +45,8 @@ internal class InternalLinkProcessor(
             throw IllegalStateException("InternalLinkProcessor encountered unbalanced amount of markers.")
         }
 
+        val labelMarker = node.children.find { it.type == MarkdownElementTypes.LINK_LABEL }
+
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = openingMarkers.maxOf { it.endOffset },
             endOffset = closingMarkers.minOf { it.startOffset },
@@ -53,7 +56,12 @@ internal class InternalLinkProcessor(
         ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = closingMarkers.minOf { it.startOffset },
             endOffset = closingMarkers.maxOf { it.endOffset },
-        )
+        ) + if (labelMarker != null) {
+            styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(
+                startOffset = labelMarker.startOffset,
+                endOffset = labelMarker.endOffset,
+            )
+        } else emptyList()
     }
 
     override fun shouldProcessChildren() = true

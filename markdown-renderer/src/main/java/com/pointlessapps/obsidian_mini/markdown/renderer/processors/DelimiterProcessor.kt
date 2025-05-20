@@ -1,8 +1,8 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.flavours.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle

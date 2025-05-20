@@ -11,6 +11,9 @@ object ObsidianTokenTypes {
     val CARET: IElementType = MarkdownElementType("^", true)
 
     @JvmField
+    val PIPE: IElementType = MarkdownElementType("|", true)
+
+    @JvmField
     val FOOTNOTE_DEFINITION: IElementType = MarkdownElementType("FOOTNOTE_DEFINITION", true)
 }
 

@@ -1,8 +1,9 @@
 package com.pointlessapps.markdown.obsidian.parser.obsidian.parsers
 
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
-import org.intellij.markdown.MarkdownTokenTypes
+import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import org.intellij.markdown.MarkdownElementTypes
+import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.parser.sequentialparsers.LocalParsingResult
 import org.intellij.markdown.parser.sequentialparsers.RangesListBuilder
 import org.intellij.markdown.parser.sequentialparsers.SequentialParser
@@ -11,6 +12,9 @@ import org.intellij.markdown.parser.sequentialparsers.TokensCache
 /**
  * Parses a structure called [ObsidianElementTypes.INTERNAL_LINK] that is represented by a text
  * ([MarkdownElementTypes.LINK_DESTINATION]) surrounded by double brackets: `[[DESTINATION]]`.
+ *
+ * Optionally it can contain a [MarkdownElementTypes.LINK_LABEL] in a form of `[[DESTINATION|LABEL]]`.
+ *
  * It can be inserted at any position in the markdown.
  */
 internal class InternalLinkParser : SequentialParser {
@@ -53,6 +57,9 @@ internal class InternalLinkParser : SequentialParser {
             val linkDestination = parseInternalLinkDestination(it) ?: return null
             it = linkDestination.iteratorPosition
 
+            val linkLabel = parseInternalLinkLabel(it)
+            it = linkLabel?.iteratorPosition ?: it
+
             // The closing of the internal link (]]) is not present
             if (it.type != MarkdownTokenTypes.RBRACKET || it.rawLookup(1) != MarkdownTokenTypes.RBRACKET) {
                 return null
@@ -60,10 +67,12 @@ internal class InternalLinkParser : SequentialParser {
 
             return LocalParsingResult(
                 iteratorPosition = it,
-                parsedNodes = linkDestination.parsedNodes + SequentialParser.Node(
-                    startIndex..it.index + 2,
-                    ObsidianElementTypes.INTERNAL_LINK,
-                ),
+                parsedNodes = linkDestination.parsedNodes +
+                        linkLabel?.parsedNodes.orEmpty() +
+                        SequentialParser.Node(
+                            range = startIndex..it.index + 2,
+                            type = ObsidianElementTypes.INTERNAL_LINK,
+                        ),
                 rangesToProcessFurther = linkDestination.rangesToProcessFurther,
             )
         }
@@ -72,6 +81,48 @@ internal class InternalLinkParser : SequentialParser {
             val startIndex = iterator.index
             var it = iterator
 
+            val delegate = RangesListBuilder()
+
+            while (it.type != MarkdownTokenTypes.RBRACKET && it.type != ObsidianTokenTypes.PIPE && it.type != null) {
+                delegate.put(it.index)
+                if (it.type == MarkdownTokenTypes.LBRACKET) {
+                    break
+                }
+
+                it = it.advance()
+            }
+
+            if (it.type == MarkdownTokenTypes.RBRACKET || it.type == ObsidianTokenTypes.PIPE) {
+                val endIndex = it.index
+
+                // The link is empty
+                if (endIndex == startIndex) {
+                    return null
+                }
+
+                return LocalParsingResult(
+                    iteratorPosition = it,
+                    parsedNodes = listOf(
+                        SequentialParser.Node(
+                            range = startIndex..endIndex,
+                            type = MarkdownElementTypes.LINK_DESTINATION,
+                        ),
+                    ),
+                    delegateRanges = delegate.get(),
+                )
+            }
+
+            return null
+        }
+
+        fun parseInternalLinkLabel(iterator: TokensCache.Iterator): LocalParsingResult? {
+            var it = iterator
+
+            if (it.type != ObsidianTokenTypes.PIPE) {
+                return null
+            }
+            it = it.advance()
+            val startIndex = it.index
             val delegate = RangesListBuilder()
 
             while (it.type != MarkdownTokenTypes.RBRACKET && it.type != null) {
@@ -86,7 +137,7 @@ internal class InternalLinkParser : SequentialParser {
             if (it.type == MarkdownTokenTypes.RBRACKET) {
                 val endIndex = it.index
 
-                // The link is empty
+                // The label is empty
                 if (endIndex == startIndex) {
                     return null
                 }
@@ -94,7 +145,10 @@ internal class InternalLinkParser : SequentialParser {
                 return LocalParsingResult(
                     iteratorPosition = it,
                     parsedNodes = listOf(
-                        SequentialParser.Node(startIndex..endIndex, MarkdownElementTypes.LINK_DESTINATION),
+                        SequentialParser.Node(
+                            range = startIndex..endIndex,
+                            type = MarkdownElementTypes.LINK_LABEL,
+                        ),
                     ),
                     delegateRanges = delegate.get(),
                 )
