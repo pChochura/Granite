@@ -46,13 +46,12 @@ internal class BlockQuoteProcessor(
         val numberOfLines = textContent.lines().size
         val styles = ArrayList<NodeStyle>(numberOfLines * 2)
 
-        // TODO fix applying styles to the content portion
         var index = 0
         var contentStartIndex = -1
-        while (index < textContent.lastIndex) {
+        while (index <= textContent.lastIndex) {
             if (textContent[index] == '>' && textContent.getOrNull(index + 1) == ' ') {
                 styles.addAll(
-                    styleProvider.styleNodeElement(NodeElement.OTHER, node.type).toNodeStyles(
+                    styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
                         startOffset = node.startOffset + index,
                         endOffset = node.startOffset + index + 2,
                     )
@@ -75,6 +74,15 @@ internal class BlockQuoteProcessor(
             }
 
             index++
+        }
+
+        if (contentStartIndex != -1) {
+            styles.addAll(
+                styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
+                    startOffset = contentStartIndex,
+                    endOffset = index, // The end of the node
+                )
+            )
         }
 
         return styles

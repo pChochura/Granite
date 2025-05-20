@@ -47,10 +47,10 @@ internal class BoldProcessor(
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = openingMarkers.maxOf { it.endOffset },
             endOffset = closingMarkers.minOf { it.startOffset },
-        ) + styleProvider.styleNodeElement(NodeElement.DELIMITER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = openingMarkers.minOf { it.startOffset },
             endOffset = openingMarkers.maxOf { it.endOffset },
-        ) + styleProvider.styleNodeElement(NodeElement.DELIMITER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = closingMarkers.minOf { it.startOffset },
             endOffset = closingMarkers.maxOf { it.endOffset },
         )

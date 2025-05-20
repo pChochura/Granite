@@ -43,13 +43,13 @@ internal class FootnoteLinkProcessor(
             throw IllegalStateException("FootnoteLinkProcessor encountered unbalanced amount of markers.")
         }
 
-        return styleProvider.styleNodeElement(NodeElement.DELIMITER, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(
             startOffset = openingMarkers.maxOf { it.endOffset },
             endOffset = closingMarker.startOffset,
-        ) + styleProvider.styleNodeElement(NodeElement.OTHER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = openingMarkers.minOf { it.startOffset },
             endOffset = openingMarkers.maxOf { it.endOffset },
-        ) + styleProvider.styleNodeElement(NodeElement.OTHER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = closingMarker.startOffset,
             endOffset = closingMarker.endOffset,
         )

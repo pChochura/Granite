@@ -70,10 +70,10 @@ internal class InlineLinkProcessor(
         return styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(
             startOffset = linkTextMarker.startOffset,
             endOffset = linkTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeElement.OTHER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = openingTextMarker.startOffset,
             endOffset = openingTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeElement.OTHER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = closingTextMarker.startOffset,
             endOffset = closingTextMarker.endOffset,
         ) + styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(

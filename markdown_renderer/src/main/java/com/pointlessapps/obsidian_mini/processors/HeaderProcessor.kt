@@ -42,7 +42,7 @@ internal class HeaderProcessor(
         ) + styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = openingMarker.endOffset + 1,
             endOffset = node.endOffset,
-        ) + styleProvider.styleNodeElement(NodeElement.OTHER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = openingMarker.startOffset,
             endOffset = openingMarker.endOffset + 1,
         )

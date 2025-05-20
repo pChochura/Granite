@@ -46,10 +46,10 @@ internal class CodeSpanProcessor(
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = openingMarker.endOffset,
             endOffset = closingMarker.startOffset,
-        ) + styleProvider.styleNodeElement(NodeElement.DELIMITER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = openingMarker.startOffset,
             endOffset = openingMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeElement.DELIMITER, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = closingMarker.startOffset,
             endOffset = closingMarker.endOffset,
         )
