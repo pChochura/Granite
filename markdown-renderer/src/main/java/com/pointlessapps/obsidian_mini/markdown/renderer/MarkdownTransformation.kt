@@ -19,6 +19,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CommentProce
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.DefaultProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.FootnoteDefinitionProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.FootnoteLinkProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HashtagProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HeaderProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HighlightProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkProcessor
@@ -33,6 +34,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentBlockS
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.DefaultStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteDefinitionStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteLinkStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HashtagStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HeaderStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HighlightStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineLinkStyleProvider
@@ -64,9 +66,11 @@ class MarkdownTransformation(private val currentCursorPosition: TextRange) : Vis
     private val headerProcessor = HeaderProcessor(HeaderStyleProvider)
     private val inlineLinkProcessor = InlineLinkProcessor(InlineLinkStyleProvider)
     private val internalLinkProcessor = InternalLinkProcessor(InternalLinkStyleProvider)
+    private val hashtagProcessor = HashtagProcessor(HashtagStyleProvider)
     private val defaultProcessor = DefaultProcessor(DefaultStyleProvider)
 
     private fun IElementType.toNodeProcessor(): NodeProcessor = when (this) {
+        ObsidianElementTypes.HASHTAG -> hashtagProcessor
         ObsidianElementTypes.FOOTNOTE_DEFINITION -> footnoteDefinitionProcessor
         ObsidianElementTypes.FOOTNOTE_LINK -> footnoteLinkProcessor
         ObsidianElementTypes.HIGHLIGHT -> highlightProcessor

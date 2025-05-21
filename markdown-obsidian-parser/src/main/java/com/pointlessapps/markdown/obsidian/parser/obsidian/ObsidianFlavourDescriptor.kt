@@ -3,6 +3,7 @@ package com.pointlessapps.markdown.obsidian.parser.obsidian
 import com.pointlessapps.markdown.obsidian.parser.obsidian.lexer._ObsidianLexer
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.CommentDelimiterParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.FootnoteParser
+import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.HashtagParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.HighlightDelimiterParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.InternalLinkParser
 import org.intellij.markdown.MarkdownTokenTypes
@@ -39,6 +40,7 @@ class ObsidianFlavourDescriptor(
             FootnoteParser(),
             InternalLinkParser(),
             InlineLinkParser(),
+            HashtagParser(),
             EmphasisLikeParser(
                 CommentDelimiterParser(),
                 EmphStrongDelimiterParser(),

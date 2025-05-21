@@ -11,6 +11,9 @@ object ObsidianTokenTypes {
     val PERCENT: IElementType = MarkdownElementType("%", true)
 
     @JvmField
+    val HASH: IElementType = MarkdownElementType("#", true)
+
+    @JvmField
     val CARET: IElementType = MarkdownElementType("^", true)
 
     @JvmField
@@ -23,6 +26,9 @@ object ObsidianTokenTypes {
 object ObsidianElementTypes {
     @JvmField
     val HIGHLIGHT: IElementType = MarkdownElementType("HIGHLIGHT")
+
+    @JvmField
+    val HASHTAG: IElementType = MarkdownElementType("HASHTAG")
 
     @JvmField
     val COMMENT: IElementType = MarkdownElementType("COMMENT")
