@@ -17,6 +17,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CodeSpanProc
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CommentBlockProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CommentProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.DefaultProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.EmbedProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.FootnoteDefinitionProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.FootnoteLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HashtagProcessor
@@ -30,9 +31,10 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.Strikethroug
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockQuoteStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BoldStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeSpanStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentBlockStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.DefaultStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.EmbedStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteDefinitionStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteLinkStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HashtagStyleProvider
@@ -69,6 +71,7 @@ class MarkdownTransformation(private val currentCursorPosition: TextRange) : Vis
     private val headerProcessor = HeaderProcessor(HeaderStyleProvider)
     private val inlineLinkProcessor = InlineLinkProcessor(InlineLinkStyleProvider)
     private val internalLinkProcessor = InternalLinkProcessor(InternalLinkStyleProvider)
+    private val embedProcessor = EmbedProcessor(EmbedStyleProvider)
     private val hashtagProcessor = HashtagProcessor(HashtagStyleProvider)
     private val defaultProcessor = DefaultProcessor(DefaultStyleProvider)
 
@@ -80,11 +83,14 @@ class MarkdownTransformation(private val currentCursorPosition: TextRange) : Vis
         ObsidianElementTypes.HIGHLIGHT -> highlightProcessor
         ObsidianElementTypes.COMMENT -> commentProcessor
         ObsidianElementTypes.COMMENT_BLOCK -> commentBlockProcessor
+        ObsidianElementTypes.INTERNAL_LINK -> internalLinkProcessor
+        ObsidianElementTypes.EMBED -> embedProcessor
         GFMElementTypes.STRIKETHROUGH -> strikethroughProcessor
         MarkdownElementTypes.STRONG -> boldProcessor
         MarkdownElementTypes.EMPH -> italicProcessor
         MarkdownElementTypes.CODE_SPAN -> codeSpanProcessor
         MarkdownElementTypes.BLOCK_QUOTE -> blockQuoteProcessor
+        MarkdownElementTypes.INLINE_LINK -> inlineLinkProcessor
         MarkdownElementTypes.ATX_1,
         MarkdownElementTypes.ATX_2,
         MarkdownElementTypes.ATX_3,
@@ -93,8 +99,6 @@ class MarkdownTransformation(private val currentCursorPosition: TextRange) : Vis
         MarkdownElementTypes.ATX_6,
             -> headerProcessor
 
-        MarkdownElementTypes.INLINE_LINK -> inlineLinkProcessor
-        ObsidianElementTypes.INTERNAL_LINK -> internalLinkProcessor
         else -> defaultProcessor
     }
 
