@@ -85,3 +85,7 @@ internal class StrikethroughProcessor(
 internal class CommentProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : DelimiterProcessor(styleProvider, ObsidianTokenTypes.PERCENT, alwaysShowMarkers = true)
+
+internal class CodeSpanProcessor(
+    styleProvider: ProcessorStyleProvider,
+) : DelimiterProcessor(styleProvider, MarkdownTokenTypes.BACKTICK)
