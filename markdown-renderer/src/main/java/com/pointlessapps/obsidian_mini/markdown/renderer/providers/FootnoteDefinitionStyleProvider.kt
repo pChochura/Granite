@@ -5,6 +5,7 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.CONTENT
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.DECORATION
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.LABEL
 import org.intellij.markdown.IElementType
@@ -15,6 +16,8 @@ object FootnoteDefinitionStyleProvider : ProcessorStyleProvider {
             SpanStyle(fontSize = 0.9.em, baselineShift = BaselineShift(0.2f)),
         )
 
-        else -> listOf(SpanStyle(fontSize = 0.95.em))
+        CONTENT -> listOf(SpanStyle(fontSize = 0.95.em))
+
+        else -> throw IllegalArgumentException("FootnoteDefinitionStyleProvider doesn't style $element")
     }
 }

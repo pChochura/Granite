@@ -6,8 +6,11 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.CONTENT
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.DECORATION
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.PARAGRAPH
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 
@@ -50,10 +53,10 @@ object HeaderStyleProvider : ProcessorStyleProvider {
             )
         }
 
-        return if (element == NodeElement.PARAGRAPH) {
-            listOf(headerStyles[type.toHeadingLevel()].second)
-        } else {
-            listOf(headerStyles[type.toHeadingLevel()].first)
+        return when (element) {
+            PARAGRAPH -> listOf(headerStyles[type.toHeadingLevel()].second)
+            CONTENT, DECORATION -> listOf(headerStyles[type.toHeadingLevel()].first)
+            else -> throw IllegalArgumentException("HeaderStyleProvider doesn't style $element")
         }
     }
 
