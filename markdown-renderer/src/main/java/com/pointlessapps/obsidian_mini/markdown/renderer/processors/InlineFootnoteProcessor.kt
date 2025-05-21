@@ -10,7 +10,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal class FootnoteLinkProcessor(
+internal class InlineFootnoteProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
@@ -18,15 +18,15 @@ internal class FootnoteLinkProcessor(
 
     override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
         val openingMarkers = node.children.takeWhile {
-            it.type in listOf(MarkdownTokenTypes.LBRACKET, ObsidianTokenTypes.CARET)
+            it.type in listOf(ObsidianTokenTypes.CARET, MarkdownTokenTypes.LBRACKET)
         }
         val closingMarker = node.children.find { it.type == MarkdownTokenTypes.RBRACKET }
 
         if (openingMarkers.isEmpty() || closingMarker == null) {
-            throw IllegalStateException("FootnoteLinkProcessor encountered unbalanced amount of markers.")
+            throw IllegalStateException("InlineFootnoteProcessor encountered unbalanced amount of markers.")
         }
 
-        return styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = openingMarkers.maxOf { it.endOffset },
             endOffset = closingMarker.startOffset,
         ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
@@ -38,5 +38,5 @@ internal class FootnoteLinkProcessor(
         )
     }
 
-    override fun shouldProcessChildren() = false
+    override fun shouldProcessChildren() = true
 }

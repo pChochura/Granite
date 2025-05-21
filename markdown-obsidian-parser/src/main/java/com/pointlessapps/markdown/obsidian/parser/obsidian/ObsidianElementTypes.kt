@@ -46,6 +46,9 @@ object ObsidianElementTypes {
     val FOOTNOTE_LINK: IElementType = MarkdownElementType("FOOTNOTE_LINK")
 
     @JvmField
+    val INLINE_FOOTNOTE: IElementType = MarkdownElementType("INLINE_FOOTNOTE")
+
+    @JvmField
     val FOOTNOTE_ID: IElementType = MarkdownElementType("FOOTNOTE_ID")
 
     @JvmField

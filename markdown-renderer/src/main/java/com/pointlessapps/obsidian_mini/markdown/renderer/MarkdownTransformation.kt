@@ -22,6 +22,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.FootnoteLink
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HashtagProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HeaderProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HighlightProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineFootnoteProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InternalLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.ItalicProcessor
@@ -37,6 +38,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteLinkS
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HashtagStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HeaderStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HighlightStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineFootnoteStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineLinkStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InternalLinkStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.ItalicStyleProvider
@@ -55,6 +57,7 @@ class MarkdownTransformation(private val currentCursorPosition: TextRange) : Vis
     private val footnoteDefinitionProcessor =
         FootnoteDefinitionProcessor(FootnoteDefinitionStyleProvider)
     private val footnoteLinkProcessor = FootnoteLinkProcessor(FootnoteLinkStyleProvider)
+    private val inlineFootnoteProcessor = InlineFootnoteProcessor(InlineFootnoteStyleProvider)
     private val highlightProcessor = HighlightProcessor(HighlightStyleProvider)
     private val strikethroughProcessor = StrikethroughProcessor(StrikethroughStyleProvider)
     private val boldProcessor = BoldProcessor(BoldStyleProvider)
@@ -73,6 +76,7 @@ class MarkdownTransformation(private val currentCursorPosition: TextRange) : Vis
         ObsidianElementTypes.HASHTAG -> hashtagProcessor
         ObsidianElementTypes.FOOTNOTE_DEFINITION -> footnoteDefinitionProcessor
         ObsidianElementTypes.FOOTNOTE_LINK -> footnoteLinkProcessor
+        ObsidianElementTypes.INLINE_FOOTNOTE -> inlineFootnoteProcessor
         ObsidianElementTypes.HIGHLIGHT -> highlightProcessor
         ObsidianElementTypes.COMMENT -> commentProcessor
         ObsidianElementTypes.COMMENT_BLOCK -> commentBlockProcessor

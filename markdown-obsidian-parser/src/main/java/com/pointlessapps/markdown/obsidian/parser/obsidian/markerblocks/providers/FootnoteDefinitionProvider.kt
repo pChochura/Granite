@@ -123,7 +123,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
 
         fun matchFootnoteLabel(text: CharSequence, start: Int): IntRange? {
             var offset = start
-            while (offset < text.length && text[offset] != ']') {
+            while (offset < text.length && !text[offset].isWhitespace() && text[offset] != ']') {
                 if (text[offset] in listOf('[', '\n')) return null
 
                 offset++
@@ -175,6 +175,6 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             return offset
         }
 
-        val REGEX = Regex("^ {0,3}\\[.*]: ?.*\$")
+        val REGEX = Regex("^ {0,3}\\[\\^[^ \\]]+]: ?.*\$")
     }
 }

@@ -9,12 +9,12 @@ import org.intellij.markdown.parser.sequentialparsers.SequentialParser
 import org.intellij.markdown.parser.sequentialparsers.TokensCache
 
 /**
- * Parses a structure called [ObsidianElementTypes.FOOTNOTE_LINK] that is represented by
- * an id ([ObsidianElementTypes.FOOTNOTE_ID]) encapsulated in a `[^ID]` block.
+ * Parses a structure called [ObsidianElementTypes.INLINE_FOOTNOTE] that is represented by
+ * an id ([ObsidianElementTypes.FOOTNOTE_DEFINITION_TEXT]) encapsulated in a `^[CONTENT]` block.
  *
  * It can be inserted at any position in the markdown.
  */
-internal class FootnoteParser : SequentialParser {
+internal class InlineFootnoteParser : SequentialParser {
     override fun parse(
         tokens: TokensCache,
         rangesToGlue: List<IntRange>,
@@ -24,8 +24,8 @@ internal class FootnoteParser : SequentialParser {
         var iterator: TokensCache.Iterator = tokens.RangesListIterator(rangesToGlue)
 
         while (iterator.type != null) {
-            if (iterator.type == MarkdownTokenTypes.LBRACKET && iterator.rawLookup(1) == ObsidianTokenTypes.CARET) {
-                val footnoteLink = parseFootnoteLink(iterator)
+            if (iterator.type == ObsidianTokenTypes.CARET && iterator.rawLookup(1) == MarkdownTokenTypes.LBRACKET) {
+                val footnoteLink = parseInlineFootnote(iterator)
                 if (footnoteLink != null) {
                     iterator = footnoteLink.iteratorPosition.advance()
                     result = result.withOtherParsingResult(footnoteLink)
@@ -41,19 +41,23 @@ internal class FootnoteParser : SequentialParser {
     }
 
     private companion object {
-        fun parseFootnoteLink(iterator: TokensCache.Iterator): LocalParsingResult? {
+        fun parseInlineFootnote(iterator: TokensCache.Iterator): LocalParsingResult? {
             val startIndex = iterator.index
-            // It was already checked that the iteration started with [^
+            // It was already checked that the iteration started with ^[
             var it = iterator.advance().advance()
 
             val delegate = RangesListBuilder()
 
-            val idStartIndex = it.index
-            while (it.type != MarkdownTokenTypes.RBRACKET && it.type != null) {
+            val contentStartIndex = it.index
+            while (
+                it.type != MarkdownTokenTypes.RBRACKET &&
+                it.type != MarkdownTokenTypes.EOL &&
+                it.type != null
+            ) {
                 delegate.put(it.index)
                 it = it.advance()
             }
-            val idEndIndex = it.index
+            val contentEndIndex = it.index
 
             if (it.type != MarkdownTokenTypes.RBRACKET) {
                 return null
@@ -65,14 +69,14 @@ internal class FootnoteParser : SequentialParser {
                 parsedNodes = listOf(
                     SequentialParser.Node(
                         range = startIndex..it.index,
-                        type = ObsidianElementTypes.FOOTNOTE_LINK,
+                        type = ObsidianElementTypes.INLINE_FOOTNOTE,
                     ),
                     SequentialParser.Node(
-                        range = idStartIndex..idEndIndex,
-                        type = ObsidianElementTypes.FOOTNOTE_ID,
+                        range = contentStartIndex..contentEndIndex,
+                        type = ObsidianElementTypes.FOOTNOTE_DEFINITION_TEXT,
                     ),
                 ),
-                rangesToProcessFurther = emptyList(),
+                rangesToProcessFurther = listOf(listOf(contentStartIndex..contentEndIndex)),
             )
         }
     }

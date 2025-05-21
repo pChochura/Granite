@@ -13,7 +13,7 @@ internal class FootnoteDefinitionMarkerBlock(
     private val endPosition: Int,
 ) : MarkerBlockImpl(myConstraints, marker) {
 
-    override fun allowsSubBlocks(): Boolean = false
+    override fun allowsSubBlocks(): Boolean = true
 
     override fun getDefaultAction() = MarkerBlock.ClosingAction.DONE
 
