@@ -71,37 +71,48 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
 
     private companion object {
         fun matchFootnoteDefinition(text: CharSequence, startOffset: Int): List<IntRange>? {
-            var offset = MarkerBlockProvider.passSmallIndent(text, startOffset)
+            val markers = matchFootnoteMarker(text, startOffset)
 
-            if (offset + 1 > text.length) return null
-            val lBracketMatch = IntRange(offset, offset + 1)
-                .takeIf { text[offset] == '[' } ?: return null
-            offset++
-
-            if (offset + 1 > text.length) return null
-            val caretMatch = IntRange(offset, offset + 1)
-                .takeIf { text[offset] == '^' } ?: return null
-            offset++
-
-            val labelMatch = matchFootnoteLabel(text, offset) ?: return null
-            offset = labelMatch.last
-
-            if (offset + 1 > text.length) return null
-            val rBracketMatch = IntRange(offset, offset + 1)
-                .takeIf { text[offset] == ']' } ?: return null
-            offset++
-
-            if (offset + 1 > text.length) return null
-            val colonMatch = IntRange(offset, offset + 1)
-                .takeIf { text[offset] == ':' } ?: return null
-            offset++
+            if (markers.isEmpty()) return null
 
             // Skip spaces before the content
-            offset = passSpacesAndNewLine(text, offset)
+            val offset = passSpacesAndNewLine(text, markers.maxOf { it.last })
 
             val contentMatch = matchFootnoteContent(text, offset) ?: return null
 
-            return listOf(lBracketMatch, caretMatch, labelMatch, rBracketMatch, colonMatch, contentMatch)
+            return buildList {
+                addAll(markers)
+                add(contentMatch)
+            }
+        }
+
+        private fun matchFootnoteMarker(text: CharSequence, start: Int): List<IntRange> {
+            var offset = MarkerBlockProvider.passSmallIndent(text, start)
+
+            if (offset + 1 > text.length) return emptyList()
+            val lBracketMatch = IntRange(offset, offset + 1)
+                .takeIf { text[offset] == '[' } ?: return emptyList()
+            offset++
+
+            if (offset + 1 > text.length) return emptyList()
+            val caretMatch = IntRange(offset, offset + 1)
+                .takeIf { text[offset] == '^' } ?: return emptyList()
+            offset++
+
+            val labelMatch = matchFootnoteLabel(text, offset) ?: return emptyList()
+            offset = labelMatch.last
+
+            if (offset + 1 > text.length) return emptyList()
+            val rBracketMatch = IntRange(offset, offset + 1)
+                .takeIf { text[offset] == ']' } ?: return emptyList()
+            offset++
+
+            if (offset + 1 > text.length) return emptyList()
+            val colonMatch = IntRange(offset, offset + 1)
+                .takeIf { text[offset] == ':' } ?: return emptyList()
+            offset++
+
+            return listOf(lBracketMatch, caretMatch, labelMatch, rBracketMatch, colonMatch)
         }
 
         private fun matchFootnoteLabel(text: CharSequence, start: Int): IntRange? {
@@ -120,8 +131,13 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
 
             var offset = start
             while (offset < text.length) {
-                if (text[offset] == '\n' && text.getOrNull(offset + 1) in listOf('\n', null)) {
-                    break
+                if (text[offset] == '\n') {
+                    if (
+                        text.getOrNull(offset + 1) in listOf('\n', null) ||
+                        matchFootnoteMarker(text, offset + 1).isNotEmpty()
+                    ) {
+                        break
+                    }
                 }
 
                 offset++
