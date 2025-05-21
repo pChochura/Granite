@@ -1,12 +1,11 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
-import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
+import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
@@ -15,23 +14,7 @@ internal class FootnoteLinkProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    private companion object {
-        const val NUMBER_OF_MARKERS = 3
-    }
-
-    override fun processMarkers(node: ASTNode, textContent: String) = node.children.fastMapNotNull {
-        when (it.type) {
-            MarkdownTokenTypes.LBRACKET -> NodeMarker(it.type, it.startOffset, it.endOffset)
-            ObsidianTokenTypes.CARET -> NodeMarker(it.type, it.startOffset, it.endOffset)
-            MarkdownTokenTypes.RBRACKET -> NodeMarker(it.type, it.startOffset, it.endOffset)
-            else -> null
-        }
-    }.also {
-        if (it.size != NUMBER_OF_MARKERS) throw IllegalStateException(
-            "FootnoteLinkProcessor encountered incorrect amount of markers." +
-                    "Expected: $NUMBER_OF_MARKERS, got: ${it.size}",
-        )
-    }
+    override fun processMarkers(node: ASTNode, textContent: String) = emptyList<NodeMarker>()
 
     override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
         val openingMarkers = node.children.takeWhile {
