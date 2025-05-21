@@ -67,7 +67,13 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
     override fun interruptsParagraph(
         pos: LookaheadText.Position,
         constraints: MarkdownConstraints,
-    ) = false
+    ): Boolean {
+        if (!MarkerBlockProvider.isStartOfLineWithConstraints(pos, constraints)) {
+            return false
+        }
+
+        return REGEX.containsMatchIn(pos.currentLineFromPosition)
+    }
 
     private companion object {
         fun matchFootnoteDefinition(text: CharSequence, startOffset: Int): List<IntRange>? {
@@ -86,7 +92,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             }
         }
 
-        private fun matchFootnoteMarker(text: CharSequence, start: Int): List<IntRange> {
+        fun matchFootnoteMarker(text: CharSequence, start: Int): List<IntRange> {
             var offset = MarkerBlockProvider.passSmallIndent(text, start)
 
             if (offset + 1 > text.length) return emptyList()
@@ -115,7 +121,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             return listOf(lBracketMatch, caretMatch, labelMatch, rBracketMatch, colonMatch)
         }
 
-        private fun matchFootnoteLabel(text: CharSequence, start: Int): IntRange? {
+        fun matchFootnoteLabel(text: CharSequence, start: Int): IntRange? {
             var offset = start
             while (offset < text.length && text[offset] != ']') {
                 if (text[offset] in listOf('[', '\n')) return null
@@ -126,7 +132,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             return IntRange(start, offset).takeIf { offset != start }
         }
 
-        private fun matchFootnoteContent(text: CharSequence, start: Int): IntRange? {
+        fun matchFootnoteContent(text: CharSequence, start: Int): IntRange? {
             if (start >= text.length) return null
 
             var offset = start
@@ -151,7 +157,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
             return IntRange(start, offset)
         }
 
-        private fun passSpacesAndNewLine(text: CharSequence, start: Int): Int {
+        fun passSpacesAndNewLine(text: CharSequence, start: Int): Int {
             var offset = start
             var newLinePassed = false
             while (offset < text.length && text[offset].isWhitespace()) {
@@ -168,5 +174,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
 
             return offset
         }
+
+        val REGEX = Regex("^ {0,3}\\[.*]: ?.*\$")
     }
 }
