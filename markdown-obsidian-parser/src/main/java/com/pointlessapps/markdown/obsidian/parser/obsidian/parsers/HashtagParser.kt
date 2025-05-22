@@ -2,7 +2,6 @@ package com.pointlessapps.markdown.obsidian.parser.obsidian.parsers
 
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
-import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.parser.sequentialparsers.LocalParsingResult
 import org.intellij.markdown.parser.sequentialparsers.RangesListBuilder
 import org.intellij.markdown.parser.sequentialparsers.SequentialParser
@@ -24,15 +23,12 @@ internal class HashtagParser : SequentialParser {
         var iterator: TokensCache.Iterator = tokens.RangesListIterator(rangesToGlue)
 
         while (iterator.type != null) {
-            if (iterator.type == ObsidianTokenTypes.HASH && !iterator.charLookup(1)
-                    .isWhitespace()
-            ) {
+            if (iterator.type == ObsidianTokenTypes.HASHTAG) {
                 val hashtag = parseHashtag(iterator)
-                if (hashtag != null) {
-                    iterator = hashtag.iteratorPosition.advance()
-                    result = result.withOtherParsingResult(hashtag)
-                    continue
-                }
+                iterator = hashtag.iteratorPosition.advance()
+                result = result.withOtherParsingResult(hashtag)
+
+                continue
             }
 
             delegateIndices.put(iterator.index)
@@ -43,24 +39,17 @@ internal class HashtagParser : SequentialParser {
     }
 
     private companion object {
-        fun parseHashtag(iterator: TokensCache.Iterator): LocalParsingResult? {
+        fun parseHashtag(iterator: TokensCache.Iterator): LocalParsingResult {
             val startIndex = iterator.index
-            // It was already checked that the iteration started with #
-            var it = iterator.advance()
-
-            if (it.type != MarkdownTokenTypes.TEXT && it.type != MarkdownTokenTypes.EMPH) {
-                return null
-            }
-
-            while (it.type == MarkdownTokenTypes.TEXT || it.type == MarkdownTokenTypes.EMPH) {
-                it = it.advance()
-            }
-
-            it = it.advance()
+            val it = iterator.advance()
 
             return LocalParsingResult(
                 iteratorPosition = it,
                 parsedNodes = listOf(
+                    SequentialParser.Node(
+                        range = startIndex..startIndex + 1,
+                        type = ObsidianTokenTypes.HASH,
+                    ),
                     SequentialParser.Node(
                         range = startIndex..it.index,
                         type = ObsidianElementTypes.HASHTAG,

@@ -21,6 +21,9 @@ object ObsidianTokenTypes {
 
     @JvmField
     val FOOTNOTE_DEFINITION: IElementType = MarkdownElementType("FOOTNOTE_DEFINITION", true)
+
+    @JvmField
+    val HASHTAG: IElementType = MarkdownElementType("HASHTAG", true)
 }
 
 object ObsidianElementTypes {

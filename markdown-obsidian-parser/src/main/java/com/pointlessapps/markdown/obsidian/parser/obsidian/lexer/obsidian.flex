@@ -226,6 +226,8 @@ GFM_AUTOLINK = (("http" "s"? | "ftp" | "file")"://" | "www.") {HOST_PART} ("." {
 FOOTNOTE_IDENTIFIER = ({ALPHANUM} | "-" | "_")+
 FOOTNOTE_DEFINITION = "[^" {FOOTNOTE_IDENTIFIER} "]:" {WHITE_SPACE}* [^\n\r]*
 
+HASHTAG = #({ALPHANUM} | "-" | "/" | "_")+
+
 %state TAG_START, AFTER_LINE_START, PARSE_DELIMITED, CODE_SPAN
 
 %%
@@ -326,6 +328,8 @@ FOOTNOTE_DEFINITION = "[^" {FOOTNOTE_IDENTIFIER} "]:" {WHITE_SPACE}* [^\n\r]*
   {EMAIL_AUTOLINK} { return parseDelimited(MarkdownTokenTypes.EMAIL_AUTOLINK, false); }
 
   {HTML_TAG} { return MarkdownTokenTypes.HTML_TAG; }
+
+  {HASHTAG} { return ObsidianTokenTypes.HASHTAG; }
 }
 
 <AFTER_LINE_START, CODE_SPAN> {
