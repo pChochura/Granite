@@ -35,5 +35,7 @@ dependencies {
     implementation(libs.composeUi)
     implementation(libs.composeMaterial)
 
+    implementation(libs.coilCompose)
+
     implementation(projects.markdownRenderer)
 }
