@@ -15,6 +15,6 @@ internal fun List<AnnotatedString.Annotation>.toNodeStyles(
     NodeStyle(
         annotation = it,
         startOffset = startOffset,
-        endOffset = endOffset
+        endOffset = endOffset,
     )
 }

@@ -35,6 +35,7 @@ internal class BlockQuoteProcessor(
             index++
         }
 
+        // TODO support nested block quotes
         if (markers.size != numberOfLines) {
             throw IllegalStateException("BlockQuoteProcessor encountered unbalanced amount of markers.")
         }
