@@ -51,7 +51,7 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.parser.MarkdownParser
 
-class MarkdownTransformation(private val currentCursorPosition: TextRange) : VisualTransformation {
+class MarkdownTransformation(private var currentCursorPosition: TextRange) : VisualTransformation {
 
     private val parser = MarkdownParser(ObsidianFlavourDescriptor())
     private var markdownParsingResult: MarkdownParsingResult? = null
@@ -197,5 +197,11 @@ class MarkdownTransformation(private val currentCursorPosition: TextRange) : Vis
         }
 
         return originalOffset - removedLength
+    }
+
+    fun withSelection(selection: TextRange): MarkdownTransformation {
+        currentCursorPosition = selection
+
+        return this
     }
 }
