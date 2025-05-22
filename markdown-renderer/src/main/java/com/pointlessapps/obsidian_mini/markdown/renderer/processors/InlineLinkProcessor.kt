@@ -14,7 +14,7 @@ internal class InlineLinkProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
+    override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val linkTextMarker = node.children.find { it.type == MarkdownElementTypes.LINK_TEXT }
         val linkDestinationMarker =
             node.children.find { it.type == MarkdownElementTypes.LINK_DESTINATION }
@@ -49,7 +49,7 @@ internal class InlineLinkProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
         val linkTextMarker = node.children.find { it.type == MarkdownElementTypes.LINK_TEXT }
         val linkDestinationMarker =
             node.children.find { it.type == MarkdownElementTypes.LINK_DESTINATION }

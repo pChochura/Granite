@@ -14,7 +14,7 @@ internal class InternalLinkProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
+    override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val openingMarkers = node.children.takeWhile { it.type == MarkdownTokenTypes.LBRACKET }
         val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.RBRACKET }
 
@@ -37,7 +37,7 @@ internal class InternalLinkProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
         val openingMarkers = node.children.takeWhile { it.type == MarkdownTokenTypes.LBRACKET }
         val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.RBRACKET }
 

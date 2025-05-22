@@ -15,7 +15,7 @@ internal class HeaderProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
+    override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val openingMarker = node.children.find { it.type == MarkdownTokenTypes.ATX_HEADER }
 
         if (openingMarker == null) {
@@ -46,7 +46,7 @@ internal class HeaderProcessor(
         }
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
         val openingMarker = node.children.find { it.type == MarkdownTokenTypes.ATX_HEADER }
 
         if (openingMarker == null) {

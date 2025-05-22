@@ -104,12 +104,11 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         else -> defaultProcessor
     }
 
-    private fun ASTNode.getStylesAndMarkers(wholeText: String): Pair<List<NodeStyle>, List<NodeMarker>> {
+    private fun ASTNode.getStylesAndMarkers(): Pair<List<NodeStyle>, List<NodeMarker>> {
         val styles = mutableListOf<NodeStyle>()
         val markers = mutableListOf<NodeMarker>()
 
         fun processNode(node: ASTNode) {
-            val nodeTextContent = wholeText.substring(node.startOffset, node.endOffset)
             val hideNodeMarkers = if (currentCursorPosition.collapsed) {
                 !TextRange(node.startOffset, node.endOffset).contains(currentCursorPosition)
             } else {
@@ -117,11 +116,9 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
                 false
             }
 
-            val result = node.type.toNodeProcessor().processNode(
-                node = node,
-                textContent = nodeTextContent,
-                hideMarkers = hideNodeMarkers,
-            )
+            val result = node.type.toNodeProcessor()
+                .processNode(node = node, hideMarkers = hideNodeMarkers)
+
             styles.addAll(result.styles)
             markers.addAll(result.markers)
             if (result.processChildren) node.children.forEach(::processNode)
@@ -139,7 +136,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
             )
         }
 
-        val (styles, markers) = markdownParsingResult!!.rootNode.getStylesAndMarkers(text.text)
+        val (styles, markers) = markdownParsingResult!!.rootNode.getStylesAndMarkers()
 
         val originalText = text.text
         val transformedTextBuilder = StringBuilder()

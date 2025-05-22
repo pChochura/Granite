@@ -10,9 +10,9 @@ internal class DefaultProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> = emptyList()
+    override fun processMarkers(node: ASTNode): List<NodeMarker> = emptyList()
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> = emptyList()
+    override fun processStyles(node: ASTNode): List<NodeStyle> = emptyList()
 
     override fun shouldProcessChildren() = true
 }

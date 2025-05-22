@@ -14,7 +14,7 @@ internal class EmbedProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
+    override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val exclamationMark = node.children.find { it.type == MarkdownTokenTypes.EXCLAMATION_MARK }
         val openingMarkers = node.children.filter { it.type == MarkdownTokenTypes.LBRACKET }
         val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.RBRACKET }
@@ -47,7 +47,7 @@ internal class EmbedProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
         val openingMarkers = node.children.takeWhile {
             it.type in listOf(MarkdownTokenTypes.EXCLAMATION_MARK, MarkdownTokenTypes.LBRACKET)
         }

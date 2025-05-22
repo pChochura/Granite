@@ -5,10 +5,9 @@ import org.intellij.markdown.ast.ASTNode
 
 internal fun NodeProcessor.processNode(
     node: ASTNode,
-    textContent: String,
     hideMarkers: Boolean,
 ) = NodeProcessorResult(
-    styles = processStyles(node, textContent),
-    markers = if (hideMarkers) processMarkers(node, textContent) else emptyList(),
+    styles = processStyles(node),
+    markers = if (hideMarkers) processMarkers(node) else emptyList(),
     processChildren = shouldProcessChildren(),
 )

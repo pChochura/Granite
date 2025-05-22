@@ -20,7 +20,7 @@ internal class FootnoteDefinitionProcessor(
         const val NUMBER_OF_MARKERS = 4
     }
 
-    override fun processMarkers(node: ASTNode, textContent: String) = node.children.fastMapNotNull {
+    override fun processMarkers(node: ASTNode) = node.children.fastMapNotNull {
         when (it.type) {
             MarkdownTokenTypes.LBRACKET -> NodeMarker(it.type, it.startOffset, it.endOffset)
             ObsidianTokenTypes.CARET -> NodeMarker(it.type, it.startOffset, it.endOffset)
@@ -35,7 +35,7 @@ internal class FootnoteDefinitionProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
         val idMarker = node.children.find { it.type == ObsidianElementTypes.FOOTNOTE_ID }
         val contentMarker = node.children.find { it.type == ObsidianElementTypes.FOOTNOTE_DEFINITION_TEXT }
 

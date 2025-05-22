@@ -14,9 +14,9 @@ internal class FootnoteLinkProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String) = emptyList<NodeMarker>()
+    override fun processMarkers(node: ASTNode) = emptyList<NodeMarker>()
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
         val openingMarkers = node.children.takeWhile {
             it.type in listOf(MarkdownTokenTypes.LBRACKET, ObsidianTokenTypes.CARET)
         }

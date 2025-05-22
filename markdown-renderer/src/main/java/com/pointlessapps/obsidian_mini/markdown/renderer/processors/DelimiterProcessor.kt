@@ -18,7 +18,7 @@ internal open class DelimiterProcessor(
     private val alwaysShowMarkers: Boolean = false,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
+    override fun processMarkers(node: ASTNode): List<NodeMarker> {
         if (alwaysShowMarkers) return emptyList()
 
         val openingMarkers = node.children.takeWhile { it.type == delimiter }
@@ -43,7 +43,7 @@ internal open class DelimiterProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
         val openingMarkers = node.children.takeWhile { it.type == delimiter }
         val closingMarkers = node.children.takeLastWhile { it.type == delimiter }
 

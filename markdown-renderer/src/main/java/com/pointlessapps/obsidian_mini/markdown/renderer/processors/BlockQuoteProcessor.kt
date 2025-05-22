@@ -1,11 +1,13 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.util.fastFlatMap
+import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
@@ -13,80 +15,72 @@ internal class BlockQuoteProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
-        val numberOfLines = textContent.lines().size
-        val markers = ArrayList<NodeMarker>(numberOfLines)
+    // TODO support this wierd case of:
+    // > paragraph
+    // >
+    // And nested block quotes
+    override fun processMarkers(node: ASTNode): List<NodeMarker> {
+        val openingMarker = node.children.find { it.type == MarkdownTokenTypes.BLOCK_QUOTE }
 
-        var index = 0
-        while (index < textContent.lastIndex) {
-            if (textContent[index] == '>' && textContent.getOrNull(index + 1) == ' ') {
-                markers.add(
-                    NodeMarker(
-                        element = MarkdownTokenTypes.GT,
-                        startOffset = node.startOffset + index,
-                        endOffset = node.startOffset + index + 2,
-                    ),
-                )
-
-                // Advance after the whitespace
-                index++
-            }
-
-            index++
-        }
-
-        // TODO support nested block quotes
-        if (markers.size != numberOfLines) {
+        if (openingMarker == null) {
             throw IllegalStateException("BlockQuoteProcessor encountered unbalanced amount of markers.")
         }
 
-        return markers
-    }
+        val paragraphMarker = node.children.find { it.type == MarkdownElementTypes.PARAGRAPH }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
-        val numberOfLines = textContent.lines().size
-        val styles = ArrayList<NodeStyle>(numberOfLines * 2)
-
-        var index = 0
-        var contentStartIndex = -1
-        while (index <= textContent.lastIndex) {
-            if (textContent[index] == '>' && textContent.getOrNull(index + 1) == ' ') {
-                styles.addAll(
-                    styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
-                        startOffset = node.startOffset + index,
-                        endOffset = node.startOffset + index + 2,
-                    ),
-                )
-
-                if (contentStartIndex != -1) {
-                    styles.addAll(
-                        styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
-                            startOffset = contentStartIndex,
-                            endOffset = node.startOffset + index - 1, // The end of the previous line
-                        ),
-                    )
-                }
-
-                // Reset the contentStartIndex because a new line is starting
-                contentStartIndex = node.startOffset + index + 2
-
-                // Advance after the whitespace
-                index++
-            }
-
-            index++
-        }
-
-        if (contentStartIndex != -1) {
-            styles.addAll(
-                styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
-                    startOffset = contentStartIndex,
-                    endOffset = node.endOffset, // The end of the node
+        if (paragraphMarker == null) {
+            return listOf(
+                NodeMarker(
+                    element = MarkdownTokenTypes.GT,
+                    startOffset = openingMarker.startOffset,
+                    endOffset = openingMarker.endOffset,
                 ),
             )
         }
 
-        return styles
+        val decorationMarkers = paragraphMarker.children.filter {
+            it.type in listOf(MarkdownTokenTypes.BLOCK_QUOTE, MarkdownTokenTypes.WHITE_SPACE)
+        } + openingMarker
+
+        return decorationMarkers.map {
+            NodeMarker(
+                element = MarkdownTokenTypes.GT,
+                startOffset = it.startOffset,
+                endOffset = it.endOffset,
+            )
+        }
+    }
+
+    override fun processStyles(node: ASTNode): List<NodeStyle> {
+        val openingMarker = node.children.find { it.type == MarkdownTokenTypes.BLOCK_QUOTE }
+
+        if (openingMarker == null) {
+            throw IllegalStateException("BlockQuoteProcessor encountered unbalanced amount of markers.")
+        }
+
+        val paragraphMarker = node.children.find { it.type == MarkdownElementTypes.PARAGRAPH }
+
+        if (paragraphMarker == null) {
+            return styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
+                startOffset = openingMarker.startOffset,
+                endOffset = openingMarker.endOffset,
+            )
+        }
+
+        val contentMarkers = paragraphMarker.children.filter { it.type == MarkdownTokenTypes.TEXT }
+        val decorationMarkers = paragraphMarker.children.filter {
+            it.type in listOf(MarkdownTokenTypes.BLOCK_QUOTE, MarkdownTokenTypes.WHITE_SPACE)
+        } + openingMarker
+
+        return decorationMarkers.fastFlatMap {
+            styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
+                startOffset = it.startOffset,
+                endOffset = it.endOffset,
+            )
+        } + styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
+            startOffset = contentMarkers.minOf { it.startOffset },
+            endOffset = contentMarkers.maxOf { it.endOffset },
+        )
     }
 
     override fun shouldProcessChildren() = true
