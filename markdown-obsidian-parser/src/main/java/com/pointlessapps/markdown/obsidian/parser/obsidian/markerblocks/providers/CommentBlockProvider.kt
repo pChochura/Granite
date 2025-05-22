@@ -43,7 +43,7 @@ internal class CommentBlockProvider : MarkerBlockProvider<MarkerProcessor.StateI
                         1 -> ObsidianElementTypes.COMMENT_BLOCK_CONTENT
                         2 -> ObsidianTokenTypes.PERCENT
                         else -> throw IllegalStateException("Unexpected group in footnote regex")
-                    }
+                    },
                 )
             },
         )

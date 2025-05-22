@@ -76,7 +76,7 @@ internal class InlineFootnoteParser : SequentialParser {
                         type = ObsidianElementTypes.FOOTNOTE_DEFINITION_TEXT,
                     ),
                 ),
-                rangesToProcessFurther = listOf(listOf(contentStartIndex..contentEndIndex)),
+                delegateRanges = listOf(contentStartIndex..contentEndIndex),
             )
         }
     }

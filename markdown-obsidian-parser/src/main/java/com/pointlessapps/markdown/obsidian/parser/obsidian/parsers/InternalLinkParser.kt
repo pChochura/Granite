@@ -73,7 +73,6 @@ internal class InternalLinkParser : SequentialParser {
                             range = startIndex..it.index + 2,
                             type = ObsidianElementTypes.INTERNAL_LINK,
                         ),
-                rangesToProcessFurther = linkDestination.rangesToProcessFurther,
             )
         }
 
@@ -81,10 +80,7 @@ internal class InternalLinkParser : SequentialParser {
             val startIndex = iterator.index
             var it = iterator
 
-            val delegate = RangesListBuilder()
-
             while (it.type != MarkdownTokenTypes.RBRACKET && it.type != ObsidianTokenTypes.PIPE && it.type != null) {
-                delegate.put(it.index)
                 if (it.type == MarkdownTokenTypes.LBRACKET) {
                     break
                 }
@@ -108,7 +104,6 @@ internal class InternalLinkParser : SequentialParser {
                             type = MarkdownElementTypes.LINK_DESTINATION,
                         ),
                     ),
-                    delegateRanges = delegate.get(),
                 )
             }
 
@@ -123,10 +118,8 @@ internal class InternalLinkParser : SequentialParser {
             }
             it = it.advance()
             val startIndex = it.index
-            val delegate = RangesListBuilder()
 
             while (it.type != MarkdownTokenTypes.RBRACKET && it.type != null) {
-                delegate.put(it.index)
                 if (it.type == MarkdownTokenTypes.LBRACKET) {
                     break
                 }
@@ -150,7 +143,6 @@ internal class InternalLinkParser : SequentialParser {
                             type = MarkdownElementTypes.LINK_LABEL,
                         ),
                     ),
-                    delegateRanges = delegate.get(),
                 )
             }
 
