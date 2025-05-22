@@ -1,13 +1,15 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
+import kotlin.math.max
+import kotlin.math.min
 
 internal class HeaderProcessor(
     styleProvider: ProcessorStyleProvider,
@@ -20,13 +22,28 @@ internal class HeaderProcessor(
             throw IllegalStateException("HeaderProcessor encountered unbalanced amount of markers.")
         }
 
-        return listOf(
-            NodeMarker(
-                element = MarkdownTokenTypes.ATX_HEADER,
-                startOffset = openingMarker.startOffset,
-                endOffset = openingMarker.endOffset + 1, // Take the following white space into account
-            ),
-        )
+        val closingMarker = node.children.findLast { it.type == MarkdownTokenTypes.ATX_HEADER }
+            ?.takeIf { it != openingMarker }
+
+        return buildList {
+            add(
+                NodeMarker(
+                    element = MarkdownTokenTypes.ATX_HEADER,
+                    startOffset = openingMarker.startOffset,
+                    endOffset = min(openingMarker.endOffset + 1, node.endOffset),
+                ),
+            )
+
+            if (closingMarker != null) {
+                add(
+                    NodeMarker(
+                        element = MarkdownTokenTypes.ATX_HEADER,
+                        startOffset = max(node.startOffset, closingMarker.startOffset - 1),
+                        endOffset = closingMarker.endOffset,
+                    ),
+                )
+            }
+        }
     }
 
     override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
@@ -36,16 +53,24 @@ internal class HeaderProcessor(
             throw IllegalStateException("HeaderProcessor encountered unbalanced amount of markers.")
         }
 
+        val closingMarker = node.children.findLast { it.type == MarkdownTokenTypes.ATX_HEADER }
+            ?.takeIf { it != openingMarker }
+
         return styleProvider.styleNodeElement(NodeElement.PARAGRAPH, node.type).toNodeStyles(
             startOffset = node.startOffset,
-            endOffset = node.endOffset,
+            endOffset = min(textContent.length, node.endOffset + 1),
         ) + styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
-            startOffset = openingMarker.endOffset + 1,
+            startOffset = min(openingMarker.endOffset + 1, node.endOffset),
             endOffset = node.endOffset,
         ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
             startOffset = openingMarker.startOffset,
-            endOffset = openingMarker.endOffset + 1,
-        )
+            endOffset = min(openingMarker.endOffset + 1, node.endOffset),
+        ) + if (closingMarker != null) {
+            styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
+                startOffset = max(node.startOffset, closingMarker.startOffset - 1),
+                endOffset = closingMarker.endOffset,
+            )
+        } else emptyList()
     }
 
     override fun shouldProcessChildren() = true
