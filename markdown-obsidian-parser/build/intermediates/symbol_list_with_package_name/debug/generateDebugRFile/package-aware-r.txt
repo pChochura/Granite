@@ -1,1 +1,0 @@
-com.pointlessapps.obsidian_mini.markdown_renderer
