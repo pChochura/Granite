@@ -50,6 +50,8 @@ import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.parser.MarkdownParser
+import kotlin.math.max
+import kotlin.math.min
 
 class MarkdownTransformation(private var currentCursorPosition: TextRange) : VisualTransformation {
 
@@ -164,7 +166,11 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
             val newStart = mapOriginalToTransformed(style.startOffset, markers)
             val newEnd = mapOriginalToTransformed(style.endOffset, markers)
             if (newStart < newEnd) {
-                AnnotatedString.Range(style.annotation, newStart, newEnd)
+                AnnotatedString.Range(
+                    item = style.annotation,
+                    start = max(0, newStart),
+                    end = min(newEnd, transformedTextBuilder.length),
+                )
             } else {
                 null
             }

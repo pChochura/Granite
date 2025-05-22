@@ -58,7 +58,8 @@ internal class HeaderProcessor(
 
         return styleProvider.styleNodeElement(NodeElement.PARAGRAPH, node.type).toNodeStyles(
             startOffset = node.startOffset,
-            endOffset = min(textContent.length, node.endOffset + 1),
+            // Add an additional offset to make the paragraph render smoother
+            endOffset = node.endOffset + 1,
         ) + styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = min(openingMarker.endOffset + 1, node.endOffset),
             endOffset = node.endOffset,
