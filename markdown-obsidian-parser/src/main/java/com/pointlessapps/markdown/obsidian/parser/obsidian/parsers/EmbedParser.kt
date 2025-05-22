@@ -29,10 +29,10 @@ internal class EmbedParser : SequentialParser {
 
         while (iterator.type != null) {
             if (iterator.type == MarkdownTokenTypes.EXCLAMATION_MARK) {
-                val inlineLink = parseEmbed(iterator)
-                if (inlineLink != null) {
-                    iterator = inlineLink.iteratorPosition.advance()
-                    result = result.withOtherParsingResult(inlineLink)
+                val embed = parseEmbed(iterator)
+                if (embed != null) {
+                    iterator = embed.iteratorPosition.advance()
+                    result = result.withOtherParsingResult(embed)
                     continue
                 }
             }

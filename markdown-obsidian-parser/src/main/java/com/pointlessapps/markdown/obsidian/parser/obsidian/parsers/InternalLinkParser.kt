@@ -29,10 +29,10 @@ internal class InternalLinkParser : SequentialParser {
 
         while (iterator.type != null) {
             if (iterator.type == MarkdownTokenTypes.LBRACKET) {
-                val inlineLink = parseInternalLink(iterator)
-                if (inlineLink != null) {
-                    iterator = inlineLink.iteratorPosition.advance()
-                    result = result.withOtherParsingResult(inlineLink)
+                val internalLink = parseInternalLink(iterator)
+                if (internalLink != null) {
+                    iterator = internalLink.iteratorPosition.advance()
+                    result = result.withOtherParsingResult(internalLink)
                     continue
                 }
             }

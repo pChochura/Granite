@@ -27,10 +27,10 @@ internal class HashtagParser : SequentialParser {
             if (iterator.type == ObsidianTokenTypes.HASH && !iterator.charLookup(1)
                     .isWhitespace()
             ) {
-                val footnoteLink = parseHashtag(iterator)
-                if (footnoteLink != null) {
-                    iterator = footnoteLink.iteratorPosition.advance()
-                    result = result.withOtherParsingResult(footnoteLink)
+                val hashtag = parseHashtag(iterator)
+                if (hashtag != null) {
+                    iterator = hashtag.iteratorPosition.advance()
+                    result = result.withOtherParsingResult(hashtag)
                     continue
                 }
             }

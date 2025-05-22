@@ -25,10 +25,10 @@ internal class InlineFootnoteParser : SequentialParser {
 
         while (iterator.type != null) {
             if (iterator.type == ObsidianTokenTypes.CARET && iterator.rawLookup(1) == MarkdownTokenTypes.LBRACKET) {
-                val footnoteLink = parseInlineFootnote(iterator)
-                if (footnoteLink != null) {
-                    iterator = footnoteLink.iteratorPosition.advance()
-                    result = result.withOtherParsingResult(footnoteLink)
+                val inlineFootnoteResult = parseInlineFootnote(iterator)
+                if (inlineFootnoteResult != null) {
+                    iterator = inlineFootnoteResult.iteratorPosition.advance()
+                    result = result.withOtherParsingResult(inlineFootnoteResult)
                     continue
                 }
             }
