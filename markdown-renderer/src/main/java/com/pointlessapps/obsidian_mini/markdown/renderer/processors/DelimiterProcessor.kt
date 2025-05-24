@@ -25,7 +25,7 @@ internal open class DelimiterProcessor(
         val closingMarkers = node.children.takeLastWhile { it.type == delimiter }
 
         if (openingMarkers.isEmpty() || closingMarkers.isEmpty() || openingMarkers.size != closingMarkers.size) {
-            throw IllegalStateException("DelimiterProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         // Flatten multiple subsequent markers into one
@@ -46,7 +46,7 @@ internal open class DelimiterProcessor(
         val closingMarkers = node.children.takeLastWhile { it.type == delimiter }
 
         if (openingMarkers.isEmpty() || closingMarkers.isEmpty() || openingMarkers.size != closingMarkers.size) {
-            throw IllegalStateException("DelimiterProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(

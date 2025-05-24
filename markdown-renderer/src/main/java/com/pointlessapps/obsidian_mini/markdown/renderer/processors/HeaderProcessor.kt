@@ -23,7 +23,7 @@ internal class HeaderProcessor(
         }
 
         if (openingMarker == null) {
-            throw IllegalStateException("HeaderProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         val closingMarker = node.children.fastLastOrNull {
@@ -63,7 +63,7 @@ internal class HeaderProcessor(
         }
 
         if (openingMarker == null) {
-            throw IllegalStateException("HeaderProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         val closingMarker = node.children.fastLastOrNull {

@@ -21,7 +21,7 @@ internal class CommentBlockProcessor(
         val closingMarkers = node.children.takeLastWhile { it.type == ObsidianTokenTypes.PERCENT }
 
         if (openingMarkers.isEmpty() || closingMarkers.isEmpty()) {
-            throw IllegalStateException("CommentBlockProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         return styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(

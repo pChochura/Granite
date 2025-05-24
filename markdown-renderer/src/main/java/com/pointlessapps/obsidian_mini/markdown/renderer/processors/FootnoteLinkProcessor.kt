@@ -24,7 +24,7 @@ internal class FootnoteLinkProcessor(
         val closingMarker = node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.RBRACKET }
 
         if (openingMarkers.isEmpty() || closingMarker == null) {
-            throw IllegalStateException("FootnoteLinkProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         return styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(

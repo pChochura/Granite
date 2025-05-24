@@ -28,7 +28,7 @@ internal class BlockQuoteProcessor(
         }
 
         if (openingMarker == null) {
-            throw IllegalStateException("BlockQuoteProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         val paragraphMarker = node.children.fastFirstOrNull {
@@ -62,7 +62,7 @@ internal class BlockQuoteProcessor(
         }
 
         if (openingMarker == null) {
-            throw IllegalStateException("BlockQuoteProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         val paragraphMarker = node.children.fastFirstOrNull {

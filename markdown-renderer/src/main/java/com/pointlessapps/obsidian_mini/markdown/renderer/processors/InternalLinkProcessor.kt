@@ -20,7 +20,7 @@ internal class InternalLinkProcessor(
         val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.RBRACKET }
 
         if (openingMarkers.isEmpty() || closingMarkers.isEmpty() || openingMarkers.size != closingMarkers.size) {
-            throw IllegalStateException("InternalLinkProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         val labelMarker = node.children.fastFirstOrNull {
@@ -51,7 +51,7 @@ internal class InternalLinkProcessor(
         val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.RBRACKET }
 
         if (openingMarkers.isEmpty() || closingMarkers.isEmpty() || openingMarkers.size != closingMarkers.size) {
-            throw IllegalStateException("InternalLinkProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         val labelMarker = node.children.fastFirstOrNull {

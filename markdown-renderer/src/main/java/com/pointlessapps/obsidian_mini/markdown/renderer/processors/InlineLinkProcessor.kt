@@ -24,7 +24,7 @@ internal class InlineLinkProcessor(
         }
 
         if (linkTextMarker == null || linkDestinationMarker == null) {
-            throw IllegalStateException("InlineLinkProcessor encountered malformed element.")
+            return emptyList()
         }
 
         val openingMarker = linkTextMarker.children.fastFirstOrNull {
@@ -35,7 +35,7 @@ internal class InlineLinkProcessor(
         }
 
         if (openingMarker == null || closingMarker == null) {
-            throw IllegalStateException("InlineLinkProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         return listOf(
@@ -63,7 +63,7 @@ internal class InlineLinkProcessor(
         }
 
         if (linkTextMarker == null || linkDestinationMarker == null) {
-            throw IllegalStateException("InlineLinkProcessor encountered malformed element.")
+            return emptyList()
         }
 
         val openingTextMarker = linkTextMarker.children.fastFirstOrNull {
@@ -74,7 +74,7 @@ internal class InlineLinkProcessor(
         }
 
         if (openingTextMarker == null || closingTextMarker == null) {
-            throw IllegalStateException("InlineLinkProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         return styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(

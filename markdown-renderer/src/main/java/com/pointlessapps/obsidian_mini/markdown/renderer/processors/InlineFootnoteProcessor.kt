@@ -24,7 +24,7 @@ internal class InlineFootnoteProcessor(
         val closingMarker = node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.RBRACKET }
 
         if (openingMarkers.isEmpty() || closingMarker == null) {
-            throw IllegalStateException("InlineFootnoteProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(

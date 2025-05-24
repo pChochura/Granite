@@ -26,7 +26,7 @@ internal class FootnoteDefinitionProcessor(
         }
 
         if (idMarker == null || contentMarker == null) {
-            throw IllegalStateException("FootnoteDefinitionProcessor encountered unbalanced amount of markers.")
+            return emptyList()
         }
 
         return styleProvider.styleNodeElement(NodeElement.LABEL, node.type).toNodeStyles(
