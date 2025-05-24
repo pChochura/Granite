@@ -31,8 +31,12 @@ internal class EmbedProcessor(
             throw IllegalStateException("EmbedProcessor encountered unbalanced amount of markers.")
         }
 
+        val labelMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_LABEL
+        }
+
         // Flatten multiple subsequent markers into one
-        return listOf(
+        return listOfNotNull(
             NodeMarker(
                 startOffset = exclamationMark.startOffset,
                 endOffset = exclamationMark.endOffset,
@@ -45,6 +49,12 @@ internal class EmbedProcessor(
                 startOffset = closingMarkers.minOf { it.startOffset },
                 endOffset = closingMarkers.maxOf { it.endOffset },
             ),
+            if (labelMarker != null) {
+                NodeMarker(
+                    startOffset = openingMarkers.maxOf { it.endOffset },
+                    endOffset = labelMarker.startOffset,
+                )
+            } else null,
         )
     }
 
