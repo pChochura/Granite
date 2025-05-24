@@ -66,13 +66,12 @@ internal class FootnoteLinkParser : SequentialParser {
             if (it.type != MarkdownTokenTypes.RBRACKET) {
                 return null
             }
-            it = it.advance()
 
             return LocalParsingResult(
                 iteratorPosition = it,
                 parsedNodes = listOf(
                     SequentialParser.Node(
-                        range = startIndex..it.index,
+                        range = startIndex..it.index + 1,
                         type = ObsidianElementTypes.FOOTNOTE_LINK,
                     ),
                     SequentialParser.Node(
