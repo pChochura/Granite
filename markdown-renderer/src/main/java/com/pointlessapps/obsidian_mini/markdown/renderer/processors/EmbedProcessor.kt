@@ -1,5 +1,7 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.util.fastFilter
+import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
@@ -15,8 +17,10 @@ internal class EmbedProcessor(
 ) : NodeProcessor(styleProvider) {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
-        val exclamationMark = node.children.find { it.type == MarkdownTokenTypes.EXCLAMATION_MARK }
-        val openingMarkers = node.children.filter { it.type == MarkdownTokenTypes.LBRACKET }
+        val exclamationMark = node.children.fastFirstOrNull {
+            it.type == MarkdownTokenTypes.EXCLAMATION_MARK
+        }
+        val openingMarkers = node.children.fastFilter { it.type == MarkdownTokenTypes.LBRACKET }
         val closingMarkers = node.children.takeLastWhile { it.type == MarkdownTokenTypes.RBRACKET }
 
         if (
@@ -30,17 +34,14 @@ internal class EmbedProcessor(
         // Flatten multiple subsequent markers into one
         return listOf(
             NodeMarker(
-                element = MarkdownTokenTypes.EXCLAMATION_MARK,
                 startOffset = exclamationMark.startOffset,
                 endOffset = exclamationMark.endOffset,
             ),
             NodeMarker(
-                element = MarkdownTokenTypes.LBRACKET,
                 startOffset = openingMarkers.minOf { it.startOffset },
                 endOffset = openingMarkers.maxOf { it.endOffset },
             ),
             NodeMarker(
-                element = MarkdownTokenTypes.RBRACKET,
                 startOffset = closingMarkers.minOf { it.startOffset },
                 endOffset = closingMarkers.maxOf { it.endOffset },
             ),
@@ -57,7 +58,9 @@ internal class EmbedProcessor(
             throw IllegalStateException("InternalLinkProcessor encountered unbalanced amount of markers.")
         }
 
-        val labelMarker = node.children.find { it.type == MarkdownElementTypes.LINK_LABEL }
+        val labelMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_LABEL
+        }
 
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = openingMarkers.maxOf { it.endOffset },

@@ -6,6 +6,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianFlavourDescriptor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.MarkdownParsingResult
@@ -45,7 +47,6 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineLinkSty
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InternalLinkStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.ItalicStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.StrikethroughStyleProvider
-import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
@@ -55,56 +56,41 @@ import kotlin.math.min
 
 class MarkdownTransformation(private var currentCursorPosition: TextRange) : VisualTransformation {
 
+    private data class AccumulateStylesResult(
+        val styles: List<NodeStyle>,
+        val markers: List<NodeMarker>,
+    )
+
     private val parser = MarkdownParser(ObsidianFlavourDescriptor())
     private var markdownParsingResult: MarkdownParsingResult? = null
 
-    private val footnoteDefinitionProcessor =
-        FootnoteDefinitionProcessor(FootnoteDefinitionStyleProvider)
-    private val footnoteLinkProcessor = FootnoteLinkProcessor(FootnoteLinkStyleProvider)
-    private val inlineFootnoteProcessor = InlineFootnoteProcessor(InlineFootnoteStyleProvider)
-    private val highlightProcessor = HighlightProcessor(HighlightStyleProvider)
-    private val strikethroughProcessor = StrikethroughProcessor(StrikethroughStyleProvider)
-    private val boldProcessor = BoldProcessor(BoldStyleProvider)
-    private val italicProcessor = ItalicProcessor(ItalicStyleProvider)
-    private val commentProcessor = CommentProcessor(CommentStyleProvider)
-    private val commentBlockProcessor = CommentBlockProcessor(CommentBlockStyleProvider)
-    private val codeSpanProcessor = CodeSpanProcessor(CodeSpanStyleProvider)
-    private val blockQuoteProcessor = BlockQuoteProcessor(BlockQuoteStyleProvider)
-    private val headerProcessor = HeaderProcessor(HeaderStyleProvider)
-    private val inlineLinkProcessor = InlineLinkProcessor(InlineLinkStyleProvider)
-    private val internalLinkProcessor = InternalLinkProcessor(InternalLinkStyleProvider)
-    private val embedProcessor = EmbedProcessor(EmbedStyleProvider)
-    private val hashtagProcessor = HashtagProcessor(HashtagStyleProvider)
-    private val defaultProcessor = DefaultProcessor(DefaultStyleProvider)
+    private val processors = mapOf(
+        ObsidianElementTypes.HASHTAG to HashtagProcessor(HashtagStyleProvider),
+        ObsidianElementTypes.FOOTNOTE_DEFINITION to FootnoteDefinitionProcessor(
+            FootnoteDefinitionStyleProvider,
+        ),
+        ObsidianElementTypes.FOOTNOTE_LINK to FootnoteLinkProcessor(FootnoteLinkStyleProvider),
+        ObsidianElementTypes.INLINE_FOOTNOTE to InlineFootnoteProcessor(InlineFootnoteStyleProvider),
+        ObsidianElementTypes.HIGHLIGHT to HighlightProcessor(HighlightStyleProvider),
+        ObsidianElementTypes.COMMENT to CommentProcessor(CommentStyleProvider),
+        ObsidianElementTypes.COMMENT_BLOCK to CommentBlockProcessor(CommentBlockStyleProvider),
+        ObsidianElementTypes.INTERNAL_LINK to InternalLinkProcessor(InternalLinkStyleProvider),
+        ObsidianElementTypes.EMBED to EmbedProcessor(EmbedStyleProvider),
+        GFMElementTypes.STRIKETHROUGH to StrikethroughProcessor(StrikethroughStyleProvider),
+        MarkdownElementTypes.STRONG to BoldProcessor(BoldStyleProvider),
+        MarkdownElementTypes.EMPH to ItalicProcessor(ItalicStyleProvider),
+        MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor(CodeSpanStyleProvider),
+        MarkdownElementTypes.BLOCK_QUOTE to BlockQuoteProcessor(BlockQuoteStyleProvider),
+        MarkdownElementTypes.INLINE_LINK to InlineLinkProcessor(InlineLinkStyleProvider),
+        MarkdownElementTypes.ATX_1 to HeaderProcessor(HeaderStyleProvider),
+        MarkdownElementTypes.ATX_2 to HeaderProcessor(HeaderStyleProvider),
+        MarkdownElementTypes.ATX_3 to HeaderProcessor(HeaderStyleProvider),
+        MarkdownElementTypes.ATX_4 to HeaderProcessor(HeaderStyleProvider),
+        MarkdownElementTypes.ATX_5 to HeaderProcessor(HeaderStyleProvider),
+        MarkdownElementTypes.ATX_6 to HeaderProcessor(HeaderStyleProvider),
+    )
 
-    private fun IElementType.toNodeProcessor(): NodeProcessor = when (this) {
-        ObsidianElementTypes.HASHTAG -> hashtagProcessor
-        ObsidianElementTypes.FOOTNOTE_DEFINITION -> footnoteDefinitionProcessor
-        ObsidianElementTypes.FOOTNOTE_LINK -> footnoteLinkProcessor
-        ObsidianElementTypes.INLINE_FOOTNOTE -> inlineFootnoteProcessor
-        ObsidianElementTypes.HIGHLIGHT -> highlightProcessor
-        ObsidianElementTypes.COMMENT -> commentProcessor
-        ObsidianElementTypes.COMMENT_BLOCK -> commentBlockProcessor
-        ObsidianElementTypes.INTERNAL_LINK -> internalLinkProcessor
-        ObsidianElementTypes.EMBED -> embedProcessor
-        GFMElementTypes.STRIKETHROUGH -> strikethroughProcessor
-        MarkdownElementTypes.STRONG -> boldProcessor
-        MarkdownElementTypes.EMPH -> italicProcessor
-        MarkdownElementTypes.CODE_SPAN -> codeSpanProcessor
-        MarkdownElementTypes.BLOCK_QUOTE -> blockQuoteProcessor
-        MarkdownElementTypes.INLINE_LINK -> inlineLinkProcessor
-        MarkdownElementTypes.ATX_1,
-        MarkdownElementTypes.ATX_2,
-        MarkdownElementTypes.ATX_3,
-        MarkdownElementTypes.ATX_4,
-        MarkdownElementTypes.ATX_5,
-        MarkdownElementTypes.ATX_6,
-            -> headerProcessor
-
-        else -> defaultProcessor
-    }
-
-    private fun ASTNode.getStylesAndMarkers(): Pair<List<NodeStyle>, List<NodeMarker>> {
+    private fun ASTNode.accumulateStyles(): AccumulateStylesResult {
         val styles = mutableListOf<NodeStyle>()
         val markers = mutableListOf<NodeMarker>()
 
@@ -116,16 +102,19 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
                 false
             }
 
-            val result = node.type.toNodeProcessor()
-                .processNode(node = node, hideMarkers = hideNodeMarkers)
+            val nodeProcessor = processors[node.type] ?: DefaultProcessor(DefaultStyleProvider)
+            val result = nodeProcessor.processNode(node, hideNodeMarkers)
 
             styles.addAll(result.styles)
             markers.addAll(result.markers)
-            if (result.processChildren) node.children.forEach(::processNode)
+            if (result.processChildren) node.children.fastForEach(::processNode)
         }
 
-        children.forEach(::processNode)
-        return styles to markers.sortedBy { it.startOffset }
+        children.fastForEach(::processNode)
+        return AccumulateStylesResult(
+            styles = styles,
+            markers = markers.sortedBy { it.startOffset },
+        )
     }
 
     override fun filter(text: AnnotatedString): TransformedText {
@@ -136,14 +125,14 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
             )
         }
 
-        val (styles, markers) = markdownParsingResult!!.rootNode.getStylesAndMarkers()
+        val result = markdownParsingResult!!.rootNode.accumulateStyles()
 
         val originalText = text.text
         val transformedTextBuilder = StringBuilder()
         var currentOriginalPos = 0
 
         // Loop through markers and add text contents between them
-        for (marker in markers) {
+        for (marker in result.markers) {
             if (currentOriginalPos < marker.startOffset) {
                 transformedTextBuilder.append(
                     originalText.substring(
@@ -159,18 +148,17 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
             transformedTextBuilder.append(originalText.substring(currentOriginalPos))
         }
 
-        val transformedStyles = styles.mapNotNull { style ->
-            val newStart = mapOriginalToTransformed(style.startOffset, markers)
-            val newEnd = mapOriginalToTransformed(style.endOffset, markers)
+        val offsetMapping = MarkdownOffsetMapping(result.markers)
+        val transformedStyles = result.styles.fastMapNotNull { style ->
+            val newStart = offsetMapping.originalToTransformed(style.startOffset)
+            val newEnd = offsetMapping.originalToTransformed(style.endOffset)
             if (newStart < newEnd) {
                 AnnotatedString.Range(
                     item = style.annotation,
                     start = max(0, newStart),
                     end = min(newEnd, transformedTextBuilder.length),
                 )
-            } else {
-                null
-            }
+            } else null
         }
 
         return TransformedText(
@@ -181,25 +169,8 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
                 paragraphStyles = text.paragraphStyles + transformedStyles
                     .filterIsInstance<AnnotatedString.Range<ParagraphStyle>>(),
             ),
-            offsetMapping = MarkdownOffsetMapping(markers),
+            offsetMapping = offsetMapping,
         )
-    }
-
-    private fun mapOriginalToTransformed(originalOffset: Int, markers: List<NodeMarker>): Int {
-        var removedLength = 0
-        for (marker in markers) {
-            if (originalOffset <= marker.startOffset) {
-                break
-            }
-
-            if (originalOffset < marker.endOffset) {
-                return marker.startOffset - removedLength
-            }
-
-            removedLength += marker.endOffset - marker.startOffset
-        }
-
-        return originalOffset - removedLength
     }
 
     fun withSelection(selection: TextRange): MarkdownTransformation {

@@ -1,5 +1,6 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
@@ -16,7 +17,7 @@ internal class HashtagProcessor(
     override fun processMarkers(node: ASTNode) = emptyList<NodeMarker>()
 
     override fun processStyles(node: ASTNode): List<NodeStyle> {
-        val openingMarker = node.children.find { it.type == ObsidianTokenTypes.HASH }
+        val openingMarker = node.children.fastFirstOrNull { it.type == ObsidianTokenTypes.HASH }
 
         if (openingMarker == null) {
             throw IllegalStateException("HashtagProcessor encountered unbalanced amount of markers.")

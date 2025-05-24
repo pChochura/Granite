@@ -1,6 +1,9 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.util.fastFilter
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastFlatMap
+import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
@@ -20,31 +23,33 @@ internal class BlockQuoteProcessor(
     // >
     // And nested block quotes
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
-        val openingMarker = node.children.find { it.type == MarkdownTokenTypes.BLOCK_QUOTE }
+        val openingMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownTokenTypes.BLOCK_QUOTE
+        }
 
         if (openingMarker == null) {
             throw IllegalStateException("BlockQuoteProcessor encountered unbalanced amount of markers.")
         }
 
-        val paragraphMarker = node.children.find { it.type == MarkdownElementTypes.PARAGRAPH }
+        val paragraphMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.PARAGRAPH
+        }
 
         if (paragraphMarker == null) {
             return listOf(
                 NodeMarker(
-                    element = MarkdownTokenTypes.GT,
                     startOffset = openingMarker.startOffset,
                     endOffset = openingMarker.endOffset,
                 ),
             )
         }
 
-        val decorationMarkers = paragraphMarker.children.filter {
+        val decorationMarkers = paragraphMarker.children.fastFilter {
             it.type in listOf(MarkdownTokenTypes.BLOCK_QUOTE, MarkdownTokenTypes.WHITE_SPACE)
         } + openingMarker
 
-        return decorationMarkers.map {
+        return decorationMarkers.fastMap {
             NodeMarker(
-                element = MarkdownTokenTypes.GT,
                 startOffset = it.startOffset,
                 endOffset = it.endOffset,
             )
@@ -52,13 +57,17 @@ internal class BlockQuoteProcessor(
     }
 
     override fun processStyles(node: ASTNode): List<NodeStyle> {
-        val openingMarker = node.children.find { it.type == MarkdownTokenTypes.BLOCK_QUOTE }
+        val openingMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownTokenTypes.BLOCK_QUOTE
+        }
 
         if (openingMarker == null) {
             throw IllegalStateException("BlockQuoteProcessor encountered unbalanced amount of markers.")
         }
 
-        val paragraphMarker = node.children.find { it.type == MarkdownElementTypes.PARAGRAPH }
+        val paragraphMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.PARAGRAPH
+        }
 
         if (paragraphMarker == null) {
             return styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
@@ -67,8 +76,10 @@ internal class BlockQuoteProcessor(
             )
         }
 
-        val contentMarkers = paragraphMarker.children.filter { it.type == MarkdownTokenTypes.TEXT }
-        val decorationMarkers = paragraphMarker.children.filter {
+        val contentMarkers = paragraphMarker.children.fastFilter {
+            it.type == MarkdownTokenTypes.TEXT
+        }
+        val decorationMarkers = paragraphMarker.children.fastFilter {
             it.type in listOf(MarkdownTokenTypes.BLOCK_QUOTE, MarkdownTokenTypes.WHITE_SPACE)
         } + openingMarker
 

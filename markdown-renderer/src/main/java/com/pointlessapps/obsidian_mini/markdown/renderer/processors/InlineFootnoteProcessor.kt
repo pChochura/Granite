@@ -1,5 +1,6 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
@@ -20,7 +21,7 @@ internal class InlineFootnoteProcessor(
         val openingMarkers = node.children.takeWhile {
             it.type in listOf(ObsidianTokenTypes.CARET, MarkdownTokenTypes.LBRACKET)
         }
-        val closingMarker = node.children.find { it.type == MarkdownTokenTypes.RBRACKET }
+        val closingMarker = node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.RBRACKET }
 
         if (openingMarkers.isEmpty() || closingMarker == null) {
             throw IllegalStateException("InlineFootnoteProcessor encountered unbalanced amount of markers.")

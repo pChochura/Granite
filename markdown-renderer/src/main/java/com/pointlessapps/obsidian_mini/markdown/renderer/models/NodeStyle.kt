@@ -1,6 +1,7 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.models
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.util.fastMap
 
 internal data class NodeStyle(
     val annotation: AnnotatedString.Annotation,
@@ -11,7 +12,7 @@ internal data class NodeStyle(
 internal fun List<AnnotatedString.Annotation>.toNodeStyles(
     startOffset: Int,
     endOffset: Int,
-): List<NodeStyle> = map {
+): List<NodeStyle> = fastMap {
     NodeStyle(
         annotation = it,
         startOffset = startOffset,

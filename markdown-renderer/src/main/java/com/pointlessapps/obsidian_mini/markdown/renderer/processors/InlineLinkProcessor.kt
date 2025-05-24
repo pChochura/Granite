@@ -1,10 +1,11 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.util.fastFirstOrNull
+import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
@@ -15,16 +16,23 @@ internal class InlineLinkProcessor(
 ) : NodeProcessor(styleProvider) {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
-        val linkTextMarker = node.children.find { it.type == MarkdownElementTypes.LINK_TEXT }
-        val linkDestinationMarker =
-            node.children.find { it.type == MarkdownElementTypes.LINK_DESTINATION }
+        val linkTextMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_TEXT
+        }
+        val linkDestinationMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_DESTINATION
+        }
 
         if (linkTextMarker == null || linkDestinationMarker == null) {
             throw IllegalStateException("InlineLinkProcessor encountered malformed element.")
         }
 
-        val openingMarker = linkTextMarker.children.find { it.type == MarkdownTokenTypes.LBRACKET }
-        val closingMarker = linkTextMarker.children.find { it.type == MarkdownTokenTypes.RBRACKET }
+        val openingMarker = linkTextMarker.children.fastFirstOrNull {
+            it.type == MarkdownTokenTypes.LBRACKET
+        }
+        val closingMarker = linkTextMarker.children.fastFirstOrNull {
+            it.type == MarkdownTokenTypes.RBRACKET
+        }
 
         if (openingMarker == null || closingMarker == null) {
             throw IllegalStateException("InlineLinkProcessor encountered unbalanced amount of markers.")
@@ -32,17 +40,14 @@ internal class InlineLinkProcessor(
 
         return listOf(
             NodeMarker(
-                element = MarkdownTokenTypes.LBRACKET,
                 startOffset = openingMarker.startOffset,
                 endOffset = openingMarker.endOffset,
             ),
             NodeMarker(
-                element = MarkdownTokenTypes.RBRACKET,
                 startOffset = closingMarker.startOffset,
                 endOffset = closingMarker.endOffset,
             ),
             NodeMarker(
-                element = MarkdownElementTypes.LINK_DESTINATION,
                 startOffset = closingMarker.endOffset,
                 endOffset = node.endOffset,
             ),
@@ -50,18 +55,23 @@ internal class InlineLinkProcessor(
     }
 
     override fun processStyles(node: ASTNode): List<NodeStyle> {
-        val linkTextMarker = node.children.find { it.type == MarkdownElementTypes.LINK_TEXT }
-        val linkDestinationMarker =
-            node.children.find { it.type == MarkdownElementTypes.LINK_DESTINATION }
+        val linkTextMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_TEXT
+        }
+        val linkDestinationMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_DESTINATION
+        }
 
         if (linkTextMarker == null || linkDestinationMarker == null) {
             throw IllegalStateException("InlineLinkProcessor encountered malformed element.")
         }
 
-        val openingTextMarker =
-            linkTextMarker.children.find { it.type == MarkdownTokenTypes.LBRACKET }
-        val closingTextMarker =
-            linkTextMarker.children.find { it.type == MarkdownTokenTypes.RBRACKET }
+        val openingTextMarker = linkTextMarker.children.fastFirstOrNull {
+            it.type == MarkdownTokenTypes.LBRACKET
+        }
+        val closingTextMarker = linkTextMarker.children.fastFirstOrNull {
+            it.type == MarkdownTokenTypes.RBRACKET
+        }
 
         if (openingTextMarker == null || closingTextMarker == null) {
             throw IllegalStateException("InlineLinkProcessor encountered unbalanced amount of markers.")

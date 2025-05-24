@@ -31,12 +31,10 @@ internal open class DelimiterProcessor(
         // Flatten multiple subsequent markers into one
         return listOf(
             NodeMarker(
-                element = delimiter,
                 startOffset = openingMarkers.minOf { it.startOffset },
                 endOffset = openingMarkers.maxOf { it.endOffset },
             ),
             NodeMarker(
-                element = delimiter,
                 startOffset = closingMarkers.minOf { it.startOffset },
                 endOffset = closingMarkers.maxOf { it.endOffset },
             ),

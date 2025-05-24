@@ -1,5 +1,6 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
@@ -22,18 +23,26 @@ internal class InternalLinkProcessor(
             throw IllegalStateException("InternalLinkProcessor encountered unbalanced amount of markers.")
         }
 
+        val labelMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_LABEL
+        }
+
         // Flatten multiple subsequent markers into one
-        return listOf(
+        return listOfNotNull(
             NodeMarker(
-                element = MarkdownTokenTypes.LBRACKET,
                 startOffset = openingMarkers.minOf { it.startOffset },
                 endOffset = openingMarkers.maxOf { it.endOffset },
             ),
             NodeMarker(
-                element = MarkdownTokenTypes.RBRACKET,
                 startOffset = closingMarkers.minOf { it.startOffset },
                 endOffset = closingMarkers.maxOf { it.endOffset },
             ),
+            if (labelMarker != null) {
+                NodeMarker(
+                    startOffset = openingMarkers.maxOf { it.endOffset },
+                    endOffset = labelMarker.startOffset,
+                )
+            } else null,
         )
     }
 
@@ -45,7 +54,9 @@ internal class InternalLinkProcessor(
             throw IllegalStateException("InternalLinkProcessor encountered unbalanced amount of markers.")
         }
 
-        val labelMarker = node.children.find { it.type == MarkdownElementTypes.LINK_LABEL }
+        val labelMarker = node.children.fastFirstOrNull {
+            it.type == MarkdownElementTypes.LINK_LABEL
+        }
 
         return styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
             startOffset = openingMarkers.maxOf { it.endOffset },

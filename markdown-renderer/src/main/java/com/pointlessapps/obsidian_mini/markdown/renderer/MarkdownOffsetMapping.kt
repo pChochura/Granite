@@ -1,37 +1,24 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer
 
 import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.util.fastForEach
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 
+// TODO refactor this to save the offsets and reuse them
 internal class MarkdownOffsetMapping(private val markers: List<NodeMarker>) : OffsetMapping {
-    private val cumulativeRemovedLengths = IntArray(markers.size + 1)
-    private val originalMarkerStarts = IntArray(markers.size)
-    private val transformedMarkerStarts = IntArray(markers.size)
-
-    init {
-        var currentRemovedLength = 0
-        markers.forEachIndexed { index, marker ->
-            cumulativeRemovedLengths[index] = currentRemovedLength
-            originalMarkerStarts[index] = marker.startOffset
-            transformedMarkerStarts[index] = marker.startOffset - currentRemovedLength
-
-            currentRemovedLength += (marker.endOffset - marker.startOffset)
-        }
-        cumulativeRemovedLengths[markers.size] = currentRemovedLength
-    }
 
     override fun originalToTransformed(offset: Int): Int {
         var removedLengthBeforeOrAtOffset = 0
-        for (marker in markers) {
+        markers.fastForEach { marker ->
             if (offset <= marker.startOffset) {
-                break
+                return@fastForEach
             }
 
             if (offset < marker.endOffset) {
                 return marker.startOffset - removedLengthBeforeOrAtOffset
             }
 
-            removedLengthBeforeOrAtOffset += (marker.endOffset - marker.startOffset)
+            removedLengthBeforeOrAtOffset += marker.endOffset - marker.startOffset
         }
 
         return offset - removedLengthBeforeOrAtOffset
@@ -39,7 +26,7 @@ internal class MarkdownOffsetMapping(private val markers: List<NodeMarker>) : Of
 
     override fun transformedToOriginal(offset: Int): Int {
         var addedLength = 0
-        for (marker in markers) {
+        markers.fastForEach { marker ->
             val markerOriginalLength = marker.endOffset - marker.startOffset
             val markerTransformedStartInOriginalContext = marker.startOffset - addedLength
 
