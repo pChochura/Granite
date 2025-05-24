@@ -39,24 +39,15 @@ internal class HashtagParser : SequentialParser {
     }
 
     private companion object {
-        fun parseHashtag(iterator: TokensCache.Iterator): LocalParsingResult {
-            val startIndex = iterator.index
-            val it = iterator.advance()
-
-            return LocalParsingResult(
-                iteratorPosition = it,
-                parsedNodes = listOf(
-                    SequentialParser.Node(
-                        range = startIndex..startIndex + 1,
-                        type = ObsidianTokenTypes.HASH,
-                    ),
-                    SequentialParser.Node(
-                        range = startIndex..it.index,
-                        type = ObsidianElementTypes.HASHTAG,
-                    ),
+        fun parseHashtag(iterator: TokensCache.Iterator) = LocalParsingResult(
+            iteratorPosition = iterator,
+            parsedNodes = listOf(
+                SequentialParser.Node(
+                    range = iterator.index..iterator.index + 1,
+                    type = ObsidianElementTypes.HASHTAG,
                 ),
-                rangesToProcessFurther = emptyList(),
-            )
-        }
+            ),
+            rangesToProcessFurther = emptyList(),
+        )
     }
 }

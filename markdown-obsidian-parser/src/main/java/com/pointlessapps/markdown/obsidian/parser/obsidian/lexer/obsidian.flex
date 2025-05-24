@@ -79,7 +79,6 @@ import org.intellij.markdown.IElementType;
     parseDelimited.exitChar = last;
     parseDelimited.returnType = contentsType;
     parseDelimited.inlinesAllowed = allowInlines;
-//    parseDelimited.inlinesAllowed = true;
 
     yybegin(PARSE_DELIMITED);
 
@@ -186,7 +185,6 @@ import org.intellij.markdown.IElementType;
 
 %}
 
-DIGIT = [0-9]
 ALPHANUM = [\p{Letter}\p{Number}]
 WHITE_SPACE = [ \t\f]
 EOL = \R
@@ -210,9 +208,6 @@ OPEN_TAG = "<" {TAG_NAME} {ATTRUBUTE}* {WHITE_SPACE}* "/"? ">"
 CLOSING_TAG = "</" {TAG_NAME} {WHITE_SPACE}* ">"
 HTML_TAG = {OPEN_TAG} | {CLOSING_TAG} | {HTML_COMMENT} | {PROCESSING_INSTRUCTION} | {DECLARATION} | {CDATA}
 
-TAG_START = "<" {TAG_NAME}
-TAG_END = "</" {TAG_NAME} {WHITE_SPACE}* ">"
-
 SCHEME = [a-zA-Z]+
 AUTOLINK = "<" {SCHEME} ":" [^ \t\f\n<>]+ ">"
 EMAIL_AUTOLINK = "<" [a-zA-Z0-9.!#$%&'*+/=?\^_`{|}~-]+ "@"[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])? (\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)* ">"
@@ -226,27 +221,20 @@ GFM_AUTOLINK = (("http" "s"? | "ftp" | "file")"://" | "www.") {HOST_PART} ("." {
 FOOTNOTE_IDENTIFIER = ({ALPHANUM} | "-" | "_")+
 FOOTNOTE_DEFINITION = "[^" {FOOTNOTE_IDENTIFIER} "]:" {WHITE_SPACE}* [^\n\r]*
 
-HASHTAG = #({ALPHANUM} | "-" | "/" | "_")+
+HASHTAG_TEXT = ({ALPHANUM} | "-" | "/" | "_")+
 
-%state TAG_START, AFTER_LINE_START, PARSE_DELIMITED, CODE_SPAN
+%state AFTER_LINE_START, PARSE_DELIMITED, CODE_SPAN
 
 %%
 
-
-
 <YYINITIAL> {
-
   {WHITE_SPACE}* {FOOTNOTE_DEFINITION} { return ObsidianTokenTypes.FOOTNOTE_DEFINITION; }
 
   {WHITE_SPACE}{0,3} ">" { return MarkdownTokenTypes.BLOCK_QUOTE; }
 
-  {ANY_CHAR} {
-    resetState();
-  }
+  {ANY_CHAR} { resetState(); }
 
-  {WHITE_SPACE}* {EOL} {
-    resetState();
-  }
+  {WHITE_SPACE}* {EOL} { resetState(); }
 }
 
 <AFTER_LINE_START> {
@@ -312,31 +300,21 @@ HASHTAG = #({ALPHANUM} | "-" | "/" | "_")+
     return getReturnGeneralized(MarkdownTokenTypes.TEXT);
   }
 
-  "*" | "_" {
-    return getReturnGeneralized(MarkdownTokenTypes.EMPH);
-  }
-
-  "~" {
-    return getReturnGeneralized(GFMTokenTypes.TILDE);
-  }
-
-  "=" {
-    return getReturnGeneralized(ObsidianTokenTypes.EQ);
-  }
+  "*" | "_" { return getReturnGeneralized(MarkdownTokenTypes.EMPH); }
+  "~" { return getReturnGeneralized(GFMTokenTypes.TILDE); }
+  "=" { return getReturnGeneralized(ObsidianTokenTypes.EQ); }
 
   {AUTOLINK} { return parseDelimited(MarkdownTokenTypes.AUTOLINK, false); }
   {EMAIL_AUTOLINK} { return parseDelimited(MarkdownTokenTypes.EMAIL_AUTOLINK, false); }
 
   {HTML_TAG} { return MarkdownTokenTypes.HTML_TAG; }
 
-  {HASHTAG} { return ObsidianTokenTypes.HASHTAG; }
+  "#" {HASHTAG_TEXT} { return ObsidianTokenTypes.HASHTAG; }
 }
 
 <AFTER_LINE_START, CODE_SPAN> {
 
-  {WHITE_SPACE}+ {
-    return MarkdownTokenTypes.WHITE_SPACE;
-  }
+  {WHITE_SPACE}+ { return MarkdownTokenTypes.WHITE_SPACE; }
 
   \" | "'"| "(" | ")" | "[" | "]" | "<" | ">" {
     return getDelimiterTokenType(yycharat(0));
@@ -346,7 +324,6 @@ HASHTAG = #({ALPHANUM} | "-" | "/" | "_")+
   "^" { return ObsidianTokenTypes.CARET; }
   "|" { return ObsidianTokenTypes.PIPE; }
   "%" { return ObsidianTokenTypes.PERCENT; }
-  "#" { return ObsidianTokenTypes.HASH; }
 
   \\ / {EOL} {
     return MarkdownTokenTypes.HARD_LINE_BREAK;
