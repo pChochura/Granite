@@ -90,6 +90,8 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         MarkdownElementTypes.ATX_6 to HeaderProcessor(HeaderStyleProvider),
     )
 
+    private val defaultProcessor = DefaultProcessor(DefaultStyleProvider)
+
     private fun ASTNode.accumulateStyles(): AccumulateStylesResult {
         val styles = mutableListOf<NodeStyle>()
         val markers = mutableListOf<NodeMarker>()
@@ -102,7 +104,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
                 false
             }
 
-            val nodeProcessor = processors[node.type] ?: DefaultProcessor(DefaultStyleProvider)
+            val nodeProcessor = processors[node.type] ?: defaultProcessor
             val result = nodeProcessor.processNode(node, hideNodeMarkers)
 
             styles.addAll(result.styles)
