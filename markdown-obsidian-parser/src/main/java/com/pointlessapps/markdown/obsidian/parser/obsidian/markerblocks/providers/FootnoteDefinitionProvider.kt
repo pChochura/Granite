@@ -123,7 +123,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
 
         fun matchFootnoteLabel(text: CharSequence, start: Int): IntRange? {
             var offset = start
-            while (offset < text.length && !text[offset].isWhitespace() && text[offset] != ']') {
+            while (offset < text.length && text[offset] != ' ' && text[offset] != ']') {
                 if (text[offset] in listOf('[', '\n')) return null
 
                 offset++
@@ -160,7 +160,7 @@ internal class FootnoteDefinitionProvider : MarkerBlockProvider<MarkerProcessor.
         fun passSpacesAndNewLine(text: CharSequence, start: Int): Int {
             var offset = start
             var newLinePassed = false
-            while (offset < text.length && text[offset].isWhitespace()) {
+            while (offset < text.length && text[offset] == ' ') {
                 if (text[offset] == '\n') {
                     if (newLinePassed) {
                         // Allow only one newline

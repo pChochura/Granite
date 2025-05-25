@@ -1,5 +1,6 @@
 package com.pointlessapps.markdown.obsidian.parser.obsidian
 
+import com.pointlessapps.markdown.obsidian.parser.obsidian.markerblocks.providers.BlockQuoteProvider
 import com.pointlessapps.markdown.obsidian.parser.obsidian.markerblocks.providers.CommentBlockProvider
 import com.pointlessapps.markdown.obsidian.parser.obsidian.markerblocks.providers.FootnoteDefinitionProvider
 import org.intellij.markdown.MarkdownTokenTypes
@@ -14,7 +15,6 @@ import org.intellij.markdown.parser.constraints.CommonMarkdownConstraints
 import org.intellij.markdown.parser.constraints.MarkdownConstraints
 import org.intellij.markdown.parser.constraints.getCharsEaten
 import org.intellij.markdown.parser.markerblocks.providers.AtxHeaderProvider
-import org.intellij.markdown.parser.markerblocks.providers.BlockQuoteProvider
 import org.intellij.markdown.parser.markerblocks.providers.CodeBlockProvider
 import org.intellij.markdown.parser.markerblocks.providers.CodeFenceProvider
 import org.intellij.markdown.parser.markerblocks.providers.HorizontalRuleProvider
