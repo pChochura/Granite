@@ -13,6 +13,7 @@ import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianFlavourDescri
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.MarkdownParsingResult
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockIdProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockQuoteProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BoldProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CodeSpanProcessor
@@ -30,6 +31,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkPr
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InternalLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.ItalicProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.StrikethroughProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockIdStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockQuoteStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BoldStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeSpanStyleProvider
@@ -65,6 +67,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
     private var markdownParsingResult: MarkdownParsingResult? = null
 
     private val processors = mapOf(
+        ObsidianElementTypes.BLOCK_ID to BlockIdProcessor(BlockIdStyleProvider),
         ObsidianElementTypes.HASHTAG to HashtagProcessor(HashtagStyleProvider),
         ObsidianElementTypes.FOOTNOTE_DEFINITION to FootnoteDefinitionProcessor(
             FootnoteDefinitionStyleProvider,

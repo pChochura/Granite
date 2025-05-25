@@ -11,6 +11,9 @@ object ObsidianTokenTypes {
     val PERCENT: IElementType = MarkdownElementType("%", true)
 
     @JvmField
+    val HASH: IElementType = MarkdownElementType("#", true)
+
+    @JvmField
     val CARET: IElementType = MarkdownElementType("^", true)
 
     @JvmField
@@ -20,7 +23,10 @@ object ObsidianTokenTypes {
     val FOOTNOTE_DEFINITION: IElementType = MarkdownElementType("FOOTNOTE_DEFINITION", true)
 
     @JvmField
-    val HASHTAG: IElementType = MarkdownElementType("HASHTAG_TOKEN", true)
+    val HASHTAG_TEXT: IElementType = MarkdownElementType("HASHTAG_TEXT", true)
+
+    @JvmField
+    val BLOCK_ID: IElementType = MarkdownElementType("BLOCK_ID", true)
 }
 
 object ObsidianElementTypes {
@@ -59,4 +65,7 @@ object ObsidianElementTypes {
 
     @JvmField
     val FOOTNOTE_DEFINITION_TEXT: IElementType = MarkdownElementType("FOOTNOTE_DEFINITION_TEXT")
+
+    @JvmField
+    val BLOCK_ID: IElementType = MarkdownElementType("BLOCK_ID")
 }

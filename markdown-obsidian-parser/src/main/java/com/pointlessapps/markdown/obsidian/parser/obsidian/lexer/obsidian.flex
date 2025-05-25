@@ -1,8 +1,10 @@
 package com.pointlessapps.obsidian_mini.obsidian.lexer;
 
-import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes;import org.intellij.markdown.MarkdownTokenTypes;
-import org.intellij.markdown.flavours.gfm.GFMTokenTypes;
+import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes;
+
 import org.intellij.markdown.IElementType;
+import org.intellij.markdown.MarkdownTokenTypes;
+import org.intellij.markdown.flavours.gfm.GFMTokenTypes;
 
 /* Auto generated File */
 %%
@@ -223,7 +225,9 @@ FOOTNOTE_DEFINITION = "[^" {FOOTNOTE_IDENTIFIER} "]:" {WHITE_SPACE}* [^\n\r]*
 
 HASHTAG_TEXT = ({ALPHANUM} | "-" | "/" | "_")+
 
-%state AFTER_LINE_START, PARSE_DELIMITED, CODE_SPAN
+BLOCK_ID = ({ALPHANUM} | "-")+
+
+%state AFTER_LINE_START, PARSE_DELIMITED, CODE_SPAN, PARSE_HASHTAG, PARSE_BLOCK_ID
 
 %%
 
@@ -263,7 +267,6 @@ HASHTAG_TEXT = ({ALPHANUM} | "-" | "/" | "_")+
     return getReturnGeneralized(MarkdownTokenTypes.TEXT);
   }
 
-  // Backticks (code span)
   "`"+ {
     if (canInline()) {
       codeSpanBacktickslength = yylength();
@@ -274,12 +277,48 @@ HASHTAG_TEXT = ({ALPHANUM} | "-" | "/" | "_")+
     return parseDelimited.returnType;
   }
 
-  // Math
   "$"+ {
     if (canInline()) {
       return GFMTokenTypes.DOLLAR;
     }
     return parseDelimited.returnType;
+  }
+
+  "#" {
+    if (canInline()) {
+      stateStack.push(yystate());
+      yybegin(PARSE_HASHTAG);
+      return ObsidianTokenTypes.HASH;
+    }
+    return parseDelimited.returnType;
+  }
+
+  "^" {
+    if (canInline()) {
+      stateStack.push(yystate());
+      yybegin(PARSE_BLOCK_ID);
+      return ObsidianTokenTypes.CARET;
+    }
+    return parseDelimited.returnType;
+  }
+}
+
+<PARSE_BLOCK_ID> {
+  {BLOCK_ID} {
+    popState();
+    return ObsidianTokenTypes.BLOCK_ID;
+  }
+
+  {ANY_CHAR} {
+    yypushback(yylength());
+    popState();
+  }
+}
+
+<PARSE_HASHTAG> {
+  {HASHTAG_TEXT} {
+    popState();
+    return ObsidianTokenTypes.HASHTAG_TEXT;
   }
 }
 
@@ -308,8 +347,6 @@ HASHTAG_TEXT = ({ALPHANUM} | "-" | "/" | "_")+
   {EMAIL_AUTOLINK} { return parseDelimited(MarkdownTokenTypes.EMAIL_AUTOLINK, false); }
 
   {HTML_TAG} { return MarkdownTokenTypes.HTML_TAG; }
-
-  "#" {HASHTAG_TEXT} { return ObsidianTokenTypes.HASHTAG; }
 }
 
 <AFTER_LINE_START, CODE_SPAN> {
@@ -324,6 +361,7 @@ HASHTAG_TEXT = ({ALPHANUM} | "-" | "/" | "_")+
   "^" { return ObsidianTokenTypes.CARET; }
   "|" { return ObsidianTokenTypes.PIPE; }
   "%" { return ObsidianTokenTypes.PERCENT; }
+  "#" { return ObsidianTokenTypes.HASH; }
 
   \\ / {EOL} {
     return MarkdownTokenTypes.HARD_LINE_BREAK;

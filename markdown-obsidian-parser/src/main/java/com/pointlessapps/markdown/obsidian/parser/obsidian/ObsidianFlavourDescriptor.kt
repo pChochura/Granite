@@ -1,6 +1,7 @@
 package com.pointlessapps.markdown.obsidian.parser.obsidian
 
 import com.pointlessapps.markdown.obsidian.parser.obsidian.lexer._ObsidianLexer
+import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.BlockIdParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.CommentDelimiterParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.EmbedParser
 import com.pointlessapps.markdown.obsidian.parser.obsidian.parsers.FootnoteLinkParser
@@ -36,6 +37,7 @@ class ObsidianFlavourDescriptor(
     override val sequentialParserManager = object : SequentialParserManager() {
         override fun getParserSequence() = listOf(
             AutolinkParser(listOf(MarkdownTokenTypes.AUTOLINK, GFMTokenTypes.GFM_AUTOLINK)),
+            BlockIdParser(),
             InlineFootnoteParser(),
             BacktickParser(),
             MathParser(),
