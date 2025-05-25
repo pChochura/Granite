@@ -1,22 +1,35 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
 import androidx.compose.ui.util.fastFirstOrNull
-import androidx.compose.ui.util.fastMap
+import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
+import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
 internal class FootnoteDefinitionProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode) = node.children.fastMap {
-        NodeMarker(it.startOffset, it.endOffset)
+    override fun processMarkers(node: ASTNode) = node.children.fastMapNotNull {
+        if (
+            it.type in listOf(
+                MarkdownTokenTypes.LBRACKET,
+                ObsidianTokenTypes.CARET,
+                MarkdownTokenTypes.RBRACKET,
+                MarkdownTokenTypes.COLON,
+            )
+        ) {
+            NodeMarker(it.startOffset, it.endOffset)
+        } else {
+            null
+        }
     }
 
     override fun processStyles(node: ASTNode): List<NodeStyle> {
