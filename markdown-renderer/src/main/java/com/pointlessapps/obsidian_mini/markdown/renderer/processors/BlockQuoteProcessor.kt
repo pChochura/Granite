@@ -61,6 +61,9 @@ internal class BlockQuoteProcessor(
             startOffset = node.startOffset,
             // Add an additional offset to make the paragraph render smoother
             endOffset = node.endOffset + 1,
+        ) + styleProvider.styleNodeElement(NodeType.WHOLE_NODE, node.type).toNodeStyles(
+            startOffset = node.startOffset,
+            endOffset = node.endOffset,
         )
     }
 

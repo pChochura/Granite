@@ -14,11 +14,14 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuote
 import org.intellij.markdown.IElementType
 
 object BlockQuoteStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = listOfNotNull(
-        when (element) {
-            NodeType.DECORATION -> StringAnnotation(BlockQuoteMarkdownSpanStyle.TAG_DECORATION)
-            NodeType.CONTENT -> StringAnnotation(BlockQuoteMarkdownSpanStyle.TAG_CONTENT)
-            NodeType.PARAGRAPH -> ParagraphStyle(
+    override fun styleNodeElement(element: NodeType, type: IElementType?) = when (element) {
+        NodeType.WHOLE_NODE -> listOf(
+            StringAnnotation(BlockQuoteMarkdownSpanStyle.TAG_CONTENT),
+            SpanStyle(fontStyle = FontStyle.Italic, color = Color.Cyan),
+        )
+
+        NodeType.PARAGRAPH -> listOf(
+            ParagraphStyle(
                 textIndent = TextIndent(
                     firstLine = 1.em,
                     restLine = 1.em,
@@ -26,9 +29,9 @@ object BlockQuoteStyleProvider : ProcessorStyleProvider {
                 lineHeight = 1.4.em,
                 lineHeightStyle = LineHeightStyle.Default,
             )
+        )
 
-            else -> null
-        },
-        SpanStyle(fontStyle = FontStyle.Italic, color = Color.Cyan),
-    )
+        else -> emptyList()
+    }
+
 }

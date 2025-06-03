@@ -26,7 +26,7 @@ object HighlightMarkdownSpanStyle : MarkdownSpanStyle {
 
     private fun getMergedAnnotations(
         annotations: List<AnnotatedString.Range<String>>,
-    ): MutableList<IntRange> {
+    ): List<IntRange> {
         val mergedAnnotations = mutableListOf<IntRange>()
         var openingDelimiter: IntRange? = null
         var content: IntRange? = null
