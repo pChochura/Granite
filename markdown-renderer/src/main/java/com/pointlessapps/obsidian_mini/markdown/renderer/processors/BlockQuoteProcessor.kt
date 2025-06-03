@@ -6,7 +6,7 @@ import androidx.compose.ui.util.fastMap
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
@@ -48,16 +48,20 @@ internal class BlockQuoteProcessor(
         }
 
         return openingMarkers.fastFlatMap {
-            styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
+            styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
                 startOffset = it.startOffset,
                 endOffset = it.endOffset,
             )
         } + contentMarkers.fastFlatMap {
-            styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
+            styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
                 startOffset = it.startOffset,
                 endOffset = it.endOffset,
             )
-        }
+        } + styleProvider.styleNodeElement(NodeType.PARAGRAPH, node.type).toNodeStyles(
+            startOffset = node.startOffset,
+            // Add an additional offset to make the paragraph render smoother
+            endOffset = node.endOffset + 1,
+        )
     }
 
     override fun shouldProcessChildren() = true

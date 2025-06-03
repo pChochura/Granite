@@ -4,7 +4,7 @@ import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastLastOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
@@ -70,18 +70,18 @@ internal class HeaderProcessor(
             it.type == MarkdownTokenTypes.ATX_HEADER
         }?.takeIf { it != openingMarker }
 
-        return styleProvider.styleNodeElement(NodeElement.PARAGRAPH, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeType.PARAGRAPH, node.type).toNodeStyles(
             startOffset = node.startOffset,
             // Add an additional offset to make the paragraph render smoother
             endOffset = node.endOffset + 1,
-        ) + styleProvider.styleNodeElement(NodeElement.CONTENT, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
             startOffset = min(openingMarker.endOffset + 1, node.endOffset),
             endOffset = node.endOffset,
-        ) + styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
             startOffset = openingMarker.startOffset,
             endOffset = min(openingMarker.endOffset + 1, node.endOffset),
         ) + if (closingMarker != null) {
-            styleProvider.styleNodeElement(NodeElement.DECORATION, node.type).toNodeStyles(
+            styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
                 startOffset = max(node.startOffset, closingMarker.startOffset - 1),
                 endOffset = closingMarker.endOffset,
             )

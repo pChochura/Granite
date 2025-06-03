@@ -5,13 +5,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.CONTENT
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.DECORATION
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.CONTENT
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.DECORATION
 import org.intellij.markdown.IElementType
 
 object InlineFootnoteStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeElement, type: IElementType?) = when (element) {
+    override fun styleNodeElement(element: NodeType, type: IElementType?) = when (element) {
         CONTENT -> listOf(
             SpanStyle(
                 fontSize = 0.8.em,

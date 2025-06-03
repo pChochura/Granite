@@ -1,5 +1,5 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.models
 
-enum class NodeElement {
+enum class NodeType {
     LABEL, CONTENT, DECORATION, PARAGRAPH
 }

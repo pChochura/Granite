@@ -1,12 +1,34 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.providers
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
+import androidx.compose.ui.text.StringAnnotation
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.unit.em
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuoteMarkdownSpanStyle
 import org.intellij.markdown.IElementType
 
 object BlockQuoteStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeElement, type: IElementType?) =
-        listOf(SpanStyle(background = Color.DarkGray.copy(alpha = 0.3f)))
+    override fun styleNodeElement(element: NodeType, type: IElementType?) = listOfNotNull(
+        when (element) {
+            NodeType.DECORATION -> StringAnnotation(BlockQuoteMarkdownSpanStyle.TAG_DECORATION)
+            NodeType.CONTENT -> StringAnnotation(BlockQuoteMarkdownSpanStyle.TAG_CONTENT)
+            NodeType.PARAGRAPH -> ParagraphStyle(
+                textIndent = TextIndent(
+                    firstLine = 1.em,
+                    restLine = 1.em,
+                ),
+                lineHeight = 1.4.em,
+                lineHeightStyle = LineHeightStyle.Default,
+            )
+
+            else -> null
+        },
+        SpanStyle(fontStyle = FontStyle.Italic, color = Color.Cyan),
+    )
 }

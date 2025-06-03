@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -54,6 +55,7 @@ fun ComposeTextField(
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     onImeAction: ((ImeAction) -> Unit)? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
     textFieldStyle: ComposeTextFieldStyle = defaultComposeTextFieldStyle(),
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -90,6 +92,7 @@ fun ComposeTextField(
             ),
             cursorBrush = SolidColor(textFieldStyle.cursorColor),
             maxLines = textFieldStyle.maxLines,
+            onTextLayout = onTextLayout,
         )
     }
 }

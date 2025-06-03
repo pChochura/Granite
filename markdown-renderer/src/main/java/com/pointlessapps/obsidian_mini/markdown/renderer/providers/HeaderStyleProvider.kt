@@ -7,10 +7,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.CONTENT
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.DECORATION
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.PARAGRAPH
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.CONTENT
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.DECORATION
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.PARAGRAPH
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 
@@ -44,7 +44,7 @@ object HeaderStyleProvider : ProcessorStyleProvider {
     )
 
     override fun styleNodeElement(
-        element: NodeElement,
+        element: NodeType,
         type: IElementType?,
     ): List<AnnotatedString.Annotation> {
         if (type == null) {

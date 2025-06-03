@@ -1,14 +1,12 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.DefaultStyleProvider
 import org.intellij.markdown.ast.ASTNode
 
-internal class DefaultProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+internal object DefaultProcessor : NodeProcessor(DefaultStyleProvider) {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> = emptyList()
 

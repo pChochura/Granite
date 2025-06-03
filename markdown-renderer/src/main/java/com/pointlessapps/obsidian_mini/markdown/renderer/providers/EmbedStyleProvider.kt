@@ -5,14 +5,14 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.CONTENT
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.DECORATION
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement.LABEL
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.CONTENT
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.DECORATION
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.LABEL
 import org.intellij.markdown.IElementType
 
 object EmbedStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeElement, type: IElementType?) = when (element) {
+    override fun styleNodeElement(element: NodeType, type: IElementType?) = when (element) {
         LABEL -> listOf(
             SpanStyle(
                 color = Color.Blue,
@@ -28,6 +28,6 @@ object EmbedStyleProvider : ProcessorStyleProvider {
             ),
         )
 
-        else -> throw IllegalArgumentException("EmbedStyleProvider doesn't style $element")
+        else -> emptyList()
     }
 }

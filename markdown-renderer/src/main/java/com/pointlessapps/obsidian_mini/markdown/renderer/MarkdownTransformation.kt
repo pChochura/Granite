@@ -3,7 +3,9 @@ package com.pointlessapps.obsidian_mini.markdown.renderer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.StringAnnotation
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.util.fastForEach
@@ -37,7 +39,6 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BoldStyleProv
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeSpanStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentBlockStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.DefaultStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.EmbedStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteDefinitionStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteLinkStyleProvider
@@ -93,21 +94,30 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         MarkdownElementTypes.ATX_6 to HeaderProcessor(HeaderStyleProvider),
     )
 
-    private val defaultProcessor = DefaultProcessor(DefaultStyleProvider)
+    private fun getMarkdownParsingResult(text: String): MarkdownParsingResult {
+        if (markdownParsingResult == null || markdownParsingResult?.textContent != text) {
+            markdownParsingResult = MarkdownParsingResult(
+                rootNode = parser.buildMarkdownTreeFromString(text),
+                textContent = text,
+            )
+        }
 
-    private fun ASTNode.accumulateStyles(): AccumulateStylesResult {
+        return markdownParsingResult!!
+    }
+
+    private fun ASTNode.accumulateStyles(cursorPosition: TextRange): AccumulateStylesResult {
         val styles = mutableListOf<NodeStyle>()
         val markers = mutableListOf<NodeMarker>()
 
         fun processNode(node: ASTNode) {
-            val hideNodeMarkers = if (currentCursorPosition.collapsed) {
-                !TextRange(node.startOffset, node.endOffset).contains(currentCursorPosition)
+            val hideNodeMarkers = if (cursorPosition.collapsed) {
+                !TextRange(node.startOffset, node.endOffset).contains(cursorPosition)
             } else {
                 // Show all markers when trying to select the text
                 false
             }
 
-            val nodeProcessor = processors[node.type] ?: defaultProcessor
+            val nodeProcessor = processors[node.type] ?: DefaultProcessor
             val result = nodeProcessor.processNode(node, hideNodeMarkers)
 
             styles.addAll(result.styles)
@@ -123,14 +133,8 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
     }
 
     override fun filter(text: AnnotatedString): TransformedText {
-        if (markdownParsingResult?.textContent != text.text) {
-            markdownParsingResult = MarkdownParsingResult(
-                rootNode = parser.buildMarkdownTreeFromString(text.text),
-                textContent = text.text,
-            )
-        }
-
-        val result = markdownParsingResult!!.rootNode.accumulateStyles()
+        val result = getMarkdownParsingResult(text.text)
+            .rootNode.accumulateStyles(currentCursorPosition)
 
         val originalText = text.text
         val transformedTextBuilder = StringBuilder()
@@ -167,13 +171,23 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         }
 
         return TransformedText(
-            text = AnnotatedString(
-                text = transformedTextBuilder.toString(),
-                spanStyles = text.spanStyles + transformedStyles
-                    .filterIsInstance<AnnotatedString.Range<SpanStyle>>(),
-                paragraphStyles = text.paragraphStyles + transformedStyles
-                    .filterIsInstance<AnnotatedString.Range<ParagraphStyle>>(),
-            ),
+            text = buildAnnotatedString {
+                append(transformedTextBuilder)
+                transformedStyles.fastForEach {
+                    when (val item = it.item) {
+                        is SpanStyle -> addStyle(item, it.start, it.end)
+                        is ParagraphStyle -> addStyle(item, it.start, it.end)
+                        is StringAnnotation -> addStringAnnotation(
+                            tag = it.tag,
+                            annotation = item.value,
+                            start = it.start,
+                            end = it.end,
+                        )
+
+                        else -> {} // TODO cover different cases
+                    }
+                }
+            },
             offsetMapping = offsetMapping,
         )
     }

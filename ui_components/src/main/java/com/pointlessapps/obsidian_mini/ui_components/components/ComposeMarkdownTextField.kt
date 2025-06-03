@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.obsidian_mini.markdown.renderer.MarkdownTransformation
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.draw
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.rememberMarkdownSpanStyles
 
 @Composable
 fun ComposeMarkdownTextField(
@@ -18,12 +20,20 @@ fun ComposeMarkdownTextField(
     textFieldStyle: ComposeTextFieldStyle = defaultComposeTextFieldStyle(),
 ) {
     val markdownTransformation by remember { mutableStateOf(MarkdownTransformation(value.selection)) }
+    val markdownSpanStyles = rememberMarkdownSpanStyles()
 
     ComposeTextField(
+        modifier = modifier.draw(markdownSpanStyles),
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
         onImeAction = onImeAction,
+        onTextLayout = { result ->
+            markdownSpanStyles.update(
+                result = result,
+                text = markdownTransformation.withSelection(value.selection)
+                    .filter(value.annotatedString).text,
+            )
+        },
         textFieldStyle = textFieldStyle.copy(
             visualTransformation = remember(value.selection) {
                 markdownTransformation.withSelection(value.selection)

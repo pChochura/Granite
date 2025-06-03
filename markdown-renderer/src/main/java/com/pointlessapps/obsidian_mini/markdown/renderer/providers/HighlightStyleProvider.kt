@@ -2,11 +2,19 @@ package com.pointlessapps.obsidian_mini.markdown.renderer.providers
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeElement
+import androidx.compose.ui.text.StringAnnotation
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HighlightMarkdownSpanStyle
 import org.intellij.markdown.IElementType
 
 object HighlightStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeElement, type: IElementType?) =
-        listOf(SpanStyle(background = Color.Yellow.copy(alpha = 0.5f)))
+    override fun styleNodeElement(element: NodeType, type: IElementType?) = listOfNotNull(
+        when (element) {
+            NodeType.DECORATION -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_DELIMITER)
+            NodeType.CONTENT -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_CONTENT)
+            else -> null
+        },
+        SpanStyle(color = Color.Black),
+    )
 }
