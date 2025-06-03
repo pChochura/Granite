@@ -8,10 +8,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMapNotNull
+import androidx.compose.ui.util.fastForEachIndexed
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.getBoundingBoxes
-import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.inflate
 
 object CodeSpanMarkdownSpanStyle : MarkdownSpanStyle {
 
@@ -21,8 +20,7 @@ object CodeSpanMarkdownSpanStyle : MarkdownSpanStyle {
     private val path = Path()
     private val backgroundColor = Color(80, 80, 80)
     private val cornerRadius = 4.sp
-    private val horizontalPadding = 2.sp
-    private val verticalPadding = 2.sp
+    private val padding = 2.sp
 
     private fun getMergedAnnotations(
         annotations: List<AnnotatedString.Range<String>>,
@@ -62,16 +60,16 @@ object CodeSpanMarkdownSpanStyle : MarkdownSpanStyle {
         val cornerRadius = CornerRadius(cornerRadius.toPx())
         val annotations = getMergedAnnotations(text.getStringAnnotations(0, text.length))
 
-        annotations.fastMapNotNull { annotation ->
+        annotations.fastForEach { annotation ->
             val boxes = result.getBoundingBoxes(
                 startOffset = annotation.first,
                 endOffset = annotation.last,
             )
-            boxes.forEachIndexed { index, box ->
+            boxes.fastForEachIndexed { index, box ->
                 path.reset()
                 path.addRoundRect(
                     RoundRect(
-                        rect = box.inflate(verticalPadding.toPx(), horizontalPadding.toPx()),
+                        rect = box.inflate(padding.toPx()),
                         topLeft = if (index == 0) cornerRadius else CornerRadius.Zero,
                         bottomLeft = if (index == 0) cornerRadius else CornerRadius.Zero,
                         topRight = if (index == boxes.lastIndex) cornerRadius else CornerRadius.Zero,

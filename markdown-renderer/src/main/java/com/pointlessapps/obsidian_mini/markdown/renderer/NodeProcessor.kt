@@ -18,6 +18,11 @@ internal abstract class NodeProcessor(
     abstract fun processStyles(node: ASTNode): List<NodeStyle>
 
     /**
+     * Same as [processStyles] with additional [textContent] of the whole document
+     */
+    open fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> = processStyles(node)
+
+    /**
      * Indicates whether this node's children should be styled as well
      */
     abstract fun shouldProcessChildren(): Boolean

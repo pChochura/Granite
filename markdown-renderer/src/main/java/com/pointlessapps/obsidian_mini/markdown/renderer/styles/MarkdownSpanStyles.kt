@@ -10,6 +10,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuoteMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeSpanMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HashtagMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HighlightMarkdownSpanStyle
@@ -22,6 +23,7 @@ class MarkdownSpanStyles(
     private val spanStyles: List<MarkdownSpanStyle> = listOf(
         HighlightMarkdownSpanStyle,
         CodeSpanMarkdownSpanStyle,
+        CodeBlockMarkdownSpanStyle,
         HashtagMarkdownSpanStyle,
         BlockQuoteMarkdownSpanStyle,
     ),

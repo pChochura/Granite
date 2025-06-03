@@ -36,5 +36,6 @@ dependencies {
     implementation(libs.composeUi)
 
     implementation(libs.markdown)
+    implementation(libs.highlights)
     implementation(projects.markdownObsidianParser)
 }

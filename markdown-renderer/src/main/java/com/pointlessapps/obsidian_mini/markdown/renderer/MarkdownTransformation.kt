@@ -18,6 +18,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockIdProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockQuoteProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BoldProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CodeBlockProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CodeSpanProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CommentBlockProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.CommentProcessor
@@ -36,6 +37,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.Strikethroug
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockIdStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockQuoteStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BoldStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeBlockStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeSpanStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentBlockStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentStyleProvider
@@ -84,6 +86,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         MarkdownElementTypes.STRONG to BoldProcessor(BoldStyleProvider),
         MarkdownElementTypes.EMPH to ItalicProcessor(ItalicStyleProvider),
         MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor(CodeSpanStyleProvider),
+        MarkdownElementTypes.CODE_FENCE to CodeBlockProcessor(CodeBlockStyleProvider),
         MarkdownElementTypes.BLOCK_QUOTE to BlockQuoteProcessor(BlockQuoteStyleProvider),
         MarkdownElementTypes.INLINE_LINK to InlineLinkProcessor(InlineLinkStyleProvider),
         MarkdownElementTypes.ATX_1 to HeaderProcessor(HeaderStyleProvider),
@@ -105,7 +108,10 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         return markdownParsingResult!!
     }
 
-    private fun ASTNode.accumulateStyles(cursorPosition: TextRange): AccumulateStylesResult {
+    private fun ASTNode.accumulateStyles(
+        cursorPosition: TextRange,
+        textContent: String,
+    ): AccumulateStylesResult {
         val styles = mutableListOf<NodeStyle>()
         val markers = mutableListOf<NodeMarker>()
 
@@ -118,7 +124,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
             }
 
             val nodeProcessor = processors[node.type] ?: DefaultProcessor
-            val result = nodeProcessor.processNode(node, hideNodeMarkers)
+            val result = nodeProcessor.processNode(node, hideNodeMarkers, textContent)
 
             styles.addAll(result.styles)
             markers.addAll(result.markers)
@@ -134,7 +140,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
 
     override fun filter(text: AnnotatedString): TransformedText {
         val result = getMarkdownParsingResult(text.text)
-            .rootNode.accumulateStyles(currentCursorPosition)
+            .rootNode.accumulateStyles(currentCursorPosition, text.text)
 
         val originalText = text.text
         val transformedTextBuilder = StringBuilder()

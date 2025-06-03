@@ -1,37 +1,34 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans
 
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.getLinesBoundingBox
 
-object BlockQuoteMarkdownSpanStyle : MarkdownSpanStyle {
+object CodeBlockMarkdownSpanStyle : MarkdownSpanStyle {
 
-    const val TAG_CONTENT = "BlockQuoteMarkdownSpanStyle_Content"
+    const val TAG_CONTENT = "CodeBlockMarkdownSpanStyle_Content"
 
     private val path = Path()
-    private val backgroundColor = Color(51, 51, 51)
-    private val cornerRadius = 4.sp
-    private val width = 4.sp
-    private val verticalPadding = 4.sp
+    private val backgroundColor = Color(80, 80, 80)
+    private val backgroundCornerRadius = 4.sp
+    private val backgroundPadding = 4.sp
 
     override fun prepare(
         result: TextLayoutResult,
         text: AnnotatedString,
     ) = MarkdownSpanStyle.DrawInstruction {
-        val cornerRadius = CornerRadius(cornerRadius.toPx())
-        val annotations = text.getStringAnnotations(0, text.length)
-            .fastFilter { it.item == TAG_CONTENT }
+        text.getStringAnnotations(0, text.length).fastForEach { annotation ->
+            if (annotation.item != TAG_CONTENT) {
+                return@fastForEach
+            }
 
-        annotations.fastForEach { annotation ->
             val box = result.getLinesBoundingBox(
                 startOffset = annotation.start,
                 endOffset = annotation.end,
@@ -39,13 +36,8 @@ object BlockQuoteMarkdownSpanStyle : MarkdownSpanStyle {
             path.reset()
             path.addRoundRect(
                 RoundRect(
-                    rect = Rect(
-                        top = box.top - verticalPadding.toPx(),
-                        left = box.left,
-                        bottom = box.bottom + verticalPadding.toPx(),
-                        right = box.left + width.toPx(),
-                    ),
-                    cornerRadius = cornerRadius,
+                    rect = box.inflate(backgroundPadding.toPx()),
+                    cornerRadius = CornerRadius(backgroundCornerRadius.toPx()),
                 ),
             )
             drawPath(path, backgroundColor)

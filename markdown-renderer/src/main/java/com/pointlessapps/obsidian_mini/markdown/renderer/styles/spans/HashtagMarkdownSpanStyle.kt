@@ -8,7 +8,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFilter
-import androidx.compose.ui.util.fastMapNotNull
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.getBoundingBoxes
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.inflate
@@ -31,12 +32,12 @@ object HashtagMarkdownSpanStyle : MarkdownSpanStyle {
         val annotations = text.getStringAnnotations(0, text.length)
             .fastFilter { it.item == TAG_CONTENT }
 
-        annotations.fastMapNotNull { annotation ->
+        annotations.fastForEach { annotation ->
             val boxes = result.getBoundingBoxes(
                 startOffset = annotation.start,
                 endOffset = annotation.end,
             )
-            boxes.forEachIndexed { index, box ->
+            boxes.fastForEachIndexed { index, box ->
                 path.reset()
                 path.addRoundRect(
                     RoundRect(
