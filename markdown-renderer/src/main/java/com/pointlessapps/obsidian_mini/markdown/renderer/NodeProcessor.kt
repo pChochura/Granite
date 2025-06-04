@@ -13,6 +13,11 @@ internal abstract class NodeProcessor(
     abstract fun processMarkers(node: ASTNode): List<NodeMarker>
 
     /**
+     * Same as [processMarkers] with additional [textContent] of the whole document
+     */
+    open fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> = processMarkers(node)
+
+    /**
      * Processes a node and returns a set of styles for that node's text content
      */
     abstract fun processStyles(node: ASTNode): List<NodeStyle>

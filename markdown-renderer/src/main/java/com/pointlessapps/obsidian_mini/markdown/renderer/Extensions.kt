@@ -9,6 +9,6 @@ internal fun NodeProcessor.processNode(
     textContent: String,
 ) = NodeProcessorResult(
     styles = processStyles(node, textContent),
-    markers = if (hideMarkers) processMarkers(node) else emptyList(),
+    markers = if (hideMarkers) processMarkers(node, textContent) else emptyList(),
     processChildren = shouldProcessChildren(),
 )

@@ -3,6 +3,7 @@ package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.util.fastFilter
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
@@ -40,7 +41,7 @@ internal class CodeBlockProcessor(
     }
 
     override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
-        val langMarker = node.children.find { it.type == MarkdownTokenTypes.FENCE_LANG }
+        val langMarker = node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.FENCE_LANG }
 
         val highlights = Highlights.Builder()
             .language(

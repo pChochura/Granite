@@ -30,7 +30,11 @@ internal class FootnoteDefinitionProcessor(
         } else {
             null
         }
-    }
+    } + NodeMarker(
+        startOffset = node.endOffset,
+        endOffset = node.endOffset,
+        replacement = "↩",
+    )
 
     override fun processStyles(node: ASTNode): List<NodeStyle> {
         val idMarker = node.children.fastFirstOrNull { it.type == ObsidianElementTypes.FOOTNOTE_ID }
