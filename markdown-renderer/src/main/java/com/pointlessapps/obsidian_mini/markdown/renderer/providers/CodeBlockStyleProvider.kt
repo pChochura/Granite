@@ -44,5 +44,4 @@ object CodeBlockStyleProvider : ProcessorStyleProvider {
 
         else -> emptyList()
     }
-
 }

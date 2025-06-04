@@ -29,6 +29,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.FootnoteLink
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HashtagProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HeaderProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HighlightProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HorizontalRuleProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineFootnoteProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InternalLinkProcessor
@@ -47,12 +48,14 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteLinkS
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HashtagStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HeaderStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HighlightStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HorizontalRulStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineFootnoteStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineLinkStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InternalLinkStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.ItalicStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.StrikethroughStyleProvider
 import org.intellij.markdown.MarkdownElementTypes
+import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.parser.MarkdownParser
@@ -83,6 +86,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         ObsidianElementTypes.INTERNAL_LINK to InternalLinkProcessor(InternalLinkStyleProvider),
         ObsidianElementTypes.EMBED to EmbedProcessor(EmbedStyleProvider),
         GFMElementTypes.STRIKETHROUGH to StrikethroughProcessor(StrikethroughStyleProvider),
+        MarkdownTokenTypes.HORIZONTAL_RULE to HorizontalRuleProcessor(HorizontalRulStyleProvider),
         MarkdownElementTypes.STRONG to BoldProcessor(BoldStyleProvider),
         MarkdownElementTypes.EMPH to ItalicProcessor(ItalicStyleProvider),
         MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor(CodeSpanStyleProvider),
@@ -139,31 +143,34 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
     }
 
     override fun filter(text: AnnotatedString): TransformedText {
-        val result = getMarkdownParsingResult(text.text)
-            .rootNode.accumulateStyles(currentCursorPosition, text.text)
-
         val originalText = text.text
         val transformedTextBuilder = StringBuilder()
-        var currentOriginalPos = 0
+        var lastMarkerPos = 0
+        val result = getMarkdownParsingResult(originalText)
+            .rootNode.accumulateStyles(currentCursorPosition, originalText)
 
         // Loop through markers and add text contents between them
         for (marker in result.markers) {
-            if (currentOriginalPos < marker.startOffset) {
+            if (lastMarkerPos < marker.startOffset) {
                 transformedTextBuilder.append(
                     originalText.substring(
-                        currentOriginalPos,
+                        lastMarkerPos,
                         marker.startOffset,
                     ),
                 )
             }
-            currentOriginalPos = marker.endOffset
+
+            if (marker.replacement != null) {
+                transformedTextBuilder.append(marker.replacement)
+            }
+            lastMarkerPos = marker.endOffset
         }
 
-        if (currentOriginalPos < originalText.length) {
-            transformedTextBuilder.append(originalText.substring(currentOriginalPos))
+        if (lastMarkerPos < originalText.length) {
+            transformedTextBuilder.append(originalText.substring(lastMarkerPos))
         }
 
-        val offsetMapping = MarkdownOffsetMapping(result.markers)
+        val offsetMapping = MarkdownOffsetMapping(result.markers, originalText.length)
         val transformedStyles = result.styles.fastMapNotNull { style ->
             val newStart = offsetMapping.originalToTransformed(style.startOffset)
             val newEnd = offsetMapping.originalToTransformed(style.endOffset)

@@ -14,6 +14,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeBlockM
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeSpanMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HashtagMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HighlightMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HorizontalRuleMarkdownSpanStyle
 
 /**
  * A helper class to handle preparing and delegating the drawing process to [spanStyles].
@@ -26,6 +27,7 @@ class MarkdownSpanStyles(
         CodeBlockMarkdownSpanStyle,
         HashtagMarkdownSpanStyle,
         BlockQuoteMarkdownSpanStyle,
+        HorizontalRuleMarkdownSpanStyle,
     ),
 ) {
 

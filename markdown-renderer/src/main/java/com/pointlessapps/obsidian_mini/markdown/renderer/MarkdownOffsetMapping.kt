@@ -4,10 +4,17 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.util.fastForEach
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 
-// TODO refactor this to save the offsets and reuse them
-internal class MarkdownOffsetMapping(private val markers: List<NodeMarker>) : OffsetMapping {
+internal class MarkdownOffsetMapping(
+    private val markers: List<NodeMarker>,
+    private val originalTextLength: Int,
+) : OffsetMapping {
+
+    private val originalToTransformedMap = mutableMapOf<Int, Int>()
+    private val transformedToOriginalMap = mutableMapOf<Int, Int>()
 
     override fun originalToTransformed(offset: Int): Int {
+        originalToTransformedMap[offset]?.let { return it }
+
         var removedLengthBeforeOrAtOffset = 0
         markers.fastForEach { marker ->
             if (offset <= marker.startOffset) {
@@ -15,28 +22,47 @@ internal class MarkdownOffsetMapping(private val markers: List<NodeMarker>) : Of
             }
 
             if (offset < marker.endOffset) {
-                return marker.startOffset - removedLengthBeforeOrAtOffset
+                return (marker.startOffset - removedLengthBeforeOrAtOffset)
+                    .also { originalToTransformedMap[offset] = it }
             }
 
-            removedLengthBeforeOrAtOffset += marker.endOffset - marker.startOffset
+            val markerLength = marker.endOffset - marker.startOffset
+            val markerReplacementLength = marker.replacement?.length ?: 0
+            removedLengthBeforeOrAtOffset += markerLength - markerReplacementLength
         }
 
-        return offset - removedLengthBeforeOrAtOffset
+        return (offset - removedLengthBeforeOrAtOffset)
+            .also { originalToTransformedMap[offset] = it }
     }
 
     override fun transformedToOriginal(offset: Int): Int {
-        var addedLength = 0
+        transformedToOriginalMap[offset]?.let { return it }
+
+        var accumulatedOriginalLength = 0
+        var accumulatedTransformedLength = 0
+
         markers.fastForEach { marker ->
             val markerOriginalLength = marker.endOffset - marker.startOffset
-            val markerTransformedStartInOriginalContext = marker.startOffset - addedLength
+            val markerReplacementLength = marker.replacement?.length ?: 0
 
-            if (offset <= markerTransformedStartInOriginalContext) {
-                return offset + addedLength
+            val markerTransformedStart =
+                marker.startOffset - accumulatedOriginalLength + accumulatedTransformedLength
+
+            if (offset < markerTransformedStart) {
+                return (offset + accumulatedOriginalLength - accumulatedTransformedLength)
+                    .coerceIn(0, originalTextLength).also { transformedToOriginalMap[offset] = it }
             }
 
-            addedLength += markerOriginalLength
+            if (offset < markerTransformedStart + markerReplacementLength) {
+                return marker.startOffset.coerceIn(0, originalTextLength)
+                    .also { transformedToOriginalMap[offset] = it }
+            }
+
+            accumulatedOriginalLength += markerOriginalLength
+            accumulatedTransformedLength += markerReplacementLength
         }
 
-        return offset + addedLength
+        return (offset + accumulatedOriginalLength - accumulatedTransformedLength)
+            .coerceIn(0, originalTextLength).also { transformedToOriginalMap[offset] = it }
     }
 }
