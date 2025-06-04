@@ -16,7 +16,7 @@ object CodeBlockMarkdownSpanStyle : MarkdownSpanStyle {
     const val TAG_CONTENT = "CodeBlockMarkdownSpanStyle_Content"
 
     private val path = Path()
-    private val backgroundColor = Color(80, 80, 80)
+    private val backgroundColor = Color(59, 59, 59, 128)
     private val backgroundCornerRadius = 4.sp
     private val backgroundPadding = 4.sp
 

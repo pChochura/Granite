@@ -18,7 +18,7 @@ object CodeSpanMarkdownSpanStyle : MarkdownSpanStyle {
     const val TAG_DELIMITER = "CodeSpanMarkdownSpanStyle_Delimiter"
 
     private val path = Path()
-    private val backgroundColor = Color(80, 80, 80)
+    private val backgroundColor = Color(59, 59, 59, 128)
     private val cornerRadius = 4.sp
     private val padding = 2.sp
 

@@ -21,7 +21,7 @@ object CodeBlockStyleProvider : ProcessorStyleProvider {
             SpanStyle(
                 fontSize = 0.6.em,
                 baselineShift = BaselineShift.Superscript,
-                color = Color(31, 31, 31, 255),
+                color = Color(216, 67, 21, 255),
                 fontWeight = FontWeight.Bold,
             ),
         )
