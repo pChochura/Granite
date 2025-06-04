@@ -89,5 +89,5 @@ internal class EmbedProcessor(
         } else emptyList()
     }
 
-    override fun shouldProcessChildren() = true
+    override fun shouldProcessChildren() = false
 }

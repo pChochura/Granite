@@ -9,7 +9,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HighlightM
 import org.intellij.markdown.IElementType
 
 object HighlightStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = listOfNotNull(
+    override fun styleNodeElement(element: NodeType, type: IElementType) = listOfNotNull(
         when (element) {
             NodeType.DECORATION -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_DELIMITER)
             NodeType.CONTENT -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_CONTENT)

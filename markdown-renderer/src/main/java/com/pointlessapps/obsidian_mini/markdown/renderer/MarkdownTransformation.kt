@@ -30,6 +30,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HashtagProce
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HeaderProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HighlightProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.HorizontalRuleProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.ImageProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineFootnoteProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InternalLinkProcessor
@@ -49,6 +50,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HashtagStyleP
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HeaderStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HighlightStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HorizontalRulStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.ImageStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineFootnoteStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineLinkStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InternalLinkStyleProvider
@@ -92,6 +94,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor(CodeSpanStyleProvider),
         MarkdownElementTypes.CODE_FENCE to CodeBlockProcessor(CodeBlockStyleProvider),
         MarkdownElementTypes.BLOCK_QUOTE to BlockQuoteProcessor(BlockQuoteStyleProvider),
+        MarkdownElementTypes.IMAGE to ImageProcessor(ImageStyleProvider),
         MarkdownElementTypes.INLINE_LINK to InlineLinkProcessor(InlineLinkStyleProvider),
         MarkdownElementTypes.ATX_1 to HeaderProcessor(HeaderStyleProvider),
         MarkdownElementTypes.ATX_2 to HeaderProcessor(HeaderStyleProvider),

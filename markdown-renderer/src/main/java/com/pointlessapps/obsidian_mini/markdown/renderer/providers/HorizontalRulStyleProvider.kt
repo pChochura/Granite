@@ -9,7 +9,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.Horizontal
 import org.intellij.markdown.IElementType
 
 object HorizontalRulStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = listOf(
+    override fun styleNodeElement(element: NodeType, type: IElementType) = listOf(
         StringAnnotation(HorizontalRuleMarkdownSpanStyle.TAG_CONTENT),
         SpanStyle(color = Color.Gray),
     )

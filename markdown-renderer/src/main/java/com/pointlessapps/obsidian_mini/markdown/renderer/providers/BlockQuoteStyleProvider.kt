@@ -14,7 +14,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuote
 import org.intellij.markdown.IElementType
 
 object BlockQuoteStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = when (element) {
+    override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
         NodeType.WHOLE_NODE -> listOf(
             StringAnnotation(BlockQuoteMarkdownSpanStyle.TAG_CONTENT),
             SpanStyle(fontStyle = FontStyle.Italic, color = Color.Cyan),

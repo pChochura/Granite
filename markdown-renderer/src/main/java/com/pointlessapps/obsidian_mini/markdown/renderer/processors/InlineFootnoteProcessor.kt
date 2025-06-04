@@ -39,5 +39,5 @@ internal class InlineFootnoteProcessor(
         )
     }
 
-    override fun shouldProcessChildren() = true
+    override fun shouldProcessChildren() = false
 }

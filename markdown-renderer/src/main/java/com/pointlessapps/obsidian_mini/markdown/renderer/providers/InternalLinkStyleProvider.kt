@@ -12,7 +12,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.LABEL
 import org.intellij.markdown.IElementType
 
 object InternalLinkStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = when (element) {
+    override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
         LABEL -> listOf(
             SpanStyle(
                 color = Color.Blue,
@@ -28,6 +28,6 @@ object InternalLinkStyleProvider : ProcessorStyleProvider {
             ),
         )
 
-        else -> throw IllegalArgumentException("InternalLinkStyleProvider doesn't style $element")
+        else -> emptyList()
     }
 }

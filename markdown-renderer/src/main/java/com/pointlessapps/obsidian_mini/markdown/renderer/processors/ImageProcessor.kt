@@ -3,23 +3,29 @@ package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal class InlineLinkProcessor(
+internal class ImageProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
-        val linkTextMarker = node.children.fastFirstOrNull {
+        val linkNode = node.children.fastFirstOrNull { it.type == MarkdownElementTypes.INLINE_LINK }
+
+        if (linkNode == null) {
+            return emptyList()
+        }
+
+        val linkTextMarker = linkNode.children.fastFirstOrNull {
             it.type == MarkdownElementTypes.LINK_TEXT
         }
-        val linkDestinationMarker = node.children.fastFirstOrNull {
+        val linkDestinationMarker = linkNode.children.fastFirstOrNull {
             it.type == MarkdownElementTypes.LINK_DESTINATION
         }
 
@@ -27,21 +33,22 @@ internal class InlineLinkProcessor(
             return emptyList()
         }
 
-        val openingMarker = linkTextMarker.children.fastFirstOrNull {
-            it.type == MarkdownTokenTypes.LBRACKET
-        }
+        val openingMarkers = listOfNotNull(
+            linkTextMarker.children.fastFirstOrNull { it.type == MarkdownTokenTypes.LBRACKET },
+            node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.EXCLAMATION_MARK },
+        )
         val closingMarker = linkTextMarker.children.fastFirstOrNull {
             it.type == MarkdownTokenTypes.RBRACKET
         }
 
-        if (openingMarker == null || closingMarker == null) {
+        if (openingMarkers.isEmpty() || closingMarker == null) {
             return emptyList()
         }
 
         return listOf(
             NodeMarker(
-                startOffset = openingMarker.startOffset,
-                endOffset = openingMarker.endOffset,
+                startOffset = openingMarkers.minOf { it.startOffset },
+                endOffset = openingMarkers.maxOf { it.endOffset },
             ),
             NodeMarker(
                 startOffset = closingMarker.startOffset,
@@ -55,10 +62,16 @@ internal class InlineLinkProcessor(
     }
 
     override fun processStyles(node: ASTNode): List<NodeStyle> {
-        val linkTextMarker = node.children.fastFirstOrNull {
+        val linkNode = node.children.fastFirstOrNull { it.type == MarkdownElementTypes.INLINE_LINK }
+
+        if (linkNode == null) {
+            return emptyList()
+        }
+
+        val linkTextMarker = linkNode.children.fastFirstOrNull {
             it.type == MarkdownElementTypes.LINK_TEXT
         }
-        val linkDestinationMarker = node.children.fastFirstOrNull {
+        val linkDestinationMarker = linkNode.children.fastFirstOrNull {
             it.type == MarkdownElementTypes.LINK_DESTINATION
         }
 
@@ -66,14 +79,15 @@ internal class InlineLinkProcessor(
             return emptyList()
         }
 
-        val openingTextMarker = linkTextMarker.children.fastFirstOrNull {
-            it.type == MarkdownTokenTypes.LBRACKET
-        }
-        val closingTextMarker = linkTextMarker.children.fastFirstOrNull {
+        val openingMarkers = listOfNotNull(
+            linkTextMarker.children.fastFirstOrNull { it.type == MarkdownTokenTypes.LBRACKET },
+            node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.EXCLAMATION_MARK },
+        )
+        val closingMarker = linkTextMarker.children.fastFirstOrNull {
             it.type == MarkdownTokenTypes.RBRACKET
         }
 
-        if (openingTextMarker == null || closingTextMarker == null) {
+        if (openingMarkers.isEmpty() || closingMarker == null) {
             return emptyList()
         }
 
@@ -81,13 +95,13 @@ internal class InlineLinkProcessor(
             startOffset = linkTextMarker.startOffset,
             endOffset = linkTextMarker.endOffset,
         ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
-            startOffset = openingTextMarker.startOffset,
-            endOffset = openingTextMarker.endOffset,
+            startOffset = openingMarkers.minOf { it.startOffset },
+            endOffset = openingMarkers.maxOf { it.endOffset },
         ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
-            startOffset = closingTextMarker.startOffset,
-            endOffset = closingTextMarker.endOffset,
+            startOffset = closingMarker.startOffset,
+            endOffset = closingMarker.endOffset,
         ) + styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
-            startOffset = closingTextMarker.endOffset,
+            startOffset = closingMarker.endOffset,
             endOffset = node.endOffset,
         )
     }

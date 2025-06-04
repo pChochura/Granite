@@ -7,6 +7,6 @@ import org.intellij.markdown.IElementType
 interface ProcessorStyleProvider {
     fun styleNodeElement(
         element: NodeType,
-        type: IElementType?,
+        type: IElementType,
     ): List<AnnotatedString.Annotation>
 }

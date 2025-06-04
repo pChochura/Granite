@@ -16,7 +16,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeBlockM
 import org.intellij.markdown.IElementType
 
 object CodeBlockStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = when (element) {
+    override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
         NodeType.LABEL -> listOf(
             SpanStyle(
                 fontSize = 0.6.em,

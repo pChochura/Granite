@@ -7,6 +7,6 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import org.intellij.markdown.IElementType
 
 object ItalicStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) =
+    override fun styleNodeElement(element: NodeType, type: IElementType) =
         listOf(SpanStyle(fontStyle = FontStyle.Italic))
 }

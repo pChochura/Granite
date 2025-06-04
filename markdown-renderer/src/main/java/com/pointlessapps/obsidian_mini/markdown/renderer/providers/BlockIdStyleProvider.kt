@@ -8,7 +8,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import org.intellij.markdown.IElementType
 
 object BlockIdStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = listOf(
+    override fun styleNodeElement(element: NodeType, type: IElementType) = listOf(
         SpanStyle(fontSize = 0.8.em, baselineShift = BaselineShift(0.4f)),
     )
 }

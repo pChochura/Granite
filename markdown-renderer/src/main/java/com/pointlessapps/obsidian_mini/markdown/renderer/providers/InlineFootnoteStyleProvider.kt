@@ -11,7 +11,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.DECORAT
 import org.intellij.markdown.IElementType
 
 object InlineFootnoteStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = when (element) {
+    override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
         CONTENT -> listOf(
             SpanStyle(
                 fontSize = 0.8.em,
@@ -27,6 +27,6 @@ object InlineFootnoteStyleProvider : ProcessorStyleProvider {
             ),
         )
 
-        else -> throw IllegalArgumentException("InlineFootnoteStyleProvider doesn't style $element")
+        else -> emptyList()
     }
 }

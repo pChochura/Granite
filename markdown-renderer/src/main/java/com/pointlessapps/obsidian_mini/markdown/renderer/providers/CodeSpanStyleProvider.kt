@@ -9,7 +9,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeSpanMa
 import org.intellij.markdown.IElementType
 
 object CodeSpanStyleProvider : ProcessorStyleProvider {
-    override fun styleNodeElement(element: NodeType, type: IElementType?) = listOfNotNull(
+    override fun styleNodeElement(element: NodeType, type: IElementType) = listOfNotNull(
         when (element) {
             NodeType.DECORATION -> StringAnnotation(CodeSpanMarkdownSpanStyle.TAG_DELIMITER)
             NodeType.CONTENT -> StringAnnotation(CodeSpanMarkdownSpanStyle.TAG_CONTENT)

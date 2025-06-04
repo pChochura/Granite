@@ -45,18 +45,12 @@ object HeaderStyleProvider : ProcessorStyleProvider {
 
     override fun styleNodeElement(
         element: NodeType,
-        type: IElementType?,
+        type: IElementType,
     ): List<AnnotatedString.Annotation> {
-        if (type == null) {
-            throw IllegalArgumentException(
-                "HeaderStyleProvider styleNodeElement(): type cannot be null",
-            )
-        }
-
         return when (element) {
             PARAGRAPH -> listOf(headerStyles[type.toHeadingLevel()].second)
             CONTENT, DECORATION -> listOf(headerStyles[type.toHeadingLevel()].first)
-            else -> throw IllegalArgumentException("HeaderStyleProvider doesn't style $element")
+            else -> emptyList()
         }
     }
 

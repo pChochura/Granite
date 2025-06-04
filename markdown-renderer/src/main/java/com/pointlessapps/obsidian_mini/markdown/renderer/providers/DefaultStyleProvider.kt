@@ -8,6 +8,6 @@ import org.intellij.markdown.IElementType
 internal object DefaultStyleProvider : ProcessorStyleProvider {
     override fun styleNodeElement(
         element: NodeType,
-        type: IElementType?,
+        type: IElementType,
     ): List<AnnotatedString.Annotation> = emptyList()
 }
