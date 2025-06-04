@@ -49,6 +49,15 @@ object ObsidianElementTypes {
     val BLOCK_QUOTE_CONTENT: IElementType = MarkdownElementType("BLOCK_QUOTE_CONTENT")
 
     @JvmField
+    val CALLOUT: IElementType = MarkdownElementType("CALLOUT")
+
+    @JvmField
+    val CALLOUT_TYPE: IElementType = MarkdownElementType("CALLOUT_TYPE")
+
+    @JvmField
+    val CALLOUT_TITLE: IElementType = MarkdownElementType("CALLOUT_TITLE")
+
+    @JvmField
     val INTERNAL_LINK: IElementType = MarkdownElementType("INTERNAL_LINK")
 
     @JvmField
