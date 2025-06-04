@@ -25,7 +25,7 @@ internal class HashtagProcessor(
     )
 
     override fun processStyles(node: ASTNode) =
-        styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
+        styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
             startOffset = node.startOffset,
             endOffset = node.endOffset,
         )

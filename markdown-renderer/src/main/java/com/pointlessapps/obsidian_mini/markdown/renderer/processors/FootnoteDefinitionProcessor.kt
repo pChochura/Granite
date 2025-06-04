@@ -46,16 +46,16 @@ internal class FootnoteDefinitionProcessor(
             return emptyList()
         }
 
-        return styleProvider.styleNodeElement(NodeType.LABEL, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
             startOffset = idMarker.startOffset,
             endOffset = idMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
             startOffset = node.startOffset,
             endOffset = idMarker.startOffset,
-        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
             startOffset = idMarker.endOffset,
             endOffset = contentMarker.startOffset,
-        ) + styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
             startOffset = contentMarker.startOffset,
             endOffset = contentMarker.endOffset,
         )

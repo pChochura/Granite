@@ -6,20 +6,18 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.DECORATION
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.LABEL
 import org.intellij.markdown.IElementType
 
 object FootnoteLinkStyleProvider : ProcessorStyleProvider {
     override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
-        LABEL -> listOf(
+        NodeType.Label -> listOf(
             SpanStyle(
                 fontSize = 0.8.em,
                 baselineShift = BaselineShift(0.4f),
             ),
         )
 
-        DECORATION -> listOf(
+        NodeType.Decoration -> listOf(
             SpanStyle(
                 fontSize = 0.8.em,
                 baselineShift = BaselineShift(0.4f),

@@ -70,18 +70,18 @@ internal class HeaderProcessor(
             it.type == MarkdownTokenTypes.ATX_HEADER
         }?.takeIf { it != openingMarker }
 
-        return styleProvider.styleNodeElement(NodeType.PARAGRAPH, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
             startOffset = node.startOffset,
             // Add an additional offset to make the paragraph render smoother
             endOffset = node.endOffset + 1,
-        ) + styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
             startOffset = min(openingMarker.endOffset + 1, node.endOffset),
             endOffset = node.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
             startOffset = openingMarker.startOffset,
             endOffset = min(openingMarker.endOffset + 1, node.endOffset),
         ) + if (closingMarker != null) {
-            styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+            styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
                 startOffset = max(node.startOffset, closingMarker.startOffset - 1),
                 endOffset = closingMarker.endOffset,
             )

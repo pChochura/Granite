@@ -48,20 +48,20 @@ internal class BlockQuoteProcessor(
         }
 
         return openingMarkers.fastFlatMap {
-            styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+            styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
                 startOffset = it.startOffset,
                 endOffset = it.endOffset,
             )
         } + contentMarkers.fastFlatMap {
-            styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
+            styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
                 startOffset = it.startOffset,
                 endOffset = it.endOffset,
             )
-        } + styleProvider.styleNodeElement(NodeType.PARAGRAPH, node.type).toNodeStyles(
+        } + styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
             startOffset = node.startOffset,
             // Add an additional offset to make the paragraph render smoother
             endOffset = node.endOffset + 1,
-        ) + styleProvider.styleNodeElement(NodeType.WHOLE_NODE, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
             startOffset = node.startOffset,
             endOffset = node.endOffset,
         )

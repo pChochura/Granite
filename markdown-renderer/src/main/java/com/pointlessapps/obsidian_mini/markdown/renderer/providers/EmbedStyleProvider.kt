@@ -6,14 +6,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.CONTENT
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.DECORATION
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.LABEL
 import org.intellij.markdown.IElementType
 
 object EmbedStyleProvider : ProcessorStyleProvider {
     override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
-        LABEL -> listOf(
+        NodeType.Label -> listOf(
             SpanStyle(
                 color = Color.Blue,
                 textDecoration = TextDecoration.Underline,
@@ -21,7 +18,7 @@ object EmbedStyleProvider : ProcessorStyleProvider {
             ),
         )
 
-        CONTENT, DECORATION -> listOf(
+        NodeType.Content, NodeType.Decoration -> listOf(
             SpanStyle(
                 color = Color.Blue,
                 textDecoration = TextDecoration.Underline,

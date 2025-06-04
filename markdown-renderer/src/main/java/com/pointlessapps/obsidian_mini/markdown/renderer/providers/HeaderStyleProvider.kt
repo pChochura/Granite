@@ -8,9 +8,6 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.CONTENT
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.DECORATION
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType.PARAGRAPH
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 
@@ -48,8 +45,8 @@ object HeaderStyleProvider : ProcessorStyleProvider {
         type: IElementType,
     ): List<AnnotatedString.Annotation> {
         return when (element) {
-            PARAGRAPH -> listOf(headerStyles[type.toHeadingLevel()].second)
-            CONTENT, DECORATION -> listOf(headerStyles[type.toHeadingLevel()].first)
+            NodeType.Paragraph -> listOf(headerStyles[type.toHeadingLevel()].second)
+            NodeType.Content, NodeType.Decoration -> listOf(headerStyles[type.toHeadingLevel()].first)
             else -> emptyList()
         }
     }

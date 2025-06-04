@@ -182,6 +182,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
                     item = style.annotation,
                     start = max(0, newStart),
                     end = min(newEnd, transformedTextBuilder.length),
+                    tag = style.tag.orEmpty(),
                 )
             } else null
         }

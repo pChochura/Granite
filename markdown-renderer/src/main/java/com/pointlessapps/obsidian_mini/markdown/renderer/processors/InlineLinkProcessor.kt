@@ -3,13 +3,15 @@ package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.URL_TAG
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
+import org.intellij.markdown.ast.getTextInNode
 
 internal class InlineLinkProcessor(
     styleProvider: ProcessorStyleProvider,
@@ -54,7 +56,7 @@ internal class InlineLinkProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode): List<NodeStyle> {
+    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
         val linkTextMarker = node.children.fastFirstOrNull {
             it.type == MarkdownElementTypes.LINK_TEXT
         }
@@ -77,20 +79,30 @@ internal class InlineLinkProcessor(
             return emptyList()
         }
 
-        return styleProvider.styleNodeElement(NodeType.LABEL, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
             startOffset = linkTextMarker.startOffset,
             endOffset = linkTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
             startOffset = openingTextMarker.startOffset,
             endOffset = openingTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
             startOffset = closingTextMarker.startOffset,
             endOffset = closingTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
             startOffset = closingTextMarker.endOffset,
             endOffset = node.endOffset,
+        ) + styleProvider.styleNodeElement(
+            element = NodeType.Clickable(linkDestinationMarker.getTextInNode(textContent).toString()),
+            type = node.type,
+        ).toNodeStyles(
+            startOffset = closingTextMarker.endOffset,
+            endOffset = node.endOffset,
+            tag = URL_TAG,
         )
     }
+
+    override fun processStyles(node: ASTNode) =
+        throw IllegalStateException("Could not process styles for the internal link without the text content")
 
     override fun shouldProcessChildren() = false
 }

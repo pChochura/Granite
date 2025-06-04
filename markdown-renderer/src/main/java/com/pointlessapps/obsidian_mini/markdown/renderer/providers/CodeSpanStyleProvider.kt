@@ -11,8 +11,8 @@ import org.intellij.markdown.IElementType
 object CodeSpanStyleProvider : ProcessorStyleProvider {
     override fun styleNodeElement(element: NodeType, type: IElementType) = listOfNotNull(
         when (element) {
-            NodeType.DECORATION -> StringAnnotation(CodeSpanMarkdownSpanStyle.TAG_DELIMITER)
-            NodeType.CONTENT -> StringAnnotation(CodeSpanMarkdownSpanStyle.TAG_CONTENT)
+            NodeType.Decoration -> StringAnnotation(CodeSpanMarkdownSpanStyle.TAG_DELIMITER)
+            NodeType.Content -> StringAnnotation(CodeSpanMarkdownSpanStyle.TAG_CONTENT)
             else -> null
         },
         SpanStyle(fontFamily = FontFamily.Monospace),

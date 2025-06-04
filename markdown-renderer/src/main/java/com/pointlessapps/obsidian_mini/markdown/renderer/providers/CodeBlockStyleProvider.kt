@@ -17,7 +17,7 @@ import org.intellij.markdown.IElementType
 
 object CodeBlockStyleProvider : ProcessorStyleProvider {
     override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
-        NodeType.LABEL -> listOf(
+        NodeType.Label -> listOf(
             SpanStyle(
                 fontSize = 0.6.em,
                 baselineShift = BaselineShift.Superscript,
@@ -26,12 +26,12 @@ object CodeBlockStyleProvider : ProcessorStyleProvider {
             ),
         )
 
-        NodeType.WHOLE_NODE -> listOf(
+        NodeType.All -> listOf(
             StringAnnotation(CodeBlockMarkdownSpanStyle.TAG_CONTENT),
             SpanStyle(fontFamily = FontFamily.Monospace),
         )
 
-        NodeType.PARAGRAPH -> listOf(
+        NodeType.Paragraph -> listOf(
             ParagraphStyle(
                 textIndent = TextIndent(
                     firstLine = 1.em,

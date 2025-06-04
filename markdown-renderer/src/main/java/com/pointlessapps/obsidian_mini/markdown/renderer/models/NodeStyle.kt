@@ -7,15 +7,18 @@ internal data class NodeStyle(
     val annotation: AnnotatedString.Annotation,
     val startOffset: Int,
     val endOffset: Int,
+    val tag: String? = null,
 )
 
 internal fun List<AnnotatedString.Annotation>.toNodeStyles(
     startOffset: Int,
     endOffset: Int,
+    tag: String? = null,
 ): List<NodeStyle> = fastMap {
     NodeStyle(
         annotation = it,
         startOffset = startOffset,
         endOffset = endOffset,
+        tag = tag,
     )
 }

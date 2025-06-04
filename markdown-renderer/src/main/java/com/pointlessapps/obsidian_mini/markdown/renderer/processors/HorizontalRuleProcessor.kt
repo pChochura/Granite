@@ -22,7 +22,7 @@ internal class HorizontalRuleProcessor(
     )
 
     override fun processStyles(node: ASTNode) =
-        styleProvider.styleNodeElement(NodeType.WHOLE_NODE, node.type).toNodeStyles(
+        styleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
             startOffset = node.startOffset,
             endOffset = node.endOffset,
         )

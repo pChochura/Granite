@@ -15,12 +15,12 @@ import org.intellij.markdown.IElementType
 
 object BlockQuoteStyleProvider : ProcessorStyleProvider {
     override fun styleNodeElement(element: NodeType, type: IElementType) = when (element) {
-        NodeType.WHOLE_NODE -> listOf(
+        NodeType.All -> listOf(
             StringAnnotation(BlockQuoteMarkdownSpanStyle.TAG_CONTENT),
             SpanStyle(fontStyle = FontStyle.Italic, color = Color.Cyan),
         )
 
-        NodeType.PARAGRAPH -> listOf(
+        NodeType.Paragraph -> listOf(
             ParagraphStyle(
                 textIndent = TextIndent(
                     firstLine = 1.em,

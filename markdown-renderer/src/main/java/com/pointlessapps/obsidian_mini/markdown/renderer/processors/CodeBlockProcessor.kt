@@ -55,11 +55,11 @@ internal class CodeBlockProcessor(
             .getHighlights()
             .filterIsInstance<ColorHighlight>()
 
-        return styleProvider.styleNodeElement(NodeType.PARAGRAPH, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
             startOffset = node.startOffset,
             // Add an additional offset to make the paragraph render smoother
             endOffset = node.endOffset + 1,
-        ) + styleProvider.styleNodeElement(NodeType.WHOLE_NODE, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
             startOffset = node.startOffset,
             endOffset = node.endOffset,
         ) + highlights.fastMap {
@@ -69,7 +69,7 @@ internal class CodeBlockProcessor(
                 endOffset = node.startOffset + it.location.end,
             )
         } + if (langMarker != null) {
-            styleProvider.styleNodeElement(NodeType.LABEL, node.type).toNodeStyles(
+            styleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
                 startOffset = langMarker.startOffset,
                 endOffset = langMarker.endOffset,
             )

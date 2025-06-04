@@ -49,13 +49,13 @@ internal open class DelimiterProcessor(
             return emptyList()
         }
 
-        return styleProvider.styleNodeElement(NodeType.CONTENT, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
             startOffset = openingMarkers.maxOf { it.endOffset },
             endOffset = closingMarkers.minOf { it.startOffset },
-        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
             startOffset = openingMarkers.minOf { it.startOffset },
             endOffset = openingMarkers.maxOf { it.endOffset },
-        ) + styleProvider.styleNodeElement(NodeType.DECORATION, node.type).toNodeStyles(
+        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
             startOffset = closingMarkers.minOf { it.startOffset },
             endOffset = closingMarkers.maxOf { it.endOffset },
         )

@@ -11,8 +11,8 @@ import org.intellij.markdown.IElementType
 object HighlightStyleProvider : ProcessorStyleProvider {
     override fun styleNodeElement(element: NodeType, type: IElementType) = listOfNotNull(
         when (element) {
-            NodeType.DECORATION -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_DELIMITER)
-            NodeType.CONTENT -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_CONTENT)
+            NodeType.Decoration -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_DELIMITER)
+            NodeType.Content -> StringAnnotation(HighlightMarkdownSpanStyle.TAG_CONTENT)
             else -> null
         },
         SpanStyle(color = Color.Black),
