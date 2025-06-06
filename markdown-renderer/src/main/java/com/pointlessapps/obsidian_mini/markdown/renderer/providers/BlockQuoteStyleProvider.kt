@@ -30,7 +30,7 @@ object BlockQuoteStyleProvider : ProcessorStyleProvider {
                     firstLine = 1.em,
                     restLine = 1.em,
                 ),
-                lineHeight = 1.4.em,
+                lineHeight = 1.6.em,
                 lineHeightStyle = LineHeightStyle.Default,
             )
         )

@@ -36,7 +36,7 @@ internal class BlockQuoteProcessor(
                 OpeningMarker(
                     startOffset = currentIndex + group.range.first,
                     endOffset = currentIndex + group.range.last + 1,
-                    indent = group.value.count { it == '>' }.coerceAtLeast(1),
+                    indent = group.value.count { it == '>' }.coerceAtLeast(1) - 1,
                 )
             }
             // Add a line break
@@ -51,7 +51,7 @@ internal class BlockQuoteProcessor(
             NodeMarker(
                 startOffset = it.startOffset + node.startOffset,
                 endOffset = it.endOffset + node.startOffset,
-                replacement = "\t".repeat(it.indent),
+                replacement = "\t\t".repeat(it.indent),
             )
         }
 
