@@ -6,34 +6,34 @@ targetSdk = "35"
 
 #Kotlin
 parcelizePluginName = "kotlin-parcelize"
-kotlinSerialization = "2.0.20"
-kotlinSerializationJson = "1.7.3"
-kotlin = "2.0.21"
-coroutines = "1.9.0"
+kotlinSerialization = "2.1.21"
+kotlinSerializationJson = "1.8.1"
+kotlin = "2.1.21"
+coroutines = "1.10.2"
 
 #Android
-gradlePlugin = "8.10.0"
+gradlePlugin = "8.10.1"
 
 #AndroidX
 androidxCore = "1.16.0"
 androidxNavigation = "2.9.0"
 androidxSplashscreen = "1.0.1"
-androidxDatastore = "1.1.6"
+androidxDatastore = "1.1.7"
 
 #Compose
 composeCompiler = "1.5.15"
-composeBom = "2025.05.00"
-composeRuntime = "1.8.1"
+composeBom = "2025.06.00"
+composeRuntime = "1.8.2"
 
 #Detekt
-detekt = "1.23.0"
+detekt = "1.23.8"
 detektFormattingPlugin = "io.gitlab.arturbosch.detekt:detekt-formatting"
 
 #AndroidVersionGit
 androidVersionGit = "0.4.14"
 
 #Koin
-koin = "4.0.0"
+koin = "4.0.4"
 
 #Markdown
 markdown = "0.7.3"
