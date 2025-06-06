@@ -3,6 +3,7 @@ package com.pointlessapps.obsidian_mini.markdown.renderer
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeProcessorResult
 import dev.snipme.highlights.internal.isNewLine
 import org.intellij.markdown.ast.ASTNode
+import java.util.Locale
 
 internal fun NodeProcessor.processNode(
     node: ASTNode,
@@ -12,6 +13,14 @@ internal fun NodeProcessor.processNode(
     styles = processStyles(node, textContent),
     markers = if (hideMarkers) processMarkers(node, textContent) else emptyList(),
 )
+
+internal fun String.capitalize() = replaceFirstChar {
+    if (it.isLowerCase()) {
+        it.titlecase(Locale.getDefault())
+    } else {
+        it.toString()
+    }
+}
 
 internal fun Int.atLineStart(text: String): Int {
     var i = this

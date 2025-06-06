@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.MarkdownSpanStyle
@@ -24,13 +23,8 @@ object BlockQuoteMarkdownSpanStyle : MarkdownSpanStyle {
     private val horizontalPadding = 12.sp
     private val verticalPadding = 4.sp
 
-    private val markerRegex = Regex("^(\t\t)*")
-
     private fun getIndents(text: String) = text.lines().fastMapNotNull { line ->
-        val matchedGroup = markerRegex.find(line)?.groups?.firstOrNull()
-
-        // Make sure it starts at 0
-        return@fastMapNotNull matchedGroup?.value?.count { it == '\t' }?.div(2)
+        line.takeWhile { it == '\t' }.count().div(2)
     }
 
     private fun getIndentRegions(text: String): List<IntRange> {
@@ -64,31 +58,35 @@ object BlockQuoteMarkdownSpanStyle : MarkdownSpanStyle {
         result: TextLayoutResult,
         text: AnnotatedString,
     ) = MarkdownSpanStyle.DrawInstruction {
-        val lines = text.lines()
-        val linesOffsets = lines.runningFold(0) { length, line -> length + line.length + 1 }
         val cornerRadius = CornerRadius(cornerRadius.toPx())
-        val annotations = text.getStringAnnotations(0, text.length)
-            .fastFilter { it.item == TAG_CONTENT }
+        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
 
         annotations.fastForEach { annotation ->
-            val indentRegions = getIndentRegions(
-                text.text.substring(annotation.start, annotation.end),
-            ).sortedBy { it.start }
+            val annotationTextContent = text.text.substring(annotation.start, annotation.end)
+            val lines = annotationTextContent.lines()
+            val linesOffsets = lines.runningFold(0) { length, line -> length + line.length + 1 }
+            val indentRegions = getIndentRegions(annotationTextContent)
 
             indentRegions.fastForEach { indent ->
                 val padding = if (indent.first == 0) verticalPadding.toPx() else 0f
-                val lastTabOffset = linesOffsets[indent.first] +
+                val lastTabOffset = annotation.start + linesOffsets[indent.first] +
                         lines[indent.first].takeWhile { it == '\t' }.length
+                val firstLineIndex = result.getLineForOffset(
+                    annotation.start + linesOffsets[indent.first],
+                )
+                val lastLineIndex = result.getLineForOffset(
+                    annotation.start + linesOffsets[indent.last],
+                )
                 path.reset()
                 path.addRoundRect(
                     RoundRect(
                         rect = Rect(
-                            top = result.getLineTop(indent.first) - padding,
+                            top = result.getLineTop(firstLineIndex) - padding,
                             left = result.getHorizontalPosition(
                                 offset = lastTabOffset,
                                 usePrimaryDirection = true
                             ) - horizontalPadding.toPx(),
-                            bottom = result.getLineBottom(indent.last) + padding,
+                            bottom = result.getLineBottom(lastLineIndex) + padding,
                             right = result.getHorizontalPosition(
                                 offset = lastTabOffset,
                                 usePrimaryDirection = true
