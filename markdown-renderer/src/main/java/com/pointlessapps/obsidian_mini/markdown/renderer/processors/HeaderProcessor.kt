@@ -74,7 +74,7 @@ internal class HeaderProcessor(
         }?.takeIf { it != openingMarker }
 
         return styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
-            startOffset = node.startOffset.atLineStart(textContent) - 1,
+            startOffset = node.startOffset.atLineStart(textContent),
             // Add an additional offset to make the paragraph render smoother
             endOffset = node.endOffset.atLineEnd(textContent) + 1,
         ) + styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(

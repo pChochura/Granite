@@ -27,7 +27,7 @@ internal fun Int.atLineEnd(text: String): Int {
 
     // Early return if we are already at the end of the line
     if (i < text.length && text[i].isNewLine()) return this
-    while (i < text.lastIndex && !text[i + 1].isNewLine()) {
+    while (i < text.length && !text[i].isNewLine()) {
         i++
     }
 
