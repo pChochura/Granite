@@ -135,7 +135,11 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
 
             styles.addAll(result.styles)
             markers.addAll(result.markers)
-            if (result.processChildren) node.children.fastForEach(::processNode)
+            node.children.fastForEach {
+                if (nodeProcessor.shouldProcessChild(it.type)) {
+                    processNode(it)
+                }
+            }
         }
 
         children.fastForEach(::processNode)

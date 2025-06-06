@@ -15,6 +15,7 @@ import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.ColorHighlight
 import dev.snipme.highlights.model.SyntaxLanguage
 import dev.snipme.highlights.model.SyntaxThemes
+import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
@@ -79,7 +80,7 @@ internal class CodeBlockProcessor(
     override fun processStyles(node: ASTNode) =
         throw IllegalStateException("Could not process styles for the code block without the text content")
 
-    override fun shouldProcessChildren() = true
+    override fun shouldProcessChild(type: IElementType) = false
 
     private fun String?.toLang() = when (this) {
         "c" -> SyntaxLanguage.C

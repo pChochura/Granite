@@ -1,71 +1,85 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
-import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFlatMap
-import androidx.compose.ui.util.fastMap
-import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
+import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
-import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
 internal class BlockQuoteProcessor(
     styleProvider: ProcessorStyleProvider,
 ) : NodeProcessor(styleProvider) {
 
-    override fun processMarkers(node: ASTNode): List<NodeMarker> {
-        val openingMarkers = node.children.fastFilter { it.type == MarkdownTokenTypes.BLOCK_QUOTE }
+    private companion object {
+        val markerRegex = Regex("^(?: {0,3}> ?)*")
+    }
 
-        if (openingMarkers.isEmpty()) {
-            return emptyList()
-        }
+    private data class OpeningMarker(
+        val startOffset: Int,
+        val endOffset: Int,
+        val indent: Int,
+    )
 
-        return openingMarkers.fastMap {
-            NodeMarker(
-                startOffset = it.startOffset,
-                endOffset = it.endOffset,
-            )
+    private fun extractMarkers(nodeTextContent: String): List<OpeningMarker> {
+        var currentIndex = 0
+        return nodeTextContent.lines().fastMapNotNull { line ->
+            val matchedGroup = markerRegex.find(line)?.groups?.firstOrNull()
+            val marker = matchedGroup?.let { group ->
+                OpeningMarker(
+                    startOffset = currentIndex + group.range.first,
+                    endOffset = currentIndex + group.range.last + 1,
+                    indent = group.value.count { it == '>' }.coerceAtLeast(1),
+                )
+            }
+            // Add a line break
+            currentIndex += line.length + 1
+
+            return@fastMapNotNull marker
         }
     }
 
-    override fun processStyles(node: ASTNode): List<NodeStyle> {
-        val openingMarkers = node.children.fastFilter { it.type == MarkdownTokenTypes.BLOCK_QUOTE }
+    override fun processMarkers(node: ASTNode, textContent: String) =
+        extractMarkers(textContent.substring(node.startOffset, node.endOffset)).map {
+            NodeMarker(
+                startOffset = it.startOffset + node.startOffset,
+                endOffset = it.endOffset + node.startOffset,
+                replacement = "\t".repeat(it.indent),
+            )
+        }
+
+    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+        val openingMarkers = extractMarkers(textContent.substring(node.startOffset, node.endOffset))
 
         if (openingMarkers.isEmpty()) {
             return emptyList()
         }
 
-        val contentMarkers = node.children.fastFilter {
-            it.type in listOf(
-                ObsidianElementTypes.BLOCK_QUOTE_CONTENT,
-                MarkdownElementTypes.PARAGRAPH,
-            )
-        }
-
-        return openingMarkers.fastFlatMap {
-            styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-                startOffset = it.startOffset,
-                endOffset = it.endOffset,
-            )
-        } + contentMarkers.fastFlatMap {
-            styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
-                startOffset = it.startOffset,
-                endOffset = it.endOffset,
-            )
-        } + styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
+        return styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
             startOffset = node.startOffset,
             // Add an additional offset to make the paragraph render smoother
             endOffset = node.endOffset + 1,
         ) + styleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
             startOffset = node.startOffset,
             endOffset = node.endOffset,
-        )
+        ) + openingMarkers.fastFlatMap {
+            styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
+                startOffset = it.startOffset + node.startOffset,
+                endOffset = it.endOffset + node.startOffset,
+            )
+        }
     }
 
-    override fun shouldProcessChildren() = true
+    override fun processMarkers(node: ASTNode) =
+        throw IllegalStateException("Could not process markers for the blockquote without the text content")
+
+    override fun processStyles(node: ASTNode) =
+        throw IllegalStateException("Could not process styles for the blockquote without the text content")
+
+    override fun shouldProcessChild(type: IElementType) = type != MarkdownElementTypes.BLOCK_QUOTE
 }

@@ -5,6 +5,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 
 internal class HorizontalRuleProcessor(
@@ -27,5 +28,5 @@ internal class HorizontalRuleProcessor(
             endOffset = node.endOffset,
         )
 
-    override fun shouldProcessChildren() = false
+    override fun shouldProcessChild(type: IElementType) = false
 }

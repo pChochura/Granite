@@ -10,6 +10,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
@@ -61,5 +62,5 @@ internal class FootnoteDefinitionProcessor(
         )
     }
 
-    override fun shouldProcessChildren() = true
+    override fun shouldProcessChild(type: IElementType) = true
 }

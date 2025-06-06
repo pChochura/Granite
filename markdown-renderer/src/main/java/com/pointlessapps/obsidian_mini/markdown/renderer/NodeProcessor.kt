@@ -2,6 +2,7 @@ package com.pointlessapps.obsidian_mini.markdown.renderer
 
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
+import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 
 internal abstract class NodeProcessor(
@@ -28,7 +29,7 @@ internal abstract class NodeProcessor(
     open fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> = processStyles(node)
 
     /**
-     * Indicates whether this node's children should be styled as well
+     * Indicates whether this node's child of [type] should be styled as well
      */
-    abstract fun shouldProcessChildren(): Boolean
+    abstract fun shouldProcessChild(type: IElementType): Boolean
 }

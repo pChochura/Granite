@@ -61,7 +61,7 @@ internal open class DelimiterProcessor(
         )
     }
 
-    override fun shouldProcessChildren() = true
+    override fun shouldProcessChild(type: IElementType) = true
 }
 
 internal class BoldProcessor(

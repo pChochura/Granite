@@ -10,5 +10,4 @@ internal fun NodeProcessor.processNode(
 ) = NodeProcessorResult(
     styles = processStyles(node, textContent),
     markers = if (hideMarkers) processMarkers(node, textContent) else emptyList(),
-    processChildren = shouldProcessChildren(),
 )
