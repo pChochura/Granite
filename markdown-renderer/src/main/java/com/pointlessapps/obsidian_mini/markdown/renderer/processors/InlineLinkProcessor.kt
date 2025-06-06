@@ -15,8 +15,8 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 
 internal class InlineLinkProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+    private val styleProvider: ProcessorStyleProvider,
+) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val linkTextMarker = node.children.fastFirstOrNull {
@@ -93,7 +93,7 @@ internal class InlineLinkProcessor(
             startOffset = closingTextMarker.endOffset,
             endOffset = node.endOffset,
         ) + styleProvider.styleNodeElement(
-            element = NodeType.Clickable(linkDestinationMarker.getTextInNode(textContent).toString()),
+            element = NodeType.Data(linkDestinationMarker.getTextInNode(textContent).toString()),
             type = node.type,
         ).toNodeStyles(
             startOffset = closingTextMarker.endOffset,

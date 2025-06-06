@@ -13,10 +13,10 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
 internal open class DelimiterProcessor(
-    styleProvider: ProcessorStyleProvider,
+    private val styleProvider: ProcessorStyleProvider,
     private val delimiter: IElementType,
     private val alwaysShowMarkers: Boolean = false,
-) : NodeProcessor(styleProvider) {
+) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         if (alwaysShowMarkers) return emptyList()

@@ -17,8 +17,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 internal class HeaderProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+    private val styleProvider: ProcessorStyleProvider,
+) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val openingMarker = node.children.fastFirstOrNull {

@@ -9,8 +9,8 @@ import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 
 internal class HorizontalRuleProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+    private val styleProvider: ProcessorStyleProvider,
+) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode) = listOf(
         NodeMarker(

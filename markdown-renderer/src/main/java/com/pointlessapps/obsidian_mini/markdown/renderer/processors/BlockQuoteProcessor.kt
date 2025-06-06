@@ -15,8 +15,9 @@ import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 
 internal class BlockQuoteProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+    private val blockQuoteStyleProvider: ProcessorStyleProvider,
+    private val calloutStyleProvider: ProcessorStyleProvider,
+) : NodeProcessor {
 
     private companion object {
         val markerRegex = Regex("^(?: {0,3}> ?)*")

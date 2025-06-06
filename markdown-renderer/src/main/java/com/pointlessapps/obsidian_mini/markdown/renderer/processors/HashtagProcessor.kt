@@ -10,8 +10,8 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 
 internal class HashtagProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+    private val styleProvider: ProcessorStyleProvider,
+) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode) =
         throw IllegalStateException("Could not process markers for the hashtag without the text content")

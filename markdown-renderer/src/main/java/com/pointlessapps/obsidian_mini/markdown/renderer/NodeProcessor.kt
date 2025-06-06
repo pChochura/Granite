@@ -5,31 +5,29 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 
-internal abstract class NodeProcessor(
-    protected val styleProvider: ProcessorStyleProvider,
-) {
+internal interface NodeProcessor {
     /**
      * Processes a node and returns a set of markers that will be removed while rendering
      */
-    abstract fun processMarkers(node: ASTNode): List<NodeMarker>
+    fun processMarkers(node: ASTNode): List<NodeMarker>
 
     /**
      * Same as [processMarkers] with additional [textContent] of the whole document
      */
-    open fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> = processMarkers(node)
+    fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> = processMarkers(node)
 
     /**
      * Processes a node and returns a set of styles for that node's text content
      */
-    abstract fun processStyles(node: ASTNode): List<NodeStyle>
+    fun processStyles(node: ASTNode): List<NodeStyle>
 
     /**
      * Same as [processStyles] with additional [textContent] of the whole document
      */
-    open fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> = processStyles(node)
+    fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> = processStyles(node)
 
     /**
      * Indicates whether this node's child of [type] should be styled as well
      */
-    abstract fun shouldProcessChild(type: IElementType): Boolean
+    fun shouldProcessChild(type: IElementType): Boolean
 }

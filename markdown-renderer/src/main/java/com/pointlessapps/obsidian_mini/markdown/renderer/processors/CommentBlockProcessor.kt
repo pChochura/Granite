@@ -11,8 +11,8 @@ import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 
 internal class CommentBlockProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+    private val styleProvider: ProcessorStyleProvider,
+) : NodeProcessor {
 
     // Always show markers
     override fun processMarkers(node: ASTNode) = emptyList<NodeMarker>()

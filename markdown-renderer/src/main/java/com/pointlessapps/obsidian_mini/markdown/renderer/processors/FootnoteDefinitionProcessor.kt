@@ -15,8 +15,8 @@ import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
 internal class FootnoteDefinitionProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : NodeProcessor(styleProvider) {
+    private val styleProvider: ProcessorStyleProvider,
+) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode) = node.children.fastMapNotNull {
         if (

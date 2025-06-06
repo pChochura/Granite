@@ -12,7 +12,7 @@ sealed class NodeType {
     /**
      * In case of a clickable element, a [data] that can be used as a link that was clicked.
      */
-    data class Clickable(val data: String) : NodeType()
+    data class Data(val data: String) : NodeType()
 
     /**
      * Content that does not qualify as decoration.

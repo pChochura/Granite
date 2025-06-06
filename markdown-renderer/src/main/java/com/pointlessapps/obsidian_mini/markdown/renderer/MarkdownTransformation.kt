@@ -39,6 +39,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.Strikethroug
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockIdStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockQuoteStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BoldStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CalloutStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeBlockStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeSpanStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentBlockStyleProvider
@@ -93,7 +94,10 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         MarkdownElementTypes.EMPH to ItalicProcessor(ItalicStyleProvider),
         MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor(CodeSpanStyleProvider),
         MarkdownElementTypes.CODE_FENCE to CodeBlockProcessor(CodeBlockStyleProvider),
-        MarkdownElementTypes.BLOCK_QUOTE to BlockQuoteProcessor(BlockQuoteStyleProvider),
+        MarkdownElementTypes.BLOCK_QUOTE to BlockQuoteProcessor(
+            blockQuoteStyleProvider = BlockQuoteStyleProvider,
+            calloutStyleProvider = CalloutStyleProvider,
+        ),
         MarkdownElementTypes.IMAGE to ImageProcessor(ImageStyleProvider),
         MarkdownElementTypes.INLINE_LINK to InlineLinkProcessor(InlineLinkStyleProvider),
         MarkdownElementTypes.ATX_1 to HeaderProcessor(HeaderStyleProvider),
