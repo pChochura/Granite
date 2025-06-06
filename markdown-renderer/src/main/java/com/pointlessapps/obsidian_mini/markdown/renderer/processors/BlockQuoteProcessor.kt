@@ -12,7 +12,6 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
-import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuoteMarkdownSpanStyle
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
@@ -73,7 +72,7 @@ internal class BlockQuoteProcessor(
             return markers + NodeMarker(
                 startOffset = node.startOffset + calloutMatch.groups[1]!!.range.first,
                 endOffset = node.startOffset + calloutMatch.groups[1]!!.range.last + 1,
-                replacement = "    " + extractCalloutTitle(calloutMatch).orEmpty().capitalize(),
+                replacement = "      " + extractCalloutTitle(calloutMatch).orEmpty().capitalize(),
             )
         }
 
@@ -88,29 +87,27 @@ internal class BlockQuoteProcessor(
             return emptyList()
         }
 
-        val openingMarkersStyles = openingMarkers.fastFlatMap {
-            blockQuoteStyleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-                startOffset = it.startOffset + node.startOffset,
-                endOffset = it.endOffset + node.startOffset,
-            )
-        }
-
         val calloutMatch = calloutRegex.find(nodeTextContent)
         return if (calloutMatch != null) {
-            blockQuoteStyleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
+            calloutStyleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
                 startOffset = node.startOffset.atLineStart(textContent),
                 // Add an additional offset to make the paragraph render smoother
                 endOffset = node.endOffset.atLineEnd(textContent) + 1,
-            ) + calloutStyleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
-                startOffset = node.startOffset.atLineStart(textContent),
-                endOffset = node.startOffset.atLineEnd(textContent),
             ) + calloutStyleProvider.styleNodeElement(
                 element = NodeType.Data(calloutMatch.groups[2]!!.value),
                 type = node.type,
             ).toNodeStyles(
-                startOffset = node.startOffset.atLineStart(textContent),
+                startOffset = node.startOffset + calloutMatch.groups[1]!!.range.first,
                 endOffset = node.startOffset.atLineEnd(textContent),
-            ) + openingMarkersStyles
+            ) + calloutStyleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
+                startOffset = node.startOffset,
+                endOffset = node.endOffset,
+            ) + openingMarkers.fastFlatMap {
+                calloutStyleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
+                    startOffset = it.startOffset + node.startOffset,
+                    endOffset = it.endOffset + node.startOffset,
+                )
+            }
         } else {
             blockQuoteStyleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
                 startOffset = node.startOffset.atLineStart(textContent),
@@ -119,8 +116,13 @@ internal class BlockQuoteProcessor(
             ) + blockQuoteStyleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
                 startOffset = node.startOffset,
                 endOffset = node.endOffset,
-                tag = BlockQuoteMarkdownSpanStyle.TAG_CONTENT,
-            ) + openingMarkersStyles
+            ) + openingMarkers.fastFlatMap {
+                blockQuoteStyleProvider.styleNodeElement(NodeType.Decoration, node.type)
+                    .toNodeStyles(
+                        startOffset = it.startOffset + node.startOffset,
+                        endOffset = it.endOffset + node.startOffset,
+                    )
+            }
         }
     }
 

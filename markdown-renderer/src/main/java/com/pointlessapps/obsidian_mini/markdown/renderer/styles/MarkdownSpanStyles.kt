@@ -5,11 +5,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuoteMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CalloutMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeSpanMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HashtagMarkdownSpanStyle
@@ -20,16 +22,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.Horizontal
  * A helper class to handle preparing and delegating the drawing process to [spanStyles].
  * Each [MarkdownSpanStyle] contain instructions on how to draw itself.
  */
-class MarkdownSpanStyles(
-    private val spanStyles: List<MarkdownSpanStyle> = listOf(
-        HighlightMarkdownSpanStyle,
-        CodeSpanMarkdownSpanStyle,
-        CodeBlockMarkdownSpanStyle,
-        HashtagMarkdownSpanStyle,
-        BlockQuoteMarkdownSpanStyle,
-        HorizontalRuleMarkdownSpanStyle,
-    ),
-) {
+class MarkdownSpanStyles(private val spanStyles: List<MarkdownSpanStyle>) {
 
     private var spanStylesDrawInstructions = emptyList<MarkdownSpanStyle.DrawInstruction>()
 
@@ -52,4 +45,20 @@ fun Modifier.draw(markdownSpanStyles: MarkdownSpanStyles) = drawWithCache {
 }
 
 @Composable
-fun rememberMarkdownSpanStyles() = remember { MarkdownSpanStyles() }
+fun rememberMarkdownSpanStyles(): MarkdownSpanStyles {
+    val context = LocalContext.current
+
+    return remember {
+        MarkdownSpanStyles(
+            listOf(
+                HighlightMarkdownSpanStyle,
+                CodeSpanMarkdownSpanStyle,
+                CodeBlockMarkdownSpanStyle,
+                HashtagMarkdownSpanStyle,
+                CalloutMarkdownSpanStyle(context),
+                BlockQuoteMarkdownSpanStyle,
+                HorizontalRuleMarkdownSpanStyle,
+            ),
+        )
+    }
+}
