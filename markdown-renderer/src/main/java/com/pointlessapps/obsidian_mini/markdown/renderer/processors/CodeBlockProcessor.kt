@@ -7,6 +7,8 @@ import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
+import com.pointlessapps.obsidian_mini.markdown.renderer.atLineEnd
+import com.pointlessapps.obsidian_mini.markdown.renderer.atLineStart
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
@@ -57,9 +59,9 @@ internal class CodeBlockProcessor(
             .filterIsInstance<ColorHighlight>()
 
         return styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
-            startOffset = node.startOffset,
+            startOffset = node.startOffset.atLineStart(textContent),
             // Add an additional offset to make the paragraph render smoother
-            endOffset = node.endOffset + 1,
+            endOffset = node.endOffset.atLineEnd(textContent) + 1,
         ) + styleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
             startOffset = node.startOffset,
             endOffset = node.endOffset,

@@ -4,9 +4,11 @@ import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastLastOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
+import com.pointlessapps.obsidian_mini.markdown.renderer.atLineEnd
+import com.pointlessapps.obsidian_mini.markdown.renderer.atLineStart
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
@@ -58,7 +60,7 @@ internal class HeaderProcessor(
         }
     }
 
-    override fun processStyles(node: ASTNode): List<NodeStyle> {
+    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
         val openingMarker = node.children.fastFirstOrNull {
             it.type == MarkdownTokenTypes.ATX_HEADER
         }
@@ -72,9 +74,9 @@ internal class HeaderProcessor(
         }?.takeIf { it != openingMarker }
 
         return styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
-            startOffset = node.startOffset,
+            startOffset = node.startOffset.atLineStart(textContent) - 1,
             // Add an additional offset to make the paragraph render smoother
-            endOffset = node.endOffset + 1,
+            endOffset = node.endOffset.atLineEnd(textContent) + 1,
         ) + styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
             startOffset = min(openingMarker.endOffset + 1, node.endOffset),
             endOffset = node.endOffset,
@@ -88,6 +90,9 @@ internal class HeaderProcessor(
             )
         } else emptyList()
     }
+
+    override fun processStyles(node: ASTNode) =
+        throw IllegalStateException("Could not process styles for the header without the text content")
 
     override fun shouldProcessChild(type: IElementType) = true
 }

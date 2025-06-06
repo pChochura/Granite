@@ -194,16 +194,27 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         return TransformedText(
             text = buildAnnotatedString {
                 append(transformedTextBuilder)
+                var parentParagraph: AnnotatedString.Range<ParagraphStyle>? = null
                 transformedStyles.fastForEach {
                     when (val item = it.item) {
                         is SpanStyle -> addStyle(item, it.start, it.end)
-                        is ParagraphStyle -> addStyle(item, it.start, it.end)
                         is StringAnnotation -> addStringAnnotation(
                             tag = it.tag,
                             annotation = item.value,
                             start = it.start,
                             end = it.end,
                         )
+
+                        is ParagraphStyle -> {
+                            if (parentParagraph != null && it.start <= parentParagraph.end) {
+                                addStyle(item.merge(parentParagraph.item), it.start, it.end)
+
+                                return@fastForEach
+                            }
+
+                            parentParagraph = AnnotatedString.Range(item, it.start, it.end)
+                            addStyle(item, it.start, it.end)
+                        }
 
                         else -> {} // TODO cover different cases
                     }
