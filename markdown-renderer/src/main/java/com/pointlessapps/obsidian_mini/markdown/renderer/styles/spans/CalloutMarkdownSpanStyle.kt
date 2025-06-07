@@ -70,7 +70,7 @@ class CalloutMarkdownSpanStyle(
         )
 
         // Draw the image only when the component is not in focus
-        if (text.substring(annotation.start).startsWith("    ")) {
+        if (text.substring(annotation.start).startsWith("\t\t\t")) {
             drawImage(
                 calloutType.icon.asImageBitmap(),
                 topLeft = Offset(

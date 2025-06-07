@@ -79,7 +79,7 @@ internal object BlockQuoteProcessor : NodeProcessor {
             return markers + NodeMarker(
                 startOffset = node.startOffset + calloutMatch.groups[1]!!.range.first,
                 endOffset = node.startOffset + calloutMatch.groups[1]!!.range.last + 1,
-                replacement = "      " + extractCalloutTitle(calloutMatch).orEmpty().capitalize(),
+                replacement = "\t\t\t" + extractCalloutTitle(calloutMatch).orEmpty().capitalize(),
             )
         }
 
