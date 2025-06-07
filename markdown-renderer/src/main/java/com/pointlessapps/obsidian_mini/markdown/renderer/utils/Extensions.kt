@@ -1,6 +1,7 @@
-package com.pointlessapps.obsidian_mini.markdown.renderer
+package com.pointlessapps.obsidian_mini.markdown.renderer.utils
 
 import androidx.compose.ui.text.AnnotatedString
+import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeProcessorResult
 import dev.snipme.highlights.internal.isNewLine
 import org.intellij.markdown.ast.ASTNode

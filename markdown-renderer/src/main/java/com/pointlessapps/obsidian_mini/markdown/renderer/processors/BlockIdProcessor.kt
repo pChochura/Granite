@@ -5,7 +5,7 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
+import com.pointlessapps.obsidian_mini.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 

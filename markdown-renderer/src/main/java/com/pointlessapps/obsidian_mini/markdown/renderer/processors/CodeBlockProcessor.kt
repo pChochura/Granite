@@ -14,11 +14,11 @@ import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.atLineEnd
-import com.pointlessapps.obsidian_mini.markdown.renderer.atLineStart
+import com.pointlessapps.obsidian_mini.markdown.renderer.utils.atLineEnd
+import com.pointlessapps.obsidian_mini.markdown.renderer.utils.atLineStart
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
+import com.pointlessapps.obsidian_mini.markdown.renderer.utils.withRange
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.ColorHighlight
 import dev.snipme.highlights.model.SyntaxLanguage

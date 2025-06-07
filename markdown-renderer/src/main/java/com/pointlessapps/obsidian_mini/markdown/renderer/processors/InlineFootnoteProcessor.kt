@@ -9,7 +9,7 @@ import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
+import com.pointlessapps.obsidian_mini.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode

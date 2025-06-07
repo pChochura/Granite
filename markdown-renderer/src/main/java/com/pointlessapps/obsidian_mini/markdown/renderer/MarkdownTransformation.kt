@@ -2,17 +2,15 @@ package com.pointlessapps.obsidian_mini.markdown.renderer
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkInteractionListener
-import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.StringAnnotation
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianFlavourDescriptor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.AccumulateStylesResult
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.MarkdownParsingResult
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockIdProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockQuoteProcessor
@@ -35,6 +33,8 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkPr
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InternalLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.ItalicProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.StrikethroughProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.utils.buildAnnotatedString
+import com.pointlessapps.obsidian_mini.markdown.renderer.utils.processNode
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
@@ -44,22 +44,11 @@ import org.intellij.markdown.parser.MarkdownParser
 import kotlin.math.max
 import kotlin.math.min
 
-private typealias NodeStyle = AnnotatedString.Range<AnnotatedString.Annotation>
-
 class MarkdownTransformation(private var currentCursorPosition: TextRange) : VisualTransformation {
 
-    private data class AccumulateStylesResult(
-        val styles: List<NodeStyle>,
-        val markers: List<NodeMarker>,
-    )
-
-    private data class MarkdownParsingResult(
-        val rootNode: ASTNode,
-        val textContent: String,
-    )
+    private var markdownParsingResult: MarkdownParsingResult? = null
 
     private val parser = MarkdownParser(ObsidianFlavourDescriptor())
-    private var markdownParsingResult: MarkdownParsingResult? = null
     private val linkInteractionListener: LinkInteractionListener? = null
 
     private val processors: Map<IElementType, NodeProcessor> = mapOf(
@@ -105,7 +94,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         cursorPosition: TextRange,
         textContent: String,
     ): AccumulateStylesResult {
-        val styles = mutableListOf<NodeStyle>()
+        val styles = mutableListOf<AnnotatedString.Range<AnnotatedString.Annotation>>()
         val markers = mutableListOf<NodeMarker>()
 
         fun processNode(node: ASTNode) {
@@ -178,38 +167,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         }
 
         return TransformedText(
-            text = buildAnnotatedString {
-                append(transformedTextBuilder)
-                var parentParagraph: AnnotatedString.Range<ParagraphStyle>? = null
-                transformedStyles.fastForEach {
-                    if (it.item !is StringAnnotation && it.tag.isNotEmpty()) {
-                        addStringAnnotation(it.tag, it.tag, it.start, it.end)
-                    }
-
-                    when (val item = it.item) {
-                        is SpanStyle -> addStyle(item, it.start, it.end)
-                        is StringAnnotation -> addStringAnnotation(
-                            tag = it.tag,
-                            annotation = item.value,
-                            start = it.start,
-                            end = it.end,
-                        )
-
-                        is ParagraphStyle -> {
-                            if (parentParagraph != null && it.start <= parentParagraph.end) {
-                                addStyle(item.merge(parentParagraph.item), it.start, it.end)
-
-                                return@fastForEach
-                            }
-
-                            parentParagraph = AnnotatedString.Range(item, it.start, it.end)
-                            addStyle(item, it.start, it.end)
-                        }
-
-                        else -> {} // TODO cover different cases
-                    }
-                }
-            },
+            text = buildAnnotatedString(transformedTextBuilder.toString(), transformedStyles),
             offsetMapping = offsetMapping,
         )
     }
