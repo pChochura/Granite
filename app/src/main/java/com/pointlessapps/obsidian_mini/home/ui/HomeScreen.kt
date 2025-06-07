@@ -11,16 +11,13 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -29,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.obsidian_mini.R
 import com.pointlessapps.obsidian_mini.navigation.Route
 import com.pointlessapps.obsidian_mini.ui_components.components.ComposeIconButton
@@ -42,23 +38,6 @@ import com.pointlessapps.obsidian_mini.ui_components.components.defaultComposeTe
 import org.koin.androidx.compose.koinViewModel
 import com.pointlessapps.obsidian_mini.ui_components.R as RC
 
-internal sealed interface Node
-internal data class ParagraphNode(val value: TextFieldValue) : Node
-internal data class ListNode(val type: Type) : Node {
-    enum class Type { Ordered, Unordered, Tasks }
-}
-
-internal data object ImageNode : Node
-internal data object TableNode : Node
-internal data object CodeBlockNode : Node
-internal data class CalloutBlockNode(val type: Type) : Node {
-    enum class Type {
-        Note, Summary, Info, Todo, Hint, Success,
-        Help, Warning, Failure, Error, Example, Quote
-    }
-}
-
-internal data object HorizontalDividerNode : Node
 
 @Composable
 internal fun HomeScreen(
@@ -67,29 +46,20 @@ internal fun HomeScreen(
 ) {
     ComposeScaffoldLayout(
         topBar = { TopBar() },
-        fab = { BottomBar(viewModel::onInsertNodeStyle) },
+        fab = { BottomBar({}) },
     ) {
-        LazyColumn(
+        ComposeMarkdownTextField(
             modifier = Modifier
-                .padding(horizontal = dimensionResource(RC.dimen.margin_tiny))
-                .fillMaxSize(),
-            contentPadding = it,
-        ) {
-            items(viewModel.state.nodes) { node ->
-                when (node) {
-                    is ParagraphNode -> ParagraphNode(node) {
-                        viewModel.onNodeValueChanged(node, it)
-                    }
-
-                    is CalloutBlockNode -> TODO()
-                    is CodeBlockNode -> TODO()
-                    is HorizontalDividerNode -> TODO()
-                    is ImageNode -> TODO()
-                    is ListNode -> TODO()
-                    is TableNode -> TODO()
-                }
-            }
-        }
+                .fillMaxWidth()
+                .padding(
+                    horizontal = dimensionResource(RC.dimen.margin_semi_big),
+                    vertical = dimensionResource(RC.dimen.margin_tiny),
+                )
+                .padding(it),
+            value = viewModel.state.textValue,
+            onValueChange = viewModel::onTextValueChanged,
+            textFieldStyle = defaultComposeTextFieldStyle(),
+        )
     }
 }
 
@@ -174,19 +144,4 @@ private fun BottomBar(insertStyle: () -> Unit) {
             }
         }
     }
-}
-
-@Composable
-private fun ParagraphNode(node: ParagraphNode, onValueChanged: (TextFieldValue) -> Unit) {
-    ComposeMarkdownTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = dimensionResource(RC.dimen.margin_medium),
-                vertical = dimensionResource(RC.dimen.margin_tiny),
-            ),
-        value = node.value,
-        onValueChange = onValueChanged,
-        textFieldStyle = defaultComposeTextFieldStyle(),
-    )
 }

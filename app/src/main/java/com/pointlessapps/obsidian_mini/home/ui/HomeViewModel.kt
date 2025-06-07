@@ -7,7 +7,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 
 internal data class HomeState(
-    val nodes: List<Node> = listOf(ParagraphNode(TextFieldValue())),
+    val textValue: TextFieldValue = TextFieldValue(),
 )
 
 internal class HomeViewModel(
@@ -17,18 +17,7 @@ internal class HomeViewModel(
     var state by mutableStateOf(HomeState())
         private set
 
-    fun onNodeValueChanged(node: ParagraphNode, value: TextFieldValue) {
-        state = state.copy(
-            nodes = state.nodes.map {
-                if (it == node) {
-                    node.copy(value = value)
-                } else {
-                    it
-                }
-            }
-        )
-    }
-
-    fun onInsertNodeStyle() {
+    fun onTextValueChanged(value: TextFieldValue) {
+        state = state.copy(textValue = value)
     }
 }

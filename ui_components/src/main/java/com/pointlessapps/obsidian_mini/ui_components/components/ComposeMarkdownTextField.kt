@@ -1,15 +1,19 @@
 package com.pointlessapps.obsidian_mini.ui_components.components
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.obsidian_mini.markdown.renderer.MarkdownTransformation
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.draw
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.rememberMarkdownSpanStyles
+import com.pointlessapps.obsidian_mini.ui_components.R
 
 @Composable
 fun ComposeMarkdownTextField(
@@ -22,22 +26,30 @@ fun ComposeMarkdownTextField(
     val markdownTransformation by remember { mutableStateOf(MarkdownTransformation(value.selection)) }
     val markdownSpanStyles = rememberMarkdownSpanStyles()
 
-    ComposeTextField(
-        modifier = modifier.draw(markdownSpanStyles),
-        value = value,
-        onValueChange = onValueChange,
-        onImeAction = onImeAction,
-        onTextLayout = { result ->
-            markdownSpanStyles.update(
-                result = result,
-                text = markdownTransformation.withSelection(value.selection)
-                    .filter(value.annotatedString).text,
-            )
-        },
-        textFieldStyle = textFieldStyle.copy(
-            visualTransformation = remember(value.selection) {
-                markdownTransformation.withSelection(value.selection)
-            },
+    LazyColumn(
+        contentPadding = PaddingValues(
+            bottom = dimensionResource(R.dimen.bottom_markdown_padding),
         ),
-    )
+    ) {
+        item {
+            ComposeTextField(
+                modifier = modifier.draw(markdownSpanStyles),
+                value = value,
+                onValueChange = onValueChange,
+                onImeAction = onImeAction,
+                onTextLayout = { result ->
+                    markdownSpanStyles.update(
+                        result = result,
+                        text = markdownTransformation.withSelection(value.selection)
+                            .filter(value.annotatedString).text,
+                    )
+                },
+                textFieldStyle = textFieldStyle.copy(
+                    visualTransformation = remember(value.selection) {
+                        markdownTransformation.withSelection(value.selection)
+                    },
+                ),
+            )
+        }
+    }
 }
