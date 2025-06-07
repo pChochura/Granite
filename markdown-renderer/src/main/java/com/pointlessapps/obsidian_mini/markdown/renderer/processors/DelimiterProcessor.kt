@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeSpanMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HighlightMarkdownSpanStyle
@@ -59,7 +60,7 @@ internal open class DelimiterProcessor(
         return styles.map { it.withRange(node.startOffset, node.endOffset, tag) }
     }
 
-    override fun shouldProcessChild(type: IElementType) = true
+    override fun processChild(type: IElementType) = ChildrenProcessing.PROCESS_CHILDREN
 }
 
 internal object BoldProcessor : DelimiterProcessor(

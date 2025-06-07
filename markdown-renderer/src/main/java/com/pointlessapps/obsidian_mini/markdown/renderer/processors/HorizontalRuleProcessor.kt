@@ -3,6 +3,7 @@ package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HorizontalRuleMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.withRange
@@ -29,5 +30,5 @@ internal object HorizontalRuleProcessor : NodeProcessor {
         ),
     )
 
-    override fun shouldProcessChild(type: IElementType) = false
+    override fun processChild(type: IElementType) = ChildrenProcessing.SKIP
 }

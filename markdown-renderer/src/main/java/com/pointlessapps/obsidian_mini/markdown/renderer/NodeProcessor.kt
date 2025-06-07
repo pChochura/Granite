@@ -1,6 +1,7 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer
 
 import androidx.compose.ui.text.AnnotatedString
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
@@ -10,22 +11,22 @@ import org.intellij.markdown.ast.ASTNode
  */
 interface NodeProcessor {
     /**
-     * Processes a node and returns a set of markers that will be removed while rendering
+     * Processes a node and returns a set of markers that will be removed while rendering.
      */
     fun processMarkers(node: ASTNode): List<NodeMarker>
 
     /**
-     * Same as [processMarkers] with additional [textContent] of the whole document
+     * Same as [processMarkers] with additional [textContent] of the whole document.
      */
     fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> = processMarkers(node)
 
     /**
-     * Processes a node and returns a set of styles for that node's text content
+     * Processes a node and returns a set of styles for that node's text content.
      */
     fun processStyles(node: ASTNode): List<AnnotatedString.Range<AnnotatedString.Annotation>>
 
     /**
-     * Same as [processStyles] with additional [textContent] of the whole document
+     * Same as [processStyles] with additional [textContent] of the whole document.
      */
     fun processStyles(
         node: ASTNode,
@@ -33,7 +34,7 @@ interface NodeProcessor {
     ): List<AnnotatedString.Range<AnnotatedString.Annotation>> = processStyles(node)
 
     /**
-     * Indicates whether this node's child of [type] should be styled as well
+     * Indicates how this node's child of [type] should be processed.
      */
-    fun shouldProcessChild(type: IElementType): Boolean
+    fun processChild(type: IElementType): ChildrenProcessing
 }

@@ -3,6 +3,7 @@ package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HashtagMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.withRange
@@ -32,5 +33,5 @@ internal object HashtagProcessor : NodeProcessor {
         ),
     )
 
-    override fun shouldProcessChild(type: IElementType) = false
+    override fun processChild(type: IElementType) = ChildrenProcessing.SKIP
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.atLineEnd
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.atLineStart
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
@@ -105,7 +106,7 @@ internal object CodeBlockProcessor : NodeProcessor {
     override fun processStyles(node: ASTNode) =
         throw IllegalStateException("Could not process styles for the code block without the text content")
 
-    override fun shouldProcessChild(type: IElementType) = false
+    override fun processChild(type: IElementType) = ChildrenProcessing.SKIP
 
     private fun String?.toLang() = when (this) {
         "c" -> SyntaxLanguage.C

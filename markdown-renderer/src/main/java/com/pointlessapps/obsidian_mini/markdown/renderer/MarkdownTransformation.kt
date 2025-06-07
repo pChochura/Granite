@@ -5,11 +5,12 @@ import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianFlavourDescriptor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.AccumulateStylesResult
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.MarkdownParsingResult
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockIdProcessor
@@ -90,34 +91,50 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         return markdownParsingResult!!
     }
 
+    private fun shouldHideMarkers(node: ASTNode, cursorPosition: TextRange) =
+        if (cursorPosition.collapsed) {
+            !TextRange(node.startOffset, node.endOffset).contains(cursorPosition)
+        } else {
+            // Show all markers when trying to select the text
+            false
+        }
+
     private fun ASTNode.accumulateStyles(
         cursorPosition: TextRange,
         textContent: String,
     ): AccumulateStylesResult {
         val styles = mutableListOf<AnnotatedString.Range<AnnotatedString.Annotation>>()
         val markers = mutableListOf<NodeMarker>()
+        val nodeStack = ArrayDeque<ASTNode>()
 
-        fun processNode(node: ASTNode) {
-            val hideNodeMarkers = if (cursorPosition.collapsed) {
-                !TextRange(node.startOffset, node.endOffset).contains(cursorPosition)
-            } else {
-                // Show all markers when trying to select the text
-                false
-            }
+        children.fastForEachReversed { nodeStack.addLast(it) }
 
-            val nodeProcessor = processors[node.type] ?: DefaultProcessor
-            val result = nodeProcessor.processNode(node, hideNodeMarkers, textContent)
-
-            styles.addAll(result.styles)
-            markers.addAll(result.markers)
-            node.children.fastForEach {
-                if (nodeProcessor.shouldProcessChild(it.type)) {
-                    processNode(it)
+        fun ASTNode.processChildren(nodeProcessor: NodeProcessor) {
+            children.fastForEachReversed { childNode ->
+                when (nodeProcessor.processChild(childNode.type)) {
+                    ChildrenProcessing.PROCESS_CHILDREN -> nodeStack.addLast(childNode)
+                    ChildrenProcessing.SKIP_PARENT -> childNode.processChildren(nodeProcessor)
+                    ChildrenProcessing.SKIP -> {} // Skip
                 }
             }
         }
 
-        children.fastForEach(::processNode)
+        while (nodeStack.isNotEmpty()) {
+            val currentNode = nodeStack.removeLast()
+            val nodeProcessor = processors[currentNode.type] ?: DefaultProcessor
+            val hideNodeMarkers = shouldHideMarkers(currentNode, cursorPosition)
+
+            val processingResult = nodeProcessor.processNode(
+                node = currentNode,
+                textContent = textContent,
+                hideMarkers = hideNodeMarkers,
+            )
+
+            styles.addAll(processingResult.styles)
+            markers.addAll(processingResult.markers)
+            currentNode.processChildren(nodeProcessor)
+        }
+
         return AccumulateStylesResult(
             styles = styles,
             markers = markers.sortedBy { it.startOffset },

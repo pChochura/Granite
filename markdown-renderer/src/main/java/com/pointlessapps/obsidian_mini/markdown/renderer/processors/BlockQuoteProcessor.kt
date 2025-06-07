@@ -15,6 +15,7 @@ import androidx.compose.ui.util.fastFlatMap
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuoteMarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CalloutMarkdownSpanStyle
@@ -238,5 +239,10 @@ internal object BlockQuoteProcessor : NodeProcessor {
     override fun processStyles(node: ASTNode) =
         throw IllegalStateException("Could not process styles for the blockquote without the text content")
 
-    override fun shouldProcessChild(type: IElementType) = type != MarkdownElementTypes.BLOCK_QUOTE
+    override fun processChild(type: IElementType) =
+        if (type == MarkdownElementTypes.BLOCK_QUOTE) {
+            ChildrenProcessing.SKIP_PARENT
+        } else {
+            ChildrenProcessing.PROCESS_CHILDREN
+        }
 }

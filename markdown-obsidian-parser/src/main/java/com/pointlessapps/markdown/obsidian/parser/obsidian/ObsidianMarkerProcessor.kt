@@ -26,7 +26,7 @@ import org.intellij.markdown.parser.sequentialparsers.SequentialParser
 import kotlin.math.min
 
 /**
- * An extension of [org.intellij.markdown.flavours.gfm.GFMMarkerProcessor]
+ * An extension of [org.intellij.markdown.flavours.gfm.GFMMarkerProcessor].
  */
 internal class ObsidianMarkerProcessor(
     productionHolder: ProductionHolder,

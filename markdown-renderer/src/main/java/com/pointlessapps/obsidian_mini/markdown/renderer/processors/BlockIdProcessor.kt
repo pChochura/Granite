@@ -4,6 +4,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
@@ -20,5 +21,5 @@ internal object BlockIdProcessor : NodeProcessor {
         ),
     )
 
-    override fun shouldProcessChild(type: IElementType) = false
+    override fun processChild(type: IElementType) = ChildrenProcessing.SKIP
 }

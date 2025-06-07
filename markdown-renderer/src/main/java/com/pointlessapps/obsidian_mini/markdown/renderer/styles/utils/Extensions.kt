@@ -34,7 +34,7 @@ internal fun TextLayoutResult.getBoundingBoxes(startOffset: Int, endOffset: Int)
 
 /**
  * Returns a bounding box that constrain a whole paragraph spanning
- * between [startOffset] and [endOffset]
+ * between [startOffset] and [endOffset].
  */
 internal fun TextLayoutResult.getLinesBoundingBox(startOffset: Int, endOffset: Int): Rect {
     val startLineNum = getLineForOffset(startOffset)

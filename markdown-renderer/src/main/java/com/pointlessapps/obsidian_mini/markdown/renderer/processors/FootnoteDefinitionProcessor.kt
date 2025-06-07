@@ -9,6 +9,7 @@ import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
@@ -68,5 +69,5 @@ internal object FootnoteDefinitionProcessor : NodeProcessor {
         )
     }
 
-    override fun shouldProcessChild(type: IElementType) = true
+    override fun processChild(type: IElementType) = ChildrenProcessing.PROCESS_CHILDREN
 }

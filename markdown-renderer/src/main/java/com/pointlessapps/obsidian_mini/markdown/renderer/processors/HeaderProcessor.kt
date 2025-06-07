@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastLastOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.atLineEnd
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.atLineStart
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
@@ -131,7 +132,7 @@ internal object HeaderProcessor : NodeProcessor {
     override fun processStyles(node: ASTNode) =
         throw IllegalStateException("Could not process styles for the header without the text content")
 
-    override fun shouldProcessChild(type: IElementType) = true
+    override fun processChild(type: IElementType) = ChildrenProcessing.PROCESS_CHILDREN
 
     private fun IElementType.toHeadingLevel() = when (this) {
         MarkdownElementTypes.ATX_1 -> 0
