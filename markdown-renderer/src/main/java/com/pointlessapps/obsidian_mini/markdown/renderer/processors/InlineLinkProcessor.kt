@@ -1,13 +1,16 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkInteractionListener
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.URL_TAG
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
@@ -15,7 +18,7 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 
 internal class InlineLinkProcessor(
-    private val styleProvider: ProcessorStyleProvider,
+    private val linkInteractionListener: LinkInteractionListener? = null,
 ) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
@@ -57,7 +60,10 @@ internal class InlineLinkProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(
+        node: ASTNode,
+        textContent: String,
+    ): List<AnnotatedString.Range<AnnotatedString.Annotation>> {
         val linkTextMarker = node.children.fastFirstOrNull {
             it.type == MarkdownElementTypes.LINK_TEXT
         }
@@ -80,25 +86,22 @@ internal class InlineLinkProcessor(
             return emptyList()
         }
 
-        return styleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
-            startOffset = linkTextMarker.startOffset,
-            endOffset = linkTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = openingTextMarker.startOffset,
-            endOffset = openingTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = closingTextMarker.startOffset,
-            endOffset = closingTextMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
-            startOffset = closingTextMarker.endOffset,
-            endOffset = node.endOffset,
-        ) + styleProvider.styleNodeElement(
-            element = NodeType.Data(linkDestinationMarker.getTextInNode(textContent).toString()),
-            type = node.type,
-        ).toNodeStyles(
-            startOffset = closingTextMarker.endOffset,
-            endOffset = node.endOffset,
-            tag = URL_TAG,
+        return listOf(
+            SpanStyle(
+                color = Color.Blue,
+                textDecoration = TextDecoration.Underline,
+            ).withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+            ),
+            LinkAnnotation.Url(
+                url = linkDestinationMarker.getTextInNode(textContent).toString(),
+                linkInteractionListener = linkInteractionListener,
+            ).withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = URL_TAG,
+            ),
         )
     }
 

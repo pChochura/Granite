@@ -1,8 +1,8 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.text.AnnotatedString
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 
@@ -10,7 +10,8 @@ internal object DefaultProcessor : NodeProcessor {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> = emptyList()
 
-    override fun processStyles(node: ASTNode): List<NodeStyle> = emptyList()
+    override fun processStyles(node: ASTNode): List<AnnotatedString.Range<AnnotatedString.Annotation>> =
+        emptyList()
 
     override fun shouldProcessChild(type: IElementType) = true
 }

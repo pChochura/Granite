@@ -1,21 +1,28 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeSpanMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HighlightMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
 internal open class DelimiterProcessor(
-    private val styleProvider: ProcessorStyleProvider,
+    private val styles: List<AnnotatedString.Annotation>,
     private val delimiter: IElementType,
     private val alwaysShowMarkers: Boolean = false,
+    private val tag: String? = null,
 ) : NodeProcessor {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
@@ -41,7 +48,7 @@ internal open class DelimiterProcessor(
         )
     }
 
-    override fun processStyles(node: ASTNode): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<AnnotatedString.Range<AnnotatedString.Annotation>> {
         val openingMarkers = node.children.takeWhile { it.type == delimiter }
         val closingMarkers = node.children.takeLastWhile { it.type == delimiter }
 
@@ -49,41 +56,41 @@ internal open class DelimiterProcessor(
             return emptyList()
         }
 
-        return styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
-            startOffset = openingMarkers.maxOf { it.endOffset },
-            endOffset = closingMarkers.minOf { it.startOffset },
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = openingMarkers.minOf { it.startOffset },
-            endOffset = openingMarkers.maxOf { it.endOffset },
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = closingMarkers.minOf { it.startOffset },
-            endOffset = closingMarkers.maxOf { it.endOffset },
-        )
+        return styles.map { it.withRange(node.startOffset, node.endOffset, tag) }
     }
 
     override fun shouldProcessChild(type: IElementType) = true
 }
 
-internal class BoldProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(styleProvider, MarkdownTokenTypes.EMPH)
+internal object BoldProcessor : DelimiterProcessor(
+    styles = listOf(SpanStyle(fontWeight = FontWeight.Bold)),
+    delimiter = MarkdownTokenTypes.EMPH,
+)
 
-internal class HighlightProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(styleProvider, ObsidianTokenTypes.EQ)
+internal object HighlightProcessor : DelimiterProcessor(
+    styles = listOf(SpanStyle(color = Color.Black)),
+    delimiter = ObsidianTokenTypes.EQ,
+    tag = HighlightMarkdownSpanStyle.TAG_CONTENT,
+)
 
-internal class ItalicProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(styleProvider, MarkdownTokenTypes.EMPH)
+internal object ItalicProcessor : DelimiterProcessor(
+    styles = listOf(SpanStyle(fontStyle = FontStyle.Italic)),
+    delimiter = MarkdownTokenTypes.EMPH,
+)
 
-internal class StrikethroughProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(styleProvider, GFMTokenTypes.TILDE)
+internal object StrikethroughProcessor : DelimiterProcessor(
+    styles = listOf(SpanStyle(textDecoration = TextDecoration.LineThrough)),
+    delimiter = GFMTokenTypes.TILDE,
+)
 
-internal class CommentProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(styleProvider, ObsidianTokenTypes.PERCENT, alwaysShowMarkers = true)
+internal object CommentProcessor : DelimiterProcessor(
+    styles = listOf(SpanStyle(color = Color.Gray)),
+    delimiter = ObsidianTokenTypes.PERCENT,
+    alwaysShowMarkers = true,
+)
 
-internal class CodeSpanProcessor(
-    styleProvider: ProcessorStyleProvider,
-) : DelimiterProcessor(styleProvider, MarkdownTokenTypes.BACKTICK)
+internal object CodeSpanProcessor : DelimiterProcessor(
+    styles = listOf(SpanStyle(fontFamily = FontFamily.Monospace)),
+    delimiter = MarkdownTokenTypes.BACKTICK,
+    tag = CodeSpanMarkdownSpanStyle.TAG_CONTENT,
+)

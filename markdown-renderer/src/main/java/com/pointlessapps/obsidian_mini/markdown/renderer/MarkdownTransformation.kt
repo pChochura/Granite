@@ -1,6 +1,7 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.StringAnnotation
@@ -12,9 +13,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianFlavourDescriptor
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.MarkdownParsingResult
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockIdProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BlockQuoteProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.BoldProcessor
@@ -36,27 +35,7 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkPr
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InternalLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.ItalicProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.StrikethroughProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockIdStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BlockQuoteStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.BoldStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CalloutStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeBlockStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CodeSpanStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentBlockStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.CommentStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.EmbedStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteDefinitionStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.FootnoteLinkStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HashtagStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HeaderStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HighlightStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.HorizontalRulStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.ImageStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineFootnoteStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InlineLinkStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.InternalLinkStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.ItalicStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.providers.StrikethroughStyleProvider
+import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
@@ -65,6 +44,8 @@ import org.intellij.markdown.parser.MarkdownParser
 import kotlin.math.max
 import kotlin.math.min
 
+private typealias NodeStyle = AnnotatedString.Range<AnnotatedString.Annotation>
+
 class MarkdownTransformation(private var currentCursorPosition: TextRange) : VisualTransformation {
 
     private data class AccumulateStylesResult(
@@ -72,40 +53,41 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         val markers: List<NodeMarker>,
     )
 
+    private data class MarkdownParsingResult(
+        val rootNode: ASTNode,
+        val textContent: String,
+    )
+
     private val parser = MarkdownParser(ObsidianFlavourDescriptor())
     private var markdownParsingResult: MarkdownParsingResult? = null
+    private val linkInteractionListener: LinkInteractionListener? = null
 
-    private val processors = mapOf(
-        ObsidianElementTypes.BLOCK_ID to BlockIdProcessor(BlockIdStyleProvider),
-        ObsidianElementTypes.HASHTAG to HashtagProcessor(HashtagStyleProvider),
-        ObsidianElementTypes.FOOTNOTE_DEFINITION to FootnoteDefinitionProcessor(
-            FootnoteDefinitionStyleProvider,
-        ),
-        ObsidianElementTypes.FOOTNOTE_LINK to FootnoteLinkProcessor(FootnoteLinkStyleProvider),
-        ObsidianElementTypes.INLINE_FOOTNOTE to InlineFootnoteProcessor(InlineFootnoteStyleProvider),
-        ObsidianElementTypes.HIGHLIGHT to HighlightProcessor(HighlightStyleProvider),
-        ObsidianElementTypes.COMMENT to CommentProcessor(CommentStyleProvider),
-        ObsidianElementTypes.COMMENT_BLOCK to CommentBlockProcessor(CommentBlockStyleProvider),
-        ObsidianElementTypes.INTERNAL_LINK to InternalLinkProcessor(InternalLinkStyleProvider),
-        ObsidianElementTypes.EMBED to EmbedProcessor(EmbedStyleProvider),
-        GFMElementTypes.STRIKETHROUGH to StrikethroughProcessor(StrikethroughStyleProvider),
-        MarkdownTokenTypes.HORIZONTAL_RULE to HorizontalRuleProcessor(HorizontalRulStyleProvider),
-        MarkdownElementTypes.STRONG to BoldProcessor(BoldStyleProvider),
-        MarkdownElementTypes.EMPH to ItalicProcessor(ItalicStyleProvider),
-        MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor(CodeSpanStyleProvider),
-        MarkdownElementTypes.CODE_FENCE to CodeBlockProcessor(CodeBlockStyleProvider),
-        MarkdownElementTypes.BLOCK_QUOTE to BlockQuoteProcessor(
-            blockQuoteStyleProvider = BlockQuoteStyleProvider,
-            calloutStyleProvider = CalloutStyleProvider,
-        ),
-        MarkdownElementTypes.IMAGE to ImageProcessor(ImageStyleProvider),
-        MarkdownElementTypes.INLINE_LINK to InlineLinkProcessor(InlineLinkStyleProvider),
-        MarkdownElementTypes.ATX_1 to HeaderProcessor(HeaderStyleProvider),
-        MarkdownElementTypes.ATX_2 to HeaderProcessor(HeaderStyleProvider),
-        MarkdownElementTypes.ATX_3 to HeaderProcessor(HeaderStyleProvider),
-        MarkdownElementTypes.ATX_4 to HeaderProcessor(HeaderStyleProvider),
-        MarkdownElementTypes.ATX_5 to HeaderProcessor(HeaderStyleProvider),
-        MarkdownElementTypes.ATX_6 to HeaderProcessor(HeaderStyleProvider),
+    private val processors: Map<IElementType, NodeProcessor> = mapOf(
+        ObsidianElementTypes.BLOCK_ID to BlockIdProcessor,
+        ObsidianElementTypes.HASHTAG to HashtagProcessor,
+        ObsidianElementTypes.FOOTNOTE_DEFINITION to FootnoteDefinitionProcessor,
+        ObsidianElementTypes.FOOTNOTE_LINK to FootnoteLinkProcessor,
+        ObsidianElementTypes.INLINE_FOOTNOTE to InlineFootnoteProcessor,
+        ObsidianElementTypes.HIGHLIGHT to HighlightProcessor,
+        ObsidianElementTypes.COMMENT to CommentProcessor,
+        ObsidianElementTypes.COMMENT_BLOCK to CommentBlockProcessor,
+        ObsidianElementTypes.INTERNAL_LINK to InternalLinkProcessor,
+        ObsidianElementTypes.EMBED to EmbedProcessor,
+        GFMElementTypes.STRIKETHROUGH to StrikethroughProcessor,
+        MarkdownTokenTypes.HORIZONTAL_RULE to HorizontalRuleProcessor,
+        MarkdownElementTypes.STRONG to BoldProcessor,
+        MarkdownElementTypes.EMPH to ItalicProcessor,
+        MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor,
+        MarkdownElementTypes.CODE_FENCE to CodeBlockProcessor,
+        MarkdownElementTypes.BLOCK_QUOTE to BlockQuoteProcessor,
+        MarkdownElementTypes.IMAGE to ImageProcessor,
+        MarkdownElementTypes.INLINE_LINK to InlineLinkProcessor(linkInteractionListener),
+        MarkdownElementTypes.ATX_1 to HeaderProcessor,
+        MarkdownElementTypes.ATX_2 to HeaderProcessor,
+        MarkdownElementTypes.ATX_3 to HeaderProcessor,
+        MarkdownElementTypes.ATX_4 to HeaderProcessor,
+        MarkdownElementTypes.ATX_5 to HeaderProcessor,
+        MarkdownElementTypes.ATX_6 to HeaderProcessor,
     )
 
     private fun getMarkdownParsingResult(text: String): MarkdownParsingResult {
@@ -183,14 +165,14 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
 
         val offsetMapping = MarkdownOffsetMapping(result.markers, originalText.length)
         val transformedStyles = result.styles.fastMapNotNull { style ->
-            val newStart = offsetMapping.originalToTransformed(style.startOffset)
-            val newEnd = offsetMapping.originalToTransformed(style.endOffset)
+            val newStart = offsetMapping.originalToTransformed(style.start)
+            val newEnd = offsetMapping.originalToTransformed(style.end)
             if (newStart < newEnd) {
                 AnnotatedString.Range(
-                    item = style.annotation,
+                    item = style.item,
                     start = max(0, newStart),
                     end = min(newEnd, transformedTextBuilder.length),
-                    tag = style.tag.orEmpty(),
+                    tag = style.tag,
                 )
             } else null
         }
@@ -200,6 +182,10 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
                 append(transformedTextBuilder)
                 var parentParagraph: AnnotatedString.Range<ParagraphStyle>? = null
                 transformedStyles.fastForEach {
+                    if (it.item !is StringAnnotation && it.tag.isNotEmpty()) {
+                        addStringAnnotation(it.tag, it.tag, it.start, it.end)
+                    }
+
                     when (val item = it.item) {
                         is SpanStyle -> addStyle(item, it.start, it.end)
                         is StringAnnotation -> addStringAnnotation(

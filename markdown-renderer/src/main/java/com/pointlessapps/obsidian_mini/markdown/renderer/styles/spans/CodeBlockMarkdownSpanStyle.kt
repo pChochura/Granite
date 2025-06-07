@@ -24,11 +24,7 @@ object CodeBlockMarkdownSpanStyle : MarkdownSpanStyle {
         result: TextLayoutResult,
         text: AnnotatedString,
     ) = MarkdownSpanStyle.DrawInstruction {
-        text.getStringAnnotations(0, text.length).fastForEach { annotation ->
-            if (annotation.item != TAG_CONTENT) {
-                return@fastForEach
-            }
-
+        text.getStringAnnotations(TAG_CONTENT, 0, text.length).fastForEach { annotation ->
             val box = result.getLinesBoundingBox(
                 startOffset = annotation.start,
                 endOffset = annotation.end,

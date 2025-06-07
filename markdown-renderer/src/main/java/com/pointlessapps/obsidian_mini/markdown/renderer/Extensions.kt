@@ -1,5 +1,6 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer
 
+import androidx.compose.ui.text.AnnotatedString
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeProcessorResult
 import dev.snipme.highlights.internal.isNewLine
 import org.intellij.markdown.ast.ASTNode
@@ -13,6 +14,9 @@ internal fun NodeProcessor.processNode(
     styles = processStyles(node, textContent),
     markers = if (hideMarkers) processMarkers(node, textContent) else emptyList(),
 )
+
+internal fun AnnotatedString.Annotation.withRange(start: Int, end: Int, tag: String? = null) =
+    AnnotatedString.Range(this, start, end, tag.orEmpty())
 
 internal fun String.capitalize() = replaceFirstChar {
     if (it.isLowerCase()) {

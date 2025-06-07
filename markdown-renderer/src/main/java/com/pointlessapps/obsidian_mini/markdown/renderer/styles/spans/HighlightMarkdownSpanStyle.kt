@@ -15,55 +15,23 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.getBoundin
 object HighlightMarkdownSpanStyle : MarkdownSpanStyle {
 
     const val TAG_CONTENT = "HighlightMarkdownSpanStyle_Content"
-    const val TAG_DELIMITER = "HighlightMarkdownSpanStyle_Delimiter"
 
     private val path = Path()
     private val backgroundColor = Color(255, 221, 114, 255)
     private val cornerRadius = 4.sp
     private val padding = 2.sp
 
-    private fun getMergedAnnotations(
-        annotations: List<AnnotatedString.Range<String>>,
-    ): List<IntRange> {
-        val mergedAnnotations = mutableListOf<IntRange>()
-        var openingDelimiter: IntRange? = null
-        var content: IntRange? = null
-        annotations.sortedBy { it.start }.fastForEach {
-            when (it.item) {
-                TAG_DELIMITER -> {
-                    if (openingDelimiter == null) {
-                        openingDelimiter = it.start..it.end
-                    } else if (content != null) {
-                        mergedAnnotations.add(openingDelimiter!!.first..it.end)
-                        openingDelimiter = null
-                        content = null
-                    }
-                }
-
-                TAG_CONTENT -> {
-                    if (openingDelimiter != null) {
-                        content = it.start..it.end
-                    } else {
-                        mergedAnnotations.add(it.start..it.end)
-                    }
-                }
-            }
-        }
-
-        return mergedAnnotations
-    }
-
     override fun prepare(
         result: TextLayoutResult,
         text: AnnotatedString,
     ) = MarkdownSpanStyle.DrawInstruction {
         val cornerRadius = CornerRadius(cornerRadius.toPx())
-        val annotations = getMergedAnnotations(text.getStringAnnotations(0, text.length))
+        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
 
         annotations.fastForEach { annotation ->
             val boxes = result.getBoundingBoxes(
-                startOffset = annotation.first,
-                endOffset = annotation.last,
+                startOffset = annotation.start,
+                endOffset = annotation.end,
             )
             boxes.fastForEachIndexed { index, box ->
                 path.reset()

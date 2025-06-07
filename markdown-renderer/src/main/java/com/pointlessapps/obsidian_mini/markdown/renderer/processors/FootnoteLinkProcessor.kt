@@ -1,24 +1,24 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.util.fastFirstOrNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal class FootnoteLinkProcessor(
-    private val styleProvider: ProcessorStyleProvider,
-) : NodeProcessor {
+internal object FootnoteLinkProcessor : NodeProcessor {
 
     override fun processMarkers(node: ASTNode) = emptyList<NodeMarker>()
 
-    override fun processStyles(node: ASTNode): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<AnnotatedString.Range<AnnotatedString.Annotation>> {
         val openingMarkers = node.children.takeWhile {
             it.type in listOf(MarkdownTokenTypes.LBRACKET, ObsidianTokenTypes.CARET)
         }
@@ -28,15 +28,21 @@ internal class FootnoteLinkProcessor(
             return emptyList()
         }
 
-        return styleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
-            startOffset = openingMarkers.maxOf { it.endOffset },
-            endOffset = closingMarker.startOffset,
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = openingMarkers.minOf { it.startOffset },
-            endOffset = openingMarkers.maxOf { it.endOffset },
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = closingMarker.startOffset,
-            endOffset = closingMarker.endOffset,
+        val style = SpanStyle(fontSize = 0.8.em, baselineShift = BaselineShift(0.4f))
+
+        return listOf(
+            style.withRange(
+                start = openingMarkers.maxOf { it.endOffset },
+                end = closingMarker.startOffset,
+            ),
+            style.copy(color = Color.Gray).withRange(
+                start = openingMarkers.minOf { it.startOffset },
+                end = openingMarkers.maxOf { it.endOffset },
+            ),
+            style.copy(color = Color.Gray).withRange(
+                start = closingMarker.startOffset,
+                end = closingMarker.endOffset,
+            ),
         )
     }
 

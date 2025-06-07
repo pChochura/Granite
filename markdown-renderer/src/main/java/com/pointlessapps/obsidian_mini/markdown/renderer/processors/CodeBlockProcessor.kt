@@ -1,18 +1,24 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.atLineEnd
 import com.pointlessapps.obsidian_mini.markdown.renderer.atLineStart
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.ColorHighlight
 import dev.snipme.highlights.model.SyntaxLanguage
@@ -21,9 +27,7 @@ import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal class CodeBlockProcessor(
-    private val styleProvider: ProcessorStyleProvider,
-) : NodeProcessor {
+internal object CodeBlockProcessor : NodeProcessor {
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val fenceMarkers = node.children.fastFilter {
@@ -43,7 +47,10 @@ internal class CodeBlockProcessor(
         }
     }
 
-    override fun processStyles(node: ASTNode, textContent: String): List<NodeStyle> {
+    override fun processStyles(
+        node: ASTNode,
+        textContent: String,
+    ): List<AnnotatedString.Range<AnnotatedString.Annotation>> {
         val langMarker = node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.FENCE_LANG }
 
         val highlights = Highlights.Builder()
@@ -58,25 +65,41 @@ internal class CodeBlockProcessor(
             .getHighlights()
             .filterIsInstance<ColorHighlight>()
 
-        return styleProvider.styleNodeElement(NodeType.Paragraph, node.type).toNodeStyles(
-            startOffset = node.startOffset.atLineStart(textContent),
-            // Add an additional offset to make the paragraph render smoother
-            endOffset = node.endOffset.atLineEnd(textContent) + 1,
-        ) + styleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
-            startOffset = node.startOffset,
-            endOffset = node.endOffset,
+        return listOfNotNull(
+            ParagraphStyle(
+                textIndent = TextIndent(
+                    firstLine = 1.em,
+                    restLine = 1.em,
+                ),
+                lineHeight = 1.4.em,
+                lineHeightStyle = LineHeightStyle.Default,
+            ).withRange(
+                start = node.startOffset.atLineStart(textContent),
+                // Add an additional offset to make the paragraph render smoother
+                end = node.endOffset.atLineEnd(textContent) + 1,
+            ),
+            SpanStyle(fontFamily = FontFamily.Monospace).withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = CodeBlockMarkdownSpanStyle.TAG_CONTENT,
+            ),
+            if (langMarker != null) {
+                SpanStyle(
+                    fontSize = 0.6.em,
+                    baselineShift = BaselineShift.Superscript,
+                    color = Color(216, 67, 21, 255),
+                    fontWeight = FontWeight.Bold,
+                ).withRange(
+                    start = langMarker.startOffset,
+                    end = langMarker.endOffset,
+                )
+            } else null,
         ) + highlights.fastMap {
-            NodeStyle(
-                annotation = SpanStyle(color = Color(it.rgb).copy(alpha = 1f)),
-                startOffset = node.startOffset + it.location.start,
-                endOffset = node.startOffset + it.location.end,
+            SpanStyle(color = Color(it.rgb).copy(alpha = 1f)).withRange(
+                start = node.startOffset + it.location.start,
+                end = node.startOffset + it.location.end,
             )
-        } + if (langMarker != null) {
-            styleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
-                startOffset = langMarker.startOffset,
-                endOffset = langMarker.endOffset,
-            )
-        } else emptyList()
+        }
     }
 
     override fun processStyles(node: ASTNode) =

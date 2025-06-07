@@ -1,22 +1,21 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianElementTypes
 import com.pointlessapps.markdown.obsidian.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal class FootnoteDefinitionProcessor(
-    private val styleProvider: ProcessorStyleProvider,
-) : NodeProcessor {
+internal object FootnoteDefinitionProcessor : NodeProcessor {
 
     override fun processMarkers(node: ASTNode) = node.children.fastMapNotNull {
         if (
@@ -37,7 +36,7 @@ internal class FootnoteDefinitionProcessor(
         replacement = "↩",
     )
 
-    override fun processStyles(node: ASTNode): List<NodeStyle> {
+    override fun processStyles(node: ASTNode): List<AnnotatedString.Range<AnnotatedString.Annotation>> {
         val idMarker = node.children.fastFirstOrNull { it.type == ObsidianElementTypes.FOOTNOTE_ID }
         val contentMarker = node.children.fastFirstOrNull {
             it.type == ObsidianElementTypes.FOOTNOTE_DEFINITION_TEXT
@@ -47,18 +46,25 @@ internal class FootnoteDefinitionProcessor(
             return emptyList()
         }
 
-        return styleProvider.styleNodeElement(NodeType.Label, node.type).toNodeStyles(
-            startOffset = idMarker.startOffset,
-            endOffset = idMarker.endOffset,
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = node.startOffset,
-            endOffset = idMarker.startOffset,
-        ) + styleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
-            startOffset = idMarker.endOffset,
-            endOffset = contentMarker.startOffset,
-        ) + styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
-            startOffset = contentMarker.startOffset,
-            endOffset = contentMarker.endOffset,
+        val style = SpanStyle(fontSize = 0.9.em, baselineShift = BaselineShift(0.2f))
+
+        return listOf(
+            style.withRange(
+                start = idMarker.startOffset,
+                end = idMarker.endOffset,
+            ),
+            style.withRange(
+                start = node.startOffset,
+                end = idMarker.startOffset,
+            ),
+            style.withRange(
+                start = idMarker.endOffset,
+                end = contentMarker.startOffset,
+            ),
+            SpanStyle(fontSize = 0.95.em).withRange(
+                start = contentMarker.startOffset,
+                end = contentMarker.endOffset,
+            ),
         )
     }
 

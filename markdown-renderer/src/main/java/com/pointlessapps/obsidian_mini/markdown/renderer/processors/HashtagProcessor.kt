@@ -1,17 +1,16 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.processors
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.NodeProcessor
-import com.pointlessapps.obsidian_mini.markdown.renderer.ProcessorStyleProvider
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
-import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.HashtagMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 
-internal class HashtagProcessor(
-    private val styleProvider: ProcessorStyleProvider,
-) : NodeProcessor {
+internal object HashtagProcessor : NodeProcessor {
 
     override fun processMarkers(node: ASTNode) =
         throw IllegalStateException("Could not process markers for the hashtag without the text content")
@@ -25,11 +24,13 @@ internal class HashtagProcessor(
         ),
     )
 
-    override fun processStyles(node: ASTNode) =
-        styleProvider.styleNodeElement(NodeType.Content, node.type).toNodeStyles(
-            startOffset = node.startOffset,
-            endOffset = node.endOffset,
-        )
+    override fun processStyles(node: ASTNode) = listOf(
+        SpanStyle(color = Color.Black).withRange(
+            start = node.startOffset,
+            end = node.endOffset,
+            tag = HashtagMarkdownSpanStyle.TAG_CONTENT,
+        ),
+    )
 
     override fun shouldProcessChild(type: IElementType) = false
 }

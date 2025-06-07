@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.MarkdownSpanStyle
@@ -29,8 +28,7 @@ object HashtagMarkdownSpanStyle : MarkdownSpanStyle {
         text: AnnotatedString,
     ) = MarkdownSpanStyle.DrawInstruction {
         val cornerRadius = CornerRadius(cornerRadius.toPx())
-        val annotations = text.getStringAnnotations(0, text.length)
-            .fastFilter { it.item == TAG_CONTENT }
+        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
 
         annotations.fastForEach { annotation ->
             val boxes = result.getBoundingBoxes(
