@@ -15,7 +15,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.CalloutTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.getLinesBoundingBox
@@ -27,6 +26,7 @@ class CalloutMarkdownSpanStyle(
     companion object {
         const val TAG_CONTENT = "CalloutMarkdownSpanStyle_Content"
         const val TAG_LABEL = "CalloutMarkdownSpanStyle_Label"
+        const val TAG_INDENT = "CalloutMarkdownSpanStyle_Indent"
     }
 
     private val path = Path()
@@ -35,37 +35,6 @@ class CalloutMarkdownSpanStyle(
     private val width = 2.sp
     private val horizontalPadding = 12.sp
     private val verticalPadding = 8.sp
-
-    private fun getIndents(text: String) = text.lines().fastMapNotNull { line ->
-        line.takeWhile { it == '\t' }.count().div(2)
-    }
-
-    private fun getIndentRegions(text: String): List<IntRange> {
-        val indents = getIndents(text).filter { it > 0 }
-        val regions = mutableListOf<IntRange>()
-        val stack = mutableListOf<Int>()
-
-        for (i in indents.indices) {
-            val currentIndent = indents[i]
-            // Close regions if current indent is less than stack top
-            while (stack.isNotEmpty() && currentIndent < indents[stack.last()]) {
-                val start = stack.removeAt(stack.size - 1)
-                regions.add(start..i - 1)
-            }
-            // Start a new region if indentation increases
-            if (stack.isEmpty() || currentIndent > indents[stack.last()]) {
-                stack.add(i)
-            }
-        }
-
-        // Close any remaining regions
-        while (stack.isNotEmpty()) {
-            val start = stack.removeAt(stack.size - 1)
-            regions.add(start..indents.size - 1)
-        }
-
-        return regions
-    }
 
     override fun prepare(
         result: TextLayoutResult,
@@ -84,11 +53,7 @@ class CalloutMarkdownSpanStyle(
                 drawCalloutStyle(calloutTypeAnnotation, result, annotation, text)
             }
 
-            drawIndentations(
-                annotationTextContent = text.text.substring(annotation.start, annotation.end),
-                annotation = annotation,
-                result = result,
-            )
+            drawIndentations(text, annotation, result)
         }
     }
 
@@ -132,38 +97,35 @@ class CalloutMarkdownSpanStyle(
     }
 
     private fun DrawScope.drawIndentations(
-        annotationTextContent: String,
+        text: AnnotatedString,
         annotation: AnnotatedString.Range<String>,
         result: TextLayoutResult,
     ) {
         val cornerRadius = CornerRadius(cornerRadius.toPx())
-        val indentRegions = getIndentRegions(annotationTextContent)
-        val lines = annotationTextContent.lines()
-        val linesOffsets = lines.runningFold(0) { length, line -> length + line.length + 1 }
+
+        val indentRegions = text.getStringAnnotations(
+            tag = TAG_INDENT,
+            start = annotation.start,
+            end = annotation.end,
+        )
+
         indentRegions.fastForEach { indent ->
-            val padding = if (indent.first == 0) verticalPadding.toPx() else 0f
-            val lastTabOffset = annotation.start + linesOffsets[indent.first] +
-                    lines[indent.first].takeWhile { it == '\t' }.length
-            val firstLineIndex = result.getLineForOffset(
-                annotation.start + linesOffsets[indent.first],
-            )
-            val lastLineIndex = result.getLineForOffset(
-                annotation.start + linesOffsets[indent.last],
-            )
+            val firstLineIndex = result.getLineForOffset(indent.start)
+            val lastLineIndex = result.getLineForOffset(indent.end)
 
             path.reset()
             path.addRoundRect(
                 RoundRect(
                     rect = Rect(
-                        top = result.getLineTop(firstLineIndex) - padding,
+                        top = result.getLineTop(firstLineIndex) - verticalPadding.toPx(),
                         left = result.getHorizontalPosition(
-                            offset = lastTabOffset,
-                            usePrimaryDirection = true
+                            offset = indent.start,
+                            usePrimaryDirection = true,
                         ) - horizontalPadding.toPx(),
-                        bottom = result.getLineBottom(lastLineIndex) + padding,
+                        bottom = result.getLineBottom(lastLineIndex) + verticalPadding.toPx(),
                         right = result.getHorizontalPosition(
-                            offset = lastTabOffset,
-                            usePrimaryDirection = true
+                            offset = indent.start,
+                            usePrimaryDirection = true,
                         ) - horizontalPadding.toPx() + width.toPx(),
                     ),
                     cornerRadius = cornerRadius,

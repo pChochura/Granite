@@ -19,6 +19,34 @@ internal fun NodeProcessor.processNode(
 internal fun AnnotatedString.Annotation.withRange(start: Int, end: Int, tag: String? = null) =
     AnnotatedString.Range(this, start, end, tag.orEmpty())
 
+internal fun getIndentRegions(indents: List<Int>): List<Pair<IntRange, Int>> {
+    val regions = mutableListOf<Pair<IntRange, Int>>()
+    val stack = mutableListOf<Int>()
+
+    for (i in indents.indices) {
+        val currentIndent = indents[i]
+        // Close regions if current indent is less than stack top
+        while (stack.isNotEmpty() && currentIndent < indents[stack.last()]) {
+            val start = stack.removeAt(stack.size - 1)
+            val indentLevel = indents[start]
+            regions.add((start..i - 1) to indentLevel)
+        }
+        // Start a new region if indentation increases
+        if (stack.isEmpty() || currentIndent > indents[stack.last()]) {
+            stack.add(i)
+        }
+    }
+
+    // Close any remaining regions
+    while (stack.isNotEmpty()) {
+        val start = stack.removeAt(stack.size - 1)
+        val indentLevel = indents[start]
+        regions.add((start..indents.size - 1) to indentLevel)
+    }
+
+    return regions
+}
+
 internal fun String.capitalize() = replaceFirstChar {
     if (it.isLowerCase()) {
         it.titlecase(Locale.getDefault())

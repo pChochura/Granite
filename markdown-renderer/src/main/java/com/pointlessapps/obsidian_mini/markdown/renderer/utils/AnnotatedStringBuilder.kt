@@ -10,37 +10,24 @@ import androidx.compose.ui.util.fastForEach
 internal fun buildAnnotatedString(
     text: String,
     styles: List<AnnotatedString.Range<AnnotatedString.Annotation>>,
-): AnnotatedString {
-    return buildAnnotatedString {
-        append(text)
-        var parentParagraph: AnnotatedString.Range<ParagraphStyle>? = null
-        styles.fastForEach {
-            if (it.item !is StringAnnotation && it.tag.isNotEmpty()) {
-                addStringAnnotation(it.tag, it.tag, it.start, it.end)
-            }
+) = buildAnnotatedString {
+    append(text)
+    styles.fastForEach { style ->
+        if (style.item !is StringAnnotation && style.tag.isNotEmpty()) {
+            addStringAnnotation(style.tag, style.tag, style.start, style.end)
+        }
 
-            when (val item = it.item) {
-                is SpanStyle -> addStyle(item, it.start, it.end)
-                is StringAnnotation -> addStringAnnotation(
-                    tag = it.tag,
-                    annotation = item.value,
-                    start = it.start,
-                    end = it.end,
-                )
+        when (val item = style.item) {
+            is ParagraphStyle -> addStyle(item, style.start, style.end)
+            is SpanStyle -> addStyle(item, style.start, style.end)
+            is StringAnnotation -> addStringAnnotation(
+                tag = style.tag,
+                annotation = item.value,
+                start = style.start,
+                end = style.end,
+            )
 
-                is ParagraphStyle -> {
-                    if (parentParagraph != null && it.start <= parentParagraph.end) {
-                        addStyle(item.merge(parentParagraph.item), it.start, it.end)
-
-                        return@fastForEach
-                    }
-
-                    parentParagraph = AnnotatedString.Range(item, it.start, it.end)
-                    addStyle(item, it.start, it.end)
-                }
-
-                else -> {} // TODO cover different cases
-            }
+            else -> {} // TODO cover different cases
         }
     }
 }
