@@ -33,7 +33,9 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineFootno
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InlineLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.InternalLinkProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.ItalicProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.OrderedListProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.processors.StrikethroughProcessor
+import com.pointlessapps.obsidian_mini.markdown.renderer.processors.UnorderedListProcessor
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.buildAnnotatedString
 import com.pointlessapps.obsidian_mini.markdown.renderer.utils.processNode
 import org.intellij.markdown.IElementType
@@ -65,6 +67,8 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         ObsidianElementTypes.EMBED to EmbedProcessor,
         GFMElementTypes.STRIKETHROUGH to StrikethroughProcessor,
         MarkdownTokenTypes.HORIZONTAL_RULE to HorizontalRuleProcessor,
+        MarkdownElementTypes.UNORDERED_LIST to UnorderedListProcessor,
+        MarkdownElementTypes.ORDERED_LIST to OrderedListProcessor,
         MarkdownElementTypes.STRONG to BoldProcessor,
         MarkdownElementTypes.EMPH to ItalicProcessor,
         MarkdownElementTypes.CODE_SPAN to CodeSpanProcessor,
