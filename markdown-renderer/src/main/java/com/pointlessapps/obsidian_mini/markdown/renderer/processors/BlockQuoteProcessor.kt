@@ -12,6 +12,8 @@ import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeMarker
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeStyle
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.NodeType
 import com.pointlessapps.obsidian_mini.markdown.renderer.models.toNodeStyles
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.BlockQuoteMarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans.CalloutMarkdownSpanStyle
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
@@ -99,9 +101,11 @@ internal class BlockQuoteProcessor(
             ).toNodeStyles(
                 startOffset = node.startOffset + calloutMatch.groups[1]!!.range.first,
                 endOffset = node.startOffset.atLineEnd(textContent),
+                tag = CalloutMarkdownSpanStyle.TAG_LABEL,
             ) + calloutStyleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
                 startOffset = node.startOffset,
                 endOffset = node.endOffset,
+                tag = CalloutMarkdownSpanStyle.TAG_CONTENT,
             ) + openingMarkers.fastFlatMap {
                 calloutStyleProvider.styleNodeElement(NodeType.Decoration, node.type).toNodeStyles(
                     startOffset = it.startOffset + node.startOffset,
@@ -116,6 +120,7 @@ internal class BlockQuoteProcessor(
             ) + blockQuoteStyleProvider.styleNodeElement(NodeType.All, node.type).toNodeStyles(
                 startOffset = node.startOffset,
                 endOffset = node.endOffset,
+                tag = BlockQuoteMarkdownSpanStyle.TAG_CONTENT,
             ) + openingMarkers.fastFlatMap {
                 blockQuoteStyleProvider.styleNodeElement(NodeType.Decoration, node.type)
                     .toNodeStyles(

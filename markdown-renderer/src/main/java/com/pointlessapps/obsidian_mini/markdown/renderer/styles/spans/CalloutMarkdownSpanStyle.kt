@@ -1,10 +1,6 @@
 package com.pointlessapps.obsidian_mini.markdown.renderer.styles.spans
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Bitmap.createBitmap
-import android.graphics.Canvas
-import android.graphics.drawable.Drawable
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -14,16 +10,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMapNotNull
-import com.pointlessapps.obsidian_mini.markdown.renderer.R
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.MarkdownSpanStyle
+import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.CalloutTypes
 import com.pointlessapps.obsidian_mini.markdown.renderer.styles.utils.getLinesBoundingBox
-
 
 class CalloutMarkdownSpanStyle(
     private val context: Context,
@@ -31,6 +26,7 @@ class CalloutMarkdownSpanStyle(
 
     companion object {
         const val TAG_CONTENT = "CalloutMarkdownSpanStyle_Content"
+        const val TAG_LABEL = "CalloutMarkdownSpanStyle_Label"
     }
 
     private val path = Path()
@@ -75,107 +71,105 @@ class CalloutMarkdownSpanStyle(
         result: TextLayoutResult,
         text: AnnotatedString,
     ) = MarkdownSpanStyle.DrawInstruction {
-        val cornerRadius = CornerRadius(cornerRadius.toPx())
-        val annotations = text.getStringAnnotations(0, text.length)
-            .fastFilter { it.item == TAG_CONTENT }
+        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
 
         annotations.fastForEach { annotation ->
-            val annotationTextContent = text.text.substring(annotation.start, annotation.end)
-            val lines = annotationTextContent.lines()
-            val linesOffsets = lines.runningFold(0) { length, line -> length + line.length + 1 }
-            val indentRegions = getIndentRegions(annotationTextContent)
+            val calloutTypeAnnotation = text.getStringAnnotations(
+                tag = TAG_LABEL,
+                start = annotation.start,
+                end = annotation.end
+            ).singleOrNull()?.item
 
-            val calloutType = "info".toCalloutType(
-                lineHeight = result.getBoundingBox(annotation.start).height.toInt(),
-            )
-            if (text.substring(annotation.start).startsWith("    ")) {
-                drawImage(
-                    calloutType.icon.asImageBitmap(),
-                    topLeft = Offset(
-                        x = result.getHorizontalPosition(annotation.start, true),
-                        y = result.getLineTop(result.getLineForOffset(annotation.start)),
-                    ),
-                    colorFilter = ColorFilter.tint(calloutType.color),
-                )
+            if (calloutTypeAnnotation != null) {
+                drawCalloutStyle(calloutTypeAnnotation, result, annotation, text)
             }
-            val rect = result.getLinesBoundingBox(annotation.start, annotation.end)
-            drawRoundRect(
-                color = calloutType.color.copy(alpha = 0.1f),
+
+            drawIndentations(
+                annotationTextContent = text.text.substring(annotation.start, annotation.end),
+                annotation = annotation,
+                result = result,
+            )
+        }
+    }
+
+    private fun DrawScope.drawCalloutStyle(
+        calloutTypeAnnotation: String,
+        result: TextLayoutResult,
+        annotation: AnnotatedString.Range<String>,
+        text: AnnotatedString,
+    ) {
+        val calloutType = CalloutTypes.getCalloutType(
+            context = context,
+            calloutType = calloutTypeAnnotation,
+            lineHeight = result.getBoundingBox(annotation.start).height.toInt(),
+        )
+
+        // Draw the image only when the component is not in focus
+        if (text.substring(annotation.start).startsWith("    ")) {
+            drawImage(
+                calloutType.icon.asImageBitmap(),
                 topLeft = Offset(
-                    x = rect.left,
-                    y = rect.top - verticalPadding.toPx(),
+                    x = result.getHorizontalPosition(annotation.start, true),
+                    y = result.getLineTop(result.getLineForOffset(annotation.start)),
                 ),
-                size = Size(
-                    width = rect.width,
-                    height = rect.height + verticalPadding.toPx() * 2,
-                ),
-                cornerRadius = cornerRadius,
+                colorFilter = ColorFilter.tint(calloutType.color),
+            )
+        }
+
+        val rect = result.getLinesBoundingBox(annotation.start, annotation.end)
+        drawRoundRect(
+            color = calloutType.color.copy(alpha = 0.1f),
+            topLeft = Offset(
+                x = rect.left,
+                y = rect.top - verticalPadding.toPx(),
+            ),
+            size = Size(
+                width = rect.width,
+                height = rect.height + verticalPadding.toPx() * 2,
+            ),
+            cornerRadius = CornerRadius(cornerRadius.toPx()),
+        )
+    }
+
+    private fun DrawScope.drawIndentations(
+        annotationTextContent: String,
+        annotation: AnnotatedString.Range<String>,
+        result: TextLayoutResult,
+    ) {
+        val cornerRadius = CornerRadius(cornerRadius.toPx())
+        val indentRegions = getIndentRegions(annotationTextContent)
+        val lines = annotationTextContent.lines()
+        val linesOffsets = lines.runningFold(0) { length, line -> length + line.length + 1 }
+        indentRegions.fastForEach { indent ->
+            val padding = if (indent.first == 0) verticalPadding.toPx() else 0f
+            val lastTabOffset = annotation.start + linesOffsets[indent.first] +
+                    lines[indent.first].takeWhile { it == '\t' }.length
+            val firstLineIndex = result.getLineForOffset(
+                annotation.start + linesOffsets[indent.first],
+            )
+            val lastLineIndex = result.getLineForOffset(
+                annotation.start + linesOffsets[indent.last],
             )
 
-            indentRegions.fastForEach { indent ->
-                val padding = if (indent.first == 0) verticalPadding.toPx() else 0f
-                val lastTabOffset = annotation.start + linesOffsets[indent.first] +
-                        lines[indent.first].takeWhile { it == '\t' }.length
-                val firstLineIndex = result.getLineForOffset(
-                    annotation.start + linesOffsets[indent.first],
-                )
-                val lastLineIndex = result.getLineForOffset(
-                    annotation.start + linesOffsets[indent.last],
-                )
-                path.reset()
-                path.addRoundRect(
-                    RoundRect(
-                        rect = Rect(
-                            top = result.getLineTop(firstLineIndex) - padding,
-                            left = result.getHorizontalPosition(
-                                offset = lastTabOffset,
-                                usePrimaryDirection = true
-                            ) - horizontalPadding.toPx(),
-                            bottom = result.getLineBottom(lastLineIndex) + padding,
-                            right = result.getHorizontalPosition(
-                                offset = lastTabOffset,
-                                usePrimaryDirection = true
-                            ) - horizontalPadding.toPx() + width.toPx(),
-                        ),
-                        cornerRadius = cornerRadius,
+            path.reset()
+            path.addRoundRect(
+                RoundRect(
+                    rect = Rect(
+                        top = result.getLineTop(firstLineIndex) - padding,
+                        left = result.getHorizontalPosition(
+                            offset = lastTabOffset,
+                            usePrimaryDirection = true
+                        ) - horizontalPadding.toPx(),
+                        bottom = result.getLineBottom(lastLineIndex) + padding,
+                        right = result.getHorizontalPosition(
+                            offset = lastTabOffset,
+                            usePrimaryDirection = true
+                        ) - horizontalPadding.toPx() + width.toPx(),
                     ),
-                )
-                drawPath(path, backgroundColor)
-            }
+                    cornerRadius = cornerRadius,
+                ),
+            )
+            drawPath(path, backgroundColor)
         }
     }
-
-    private fun String.toCalloutType(lineHeight: Int): CalloutType {
-        val icon =
-            convertToBitmap(context.getDrawable(R.drawable.ic_note)!!, lineHeight, lineHeight)
-
-        return when (this) {
-            "abstract", "summary", "tldr" -> CalloutType(Color(83, 223, 221), icon)
-            "info" -> CalloutType(Color(2, 122, 255), icon)
-            "todo" -> CalloutType(Color(2, 122, 255), icon)
-            "tip", "hint", "important" -> CalloutType(Color(83, 223, 221), icon)
-            "success", "check", "done" -> CalloutType(Color(68, 207, 110), icon)
-            "question", "help", "faq" -> CalloutType(Color(233, 151, 63), icon)
-            "warning", "caution", "attention" -> CalloutType(Color(233, 151, 63), icon)
-            "failure", "fail", "missing" -> CalloutType(Color(251, 70, 76), icon)
-            "danger", "error" -> CalloutType(Color(251, 70, 76), icon)
-            "bug" -> CalloutType(Color(251, 70, 76), icon)
-            "example" -> CalloutType(Color(168, 130, 255), icon)
-            "quote" -> CalloutType(Color(158, 158, 158), icon)
-            else -> CalloutType(Color(2, 122, 255), icon)
-        }
-    }
-
-    private fun convertToBitmap(drawable: Drawable, widthPixels: Int, heightPixels: Int): Bitmap {
-        val bitmap = createBitmap(widthPixels, heightPixels, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, widthPixels, heightPixels)
-        drawable.draw(canvas)
-        return bitmap
-    }
-
-    private data class CalloutType(
-        val color: Color,
-        val icon: Bitmap,
-    )
 }
