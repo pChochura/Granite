@@ -32,7 +32,7 @@ import org.intellij.markdown.ast.ASTNode
 internal object BlockQuoteProcessor : NodeProcessor {
 
     private val markerRegex = Regex("^(?: {0,3}> ?)*")
-    private val calloutRegex = Regex("^ {0,3}> ?(\\[!([^]]+)](?: +|$))(.*)$", RegexOption.MULTILINE)
+    private val calloutRegex = Regex("^ {0,3}> ?(\\[!(.*)](?: +|$))(.*)$")
 
     private data class OpeningMarker(
         val startOffset: Int,
@@ -67,7 +67,8 @@ internal object BlockQuoteProcessor : NodeProcessor {
 
     override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
         val nodeTextContent = textContent.substring(node.startOffset, node.endOffset)
-        val calloutMatch = calloutRegex.find(nodeTextContent)
+        val firstLine = nodeTextContent.lineSequence().first()
+        val calloutMatch = calloutRegex.find(firstLine)
         val markers = extractMarkers(nodeTextContent).fastMap {
             NodeMarker(
                 startOffset = it.startOffset + node.startOffset,
@@ -97,7 +98,8 @@ internal object BlockQuoteProcessor : NodeProcessor {
             return emptyList()
         }
 
-        val calloutMatch = calloutRegex.find(nodeTextContent)
+        val firstLine = nodeTextContent.lineSequence().first()
+        val calloutMatch = calloutRegex.find(firstLine)
         return if (calloutMatch != null) {
             getCalloutStyles(node, textContent, openingMarkers, calloutMatch)
         } else {
