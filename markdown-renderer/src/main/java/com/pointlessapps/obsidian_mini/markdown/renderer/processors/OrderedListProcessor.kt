@@ -58,13 +58,7 @@ internal object OrderedListProcessor : NodeProcessor {
         }
 
         return listOf(
-            ParagraphStyle(
-                lineHeight = 1.4.em,
-                textIndent = TextIndent(
-                    firstLine = 1.em,
-                    restLine = 2.em,
-                ),
-            ).withRange(
+            ParagraphStyle().withRange(
                 start = node.startOffset.atLineStart(textContent),
                 // Add an additional offset to make the paragraph render smoother
                 end = node.endOffset.atLineEnd(textContent) + 1,
