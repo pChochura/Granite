@@ -4,4 +4,7 @@
 
 	<dimen name="button_padding_vertical">16dp</dimen>
 	<dimen name="button_padding_horizontal">32dp</dimen>
+
+	<dimen name="logo_icon_size">32dp</dimen>
+	<dimen name="folder_icon_size">16dp</dimen>
 </resources>

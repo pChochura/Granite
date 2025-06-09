@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.library)
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -23,4 +24,6 @@ android {
 
 dependencies {
     implementation(libs.koinCore)
+
+    implementation(libs.kotlinSerializationJson)
 }

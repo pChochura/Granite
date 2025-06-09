@@ -17,12 +17,13 @@ dependencyResolutionManagement {
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-rootProject.name = "obsidian-mini"
+rootProject.name = "granite"
 
 include(
     ":app",
     ":domain",
     ":datasource",
+    ":supabase-datasource",
     ":ui_components",
     ":markdown-renderer",
     ":markdown-obsidian-parser",

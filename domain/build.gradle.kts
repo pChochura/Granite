@@ -23,4 +23,7 @@ android {
 
 dependencies {
     implementation(libs.koinCore)
+    implementation(libs.coroutinesCore)
+
+    implementation(projects.datasource)
 }

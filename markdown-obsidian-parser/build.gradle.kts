@@ -5,7 +5,7 @@ plugins {
 
 android {
     compileSdk = libs.versions.targetSdk.get().toInt()
-    namespace = "${libs.versions.packageName.get()}.markdown.obsidian.parser"
+    namespace = "${libs.versions.packageName.get()}.markdown.granite.parser"
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()

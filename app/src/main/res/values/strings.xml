@@ -1,4 +1,5 @@
 <resources>
-	<string name="app_name">Obsidian Mini</string>
+	<string name="app_name">Granite</string>
     <string name="title_note">Note</string>
+    <string name="search">Search</string>
 </resources>

@@ -1,6 +1,6 @@
 [versions]
 #Application
-packageName = "com.pointlessapps.obsidian_mini"
+packageName = "com.pointlessapps.granite"
 minSdk = "26"
 targetSdk = "35"
 
@@ -42,6 +42,12 @@ highlights = "1.0.0"
 #Coil
 coil = "2.7.0"
 
+#Supabase
+supabase = "3.1.4"
+
+#Ktor
+ktor = "3.1.3"
+
 [libraries]
 #Kotlin
 coroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -75,6 +81,14 @@ coilCompose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 #Markdown
 markdown = { module = "org.jetbrains:markdown", version.ref = "markdown" }
 highlights = { module = "dev.snipme:highlights", version.ref = "highlights" }
+
+#Supabase
+supabaseBom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
+supabasePostgres = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+supabaseAuth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+
+#Ktor
+ktor = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 
 [plugins]
 #Kotlin
