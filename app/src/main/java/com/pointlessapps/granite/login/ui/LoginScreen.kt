@@ -82,6 +82,7 @@ internal fun LoginScreen(
                 ),
             )
             ComposeButton("Login", onClick = viewModel::login)
+            ComposeButton("Login with google", onClick = viewModel::loginWithGoogle)
         }
 
         ComposeLoader(viewModel.state.isLoading, scrimAlpha = 1f)

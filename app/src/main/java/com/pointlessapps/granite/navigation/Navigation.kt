@@ -5,19 +5,31 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.pointlessapps.granite.MainViewModel
 import com.pointlessapps.granite.home.ui.HomeScreen
 import com.pointlessapps.granite.login.ui.LoginScreen
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun Navigation(
     navController: NavHostController = rememberNavController(),
+    mainViewModel: MainViewModel = koinViewModel(),
 ) {
+    if (!mainViewModel.isInitialized) return
+
     NavHost(
         navController = navController,
-        startDestination = Route.Login,
+        startDestination = if (mainViewModel.isSignedIn()) Route.Home else Route.Login,
     ) {
         composable<Route.Login> {
-            LoginScreen(onNavigateTo = navController::navigate)
+            LoginScreen(
+                onNavigateTo = {
+                    navController.navigate(
+                        route = it,
+                        builder = { popUpTo(Route.Login) { inclusive = true } },
+                    )
+                },
+            )
         }
         composable<Route.Home> {
             HomeScreen(onNavigateTo = navController::navigate)

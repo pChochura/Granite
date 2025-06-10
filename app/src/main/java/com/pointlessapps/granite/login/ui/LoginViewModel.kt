@@ -5,9 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pointlessapps.granite.domain.auth.usecase.IsSignedInUseCase
 import com.pointlessapps.granite.domain.auth.usecase.SignInAnonymouslyUseCase
 import com.pointlessapps.granite.domain.auth.usecase.SignInUseCase
+import com.pointlessapps.granite.domain.auth.usecase.SignInWithGoogleUseCase
 import com.pointlessapps.granite.navigation.Route
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.catch
@@ -23,12 +23,12 @@ internal sealed interface LoginEvent {
 internal data class HomeState(
     val email: String = "",
     val password: String = "",
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
 )
 
 internal class LoginViewModel(
-    isSignedInUseCase: IsSignedInUseCase,
     private val signInUseCase: SignInUseCase,
+    private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val signInAnonymouslyUseCase: SignInAnonymouslyUseCase,
 ) : ViewModel() {
 
@@ -38,29 +38,29 @@ internal class LoginViewModel(
     private val eventChannel = Channel<LoginEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    init {
-        isSignedInUseCase()
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach {
-                state = state.copy(isLoading = false)
-                if (it) eventChannel.send(LoginEvent.NavigateTo(Route.Home))
-            }
-            .catch {
-                state = state.copy(isLoading = true)
-                /* handle errors */
-            }
-            .launchIn(viewModelScope)
-    }
-
     fun login() {
-        signInAnonymouslyUseCase()
+        signInUseCase(state.email, state.password)
             .onStart { state = state.copy(isLoading = true) }
             .onEach {
                 state = state.copy(isLoading = false)
                 eventChannel.send(LoginEvent.NavigateTo(Route.Home))
             }
             .catch {
-                state = state.copy(isLoading = true)
+                state = state.copy(isLoading = false)
+                /* handle errors */
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun loginWithGoogle() {
+        signInWithGoogleUseCase()
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach {
+                state = state.copy(isLoading = false)
+                eventChannel.send(LoginEvent.NavigateTo(Route.Home))
+            }
+            .catch {
+                state = state.copy(isLoading = false)
                 /* handle errors */
             }
             .launchIn(viewModelScope)

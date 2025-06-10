@@ -9,6 +9,18 @@ android {
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
+
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
     }
 
     compileOptions {
@@ -24,6 +36,10 @@ android {
 dependencies {
     implementation(libs.koinCore)
     implementation(libs.coroutinesCore)
+
+    implementation(libs.credentials)
+    implementation(libs.credentialsPlayServices)
+    implementation(libs.credentialsGoogleId)
 
     implementation(projects.datasource)
 }

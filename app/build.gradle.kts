@@ -1,5 +1,5 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import java.util.*
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.application)
@@ -25,13 +25,6 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = androidGitVersion.code().takeIf { it > 0 } ?: 1
         versionName = androidGitVersion.name().takeIf { it.isNotEmpty() } ?: "1.0"
-
-        Properties().also {
-            it.load(project.rootProject.file("local.properties").inputStream())
-
-            buildConfigField("String", "SUPABASE_URL", "\"${it["SUPABASE_URL"]}\"")
-            buildConfigField("String", "SUPABASE_KEY", "\"${it["SUPABASE_KEY"]}\"")
-        }
     }
 
     signingConfigs {
@@ -111,11 +104,6 @@ dependencies {
 
     implementation(libs.koinCompose)
     implementation(libs.kotlinSerializationJson)
-
-    implementation(platform(libs.supabaseBom))
-    implementation(libs.supabasePostgres)
-    implementation(libs.supabaseAuth)
-    implementation(libs.ktor)
 
     implementation(projects.domain)
     implementation(projects.supabaseDatasource)

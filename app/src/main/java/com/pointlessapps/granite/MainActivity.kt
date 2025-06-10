@@ -1,6 +1,5 @@
 package com.pointlessapps.granite
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -18,36 +17,26 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.pointlessapps.granite.navigation.Navigation
-import com.pointlessapps.granite.di.applicationModules
-import com.pointlessapps.granite.domain.di.domainModules
-import com.pointlessapps.granite.supabase.datasource.di.supabaseModules
 import com.pointlessapps.granite.ui_components.theme.ProjectTheme
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
-import org.koin.compose.KoinApplication
-import org.koin.core.KoinApplication
-import org.koin.core.logger.Level
+import org.koin.android.ext.android.inject
+import org.koin.androidx.compose.KoinAndroidContext
 
 class MainActivity : ComponentActivity() {
 
-    private fun KoinApplication.koinConfiguration(context: Context) {
-        androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
-        androidContext(context)
-        modules(applicationModules + domainModules + supabaseModules)
-    }
+    private val mainViewModel: MainViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen().setKeepOnScreenCondition { !mainViewModel.isInitialized }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 Color.Transparent.toArgb(),
                 Color.Transparent.toArgb(),
             ),
         )
-        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         setContent {
-            KoinApplication({ koinConfiguration(this@MainActivity) }) {
+            KoinAndroidContext {
                 ProjectTheme {
                     val navigationController = rememberNavController()
                     CompositionLocalProvider(

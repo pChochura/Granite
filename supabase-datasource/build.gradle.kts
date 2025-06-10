@@ -26,6 +26,7 @@ dependencies {
 
     implementation(platform(libs.supabaseBom))
     implementation(libs.supabasePostgres)
+    implementation(libs.supabaseAuth)
     implementation(libs.ktor)
 
     implementation(projects.datasource)
