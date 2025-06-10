@@ -7,10 +7,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Note(
     val id: Int,
-    @SerialName("user_id")
-    val userId: String,
-    @SerialName("folder_id")
-    val folderId: Int?,
+    @SerialName("parent_id")
+    val parentId: Int?,
     val name: String,
     @SerialName("updated_at")
     @Serializable(DateSerializer::class)
@@ -18,5 +16,5 @@ data class Note(
     @SerialName("created_at")
     @Serializable(DateSerializer::class)
     val createdAt: Long,
-    val content: String,
+    val content: String? = null,
 )

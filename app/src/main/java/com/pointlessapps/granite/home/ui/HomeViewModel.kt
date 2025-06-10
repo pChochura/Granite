@@ -7,6 +7,7 @@ import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.home.model.File
 import com.pointlessapps.granite.home.model.Folder
@@ -122,6 +123,7 @@ internal data class HomeState(
         )
     ),
     val selectedItemId: Int = 1,
+    val isLoading: Boolean = false,
 ) : Parcelable
 
 internal sealed interface HomeEvent {
@@ -131,6 +133,7 @@ internal sealed interface HomeEvent {
 internal class HomeViewModel(
     savedStateHandle: SavedStateHandle,
     getNotesUseCase: GetNotesUseCase,
+    private val getNoteUseCase: GetNoteUseCase,
 ) : ViewModel() {
 
     private val eventChannel = Channel<HomeEvent>()
@@ -152,7 +155,7 @@ internal class HomeViewModel(
                             updatedAt = "",
                             createdAt = "",
                             indent = 1,
-                            content = it.content,
+                            content = it.content.orEmpty(),
                         )
                     }
                 )
@@ -168,11 +171,19 @@ internal class HomeViewModel(
     fun onItemSelected(item: Item) {
         when (item) {
             is File -> {
-                state = state.copy(
-                    selectedItemId = item.id,
-                    textValue = TextFieldValue(text = item.content),
-                )
+                state = state.copy(selectedItemId = item.id)
                 eventChannel.trySend(HomeEvent.CloseDrawer)
+
+                getNoteUseCase(item.id)
+                    .onStart { state = state.copy(isLoading = true) }
+                    .onEach {
+                        state = state.copy(isLoading = false)
+                        state = state.copy(
+                            textValue = TextFieldValue(text = it?.content.orEmpty()),
+                        )
+                    }
+                    .catch { state = state.copy(isLoading = false) }
+                    .launchIn(viewModelScope)
             }
 
             is Folder -> state = state.copy(

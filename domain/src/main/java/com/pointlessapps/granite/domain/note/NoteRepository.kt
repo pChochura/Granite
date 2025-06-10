@@ -9,12 +9,17 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 interface NoteRepository {
+    fun getNote(id: Int): Flow<Note?>
     fun getNotes(): Flow<List<Note>>
 }
 
 internal class NoteRepositoryImpl(
     private val noteDatasource: NoteDatasource,
 ) : NoteRepository {
+    override fun getNote(id: Int) = flow {
+        emit(noteDatasource.getNote(id)?.fromRemote())
+    }
+
     override fun getNotes() = flow {
         emit(noteDatasource.getNotes().map { it.fromRemote() })
     }.flowOn(Dispatchers.IO)

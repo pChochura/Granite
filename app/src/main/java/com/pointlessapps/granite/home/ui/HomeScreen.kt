@@ -66,6 +66,7 @@ import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.ui_components.components.ComposeIcon
 import com.pointlessapps.granite.ui_components.components.ComposeIconButton
+import com.pointlessapps.granite.ui_components.components.ComposeLoader
 import com.pointlessapps.granite.ui_components.components.ComposeMarkdownTextField
 import com.pointlessapps.granite.ui_components.components.ComposeScaffoldLayout
 import com.pointlessapps.granite.ui_components.components.ComposeText
@@ -142,6 +143,8 @@ internal fun HomeScreen(
                     textFieldStyle = defaultComposeTextFieldStyle(),
                 )
             }
+
+            ComposeLoader(viewModel.state.isLoading)
         }
     )
 }

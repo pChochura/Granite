@@ -5,7 +5,7 @@ import com.pointlessapps.granite.datasource.note.model.Note as RemoteNote
 
 internal fun RemoteNote.fromRemote() = Note(
     id = id,
-    folderId = folderId,
+    parentId = parentId,
     name = name,
     updatedAt = updatedAt,
     createdAt = createdAt,
