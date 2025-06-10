@@ -22,7 +22,7 @@ rootProject.name = "granite"
 include(
     ":app",
     ":domain",
-    ":datasource",
+    ":local-datasource",
     ":supabase-datasource",
     ":ui_components",
     ":markdown-renderer",

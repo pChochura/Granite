@@ -1,6 +1,5 @@
-package com.pointlessapps.granite.datasource.note.model
+package com.pointlessapps.granite.supabase.datasource.note.model
 
-import com.pointlessapps.granite.datasource.utils.DateSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,10 +10,8 @@ data class Note(
     val parentId: Int?,
     val name: String,
     @SerialName("updated_at")
-    @Serializable(DateSerializer::class)
-    val updatedAt: Long,
+    val updatedAt: String,
     @SerialName("created_at")
-    @Serializable(DateSerializer::class)
-    val createdAt: Long,
+    val createdAt: String,
     val content: String? = null,
 )

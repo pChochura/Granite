@@ -5,5 +5,5 @@ import com.pointlessapps.granite.domain.note.NoteRepository
 class GetNotesUseCase(
     private val noteRepository: NoteRepository,
 ) {
-    operator fun invoke() = noteRepository.getNotes()
+    operator fun invoke() = noteRepository.getAll()
 }

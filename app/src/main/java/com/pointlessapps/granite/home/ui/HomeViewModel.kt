@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
+import com.pointlessapps.granite.domain.note.usecase.UpsertNoteUseCase
 import com.pointlessapps.granite.home.model.File
 import com.pointlessapps.granite.home.model.Folder
 import com.pointlessapps.granite.home.model.Item
@@ -25,104 +26,10 @@ import kotlinx.parcelize.WriteWith
 
 @Parcelize
 internal data class HomeState(
-    val textValue: @WriteWith<TextFieldValueParceler> TextFieldValue = TextFieldValue(),
-    val items: List<Item> = listOf(
-        Folder(
-            id = 2,
-            name = "Work Documents",
-            updatedAt = "2023-10-27T11:00:00Z",
-            createdAt = "2023-10-25T09:15:00Z",
-            indent = 0,
-            items = listOf(
-                Folder(
-                    id = 5,
-                    name = "Archive",
-                    updatedAt = "2023-10-27T12:00:00Z",
-                    createdAt = "2023-10-24T10:00:00Z",
-                    indent = 1,
-                    items = listOf(
-                        File(
-                            id = 6,
-                            name = "OldContract.pdf",
-                            updatedAt = "2022-01-15T13:00:00Z",
-                            createdAt = "2022-01-10T11:00:00Z",
-                            content = "Details of an old contract.",
-                            indent = 2,
-                        )
-                    ),
-                    opened = false,
-                ),
-                File(
-                    id = 3,
-                    name = "Report.docx",
-                    updatedAt = "2023-10-27T08:00:00Z",
-                    createdAt = "2023-10-27T08:00:00Z",
-                    content = "Monthly report content.",
-                    indent = 1,
-                ),
-                File(
-                    id = 4,
-                    name = "Presentation.pptx",
-                    updatedAt = "2023-10-26T15:00:00Z",
-                    createdAt = "2023-10-26T15:00:00Z",
-                    content = "Slides for the presentation.",
-                    indent = 1,
-                ),
-            ),
-            opened = false,
-        ),
-        Folder(
-            id = 9,
-            name = "Recipes",
-            updatedAt = "2023-10-27T18:00:00Z",
-            createdAt = "2023-10-20T17:00:00Z",
-            indent = 0,
-            items = listOf(
-                File(
-                    id = 10,
-                    name = "PastaRecipe.txt",
-                    updatedAt = "2023-10-21T19:00:00Z",
-                    createdAt = "2023-10-21T19:00:00Z",
-                    content = "Ingredients and steps for pasta.",
-                    indent = 1,
-                ),
-            ),
-            opened = false,
-        ),
-        File(
-            id = 1,
-            name = "Document1.txt",
-            updatedAt = "2023-10-27T10:00:00Z",
-            createdAt = "2023-10-26T14:30:00Z",
-            content = "Content of Document1.",
-            indent = 0,
-        ),
-        File(
-            id = 7,
-            name = "Photo1.jpg",
-            updatedAt = "2023-10-26T16:45:00Z",
-            createdAt = "2023-10-26T16:45:00Z",
-            content = "Image data for Photo1",
-            indent = 0,
-        ),
-        File(
-            id = 8,
-            name = "Notes.md",
-            updatedAt = "2023-10-28T09:30:00Z",
-            createdAt = "2023-10-28T09:30:00Z",
-            content = "# Personal Notes\n- Remember to buy milk\n- Meeting at 3 PM",
-            indent = 0,
-        ),
-        File(
-            id = 11,
-            name = "Instructions.txt",
-            updatedAt = "2023-10-29T10:10:10Z",
-            createdAt = "2023-10-29T10:10:10Z",
-            content = "Step-by-step instructions.",
-            indent = 0,
-        )
-    ),
-    val selectedItemId: Int = 1,
+    val noteTitle: String = "",
+    val noteContent: @WriteWith<TextFieldValueParceler> TextFieldValue = TextFieldValue(),
+    val items: List<Item> = emptyList(),
+    val selectedItemId: Int = -1,
     val isLoading: Boolean = false,
 ) : Parcelable
 
@@ -134,6 +41,7 @@ internal class HomeViewModel(
     savedStateHandle: SavedStateHandle,
     getNotesUseCase: GetNotesUseCase,
     private val getNoteUseCase: GetNoteUseCase,
+    private val upsertNoteUseCase: UpsertNoteUseCase,
 ) : ViewModel() {
 
     private val eventChannel = Channel<HomeEvent>()
@@ -160,12 +68,15 @@ internal class HomeViewModel(
                     }
                 )
             }
-            .catch { /* add error handling */ }
+            .catch {
+                /* add error handling */
+                it.printStackTrace()
+            }
             .launchIn(viewModelScope)
     }
 
     fun onTextValueChanged(value: TextFieldValue) {
-        state = state.copy(textValue = value)
+        state = state.copy(noteContent = value)
     }
 
     fun onItemSelected(item: Item) {
@@ -179,10 +90,13 @@ internal class HomeViewModel(
                     .onEach {
                         state = state.copy(isLoading = false)
                         state = state.copy(
-                            textValue = TextFieldValue(text = it?.content.orEmpty()),
+                            noteContent = TextFieldValue(text = it?.content.orEmpty()),
                         )
                     }
-                    .catch { state = state.copy(isLoading = false) }
+                    .catch {
+                        state = state.copy(isLoading = false)
+                        it.printStackTrace()
+                    }
                     .launchIn(viewModelScope)
             }
 
@@ -206,5 +120,26 @@ internal class HomeViewModel(
         if (it is Folder && it.opened) {
             it.flatten()
         } else listOf(it)
+    }
+
+    fun saveNote() {
+        upsertNoteUseCase(
+            id = state.selectedItemId.takeIf { it != -1 },
+            name = state.noteTitle,
+            content = state.noteContent.text,
+            parentId = null,
+        )
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach {
+                state = state.copy(
+                    isLoading = false,
+                    selectedItemId = it,
+                )
+            }
+            .catch {
+                state = state.copy(isLoading = false)
+                it.printStackTrace()
+            }
+            .launchIn(viewModelScope)
     }
 }

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.pointlessapps.granite.di.applicationModules
 import com.pointlessapps.granite.domain.di.domainModules
+import com.pointlessapps.granite.local.datasource.di.localModules
 import com.pointlessapps.granite.supabase.datasource.di.supabaseModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -18,7 +19,7 @@ class MainApplication : Application() {
         fileProperties()
         androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
         androidContext(context)
-        modules(applicationModules + domainModules + supabaseModules)
+        modules(applicationModules + domainModules + supabaseModules + localModules)
     }
 
     override fun onCreate() {

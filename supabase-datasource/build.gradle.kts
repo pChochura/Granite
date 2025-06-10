@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.library)
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -29,5 +30,5 @@ dependencies {
     implementation(libs.supabaseAuth)
     implementation(libs.ktor)
 
-    implementation(projects.datasource)
+    implementation(libs.kotlinSerializationJson)
 }

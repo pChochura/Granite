@@ -5,7 +5,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.pointlessapps.granite.datasource.auth.AuthDatasource
+import com.pointlessapps.granite.supabase.datasource.auth.SupabaseAuthDatasource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -22,7 +22,7 @@ interface AuthRepository {
 
 internal class AuthRepositoryImpl(
     private val context: Context,
-    private val authDatasource: AuthDatasource,
+    private val authDatasource: SupabaseAuthDatasource,
     private val googleWebClientId: String,
 ) : AuthRepository {
 

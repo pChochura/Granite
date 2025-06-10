@@ -41,5 +41,6 @@ dependencies {
     implementation(libs.credentialsPlayServices)
     implementation(libs.credentialsGoogleId)
 
-    implementation(projects.datasource)
+    implementation(projects.supabaseDatasource)
+    implementation(projects.localDatasource)
 }

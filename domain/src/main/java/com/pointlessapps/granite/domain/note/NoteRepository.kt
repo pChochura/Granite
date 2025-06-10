@@ -1,26 +1,35 @@
 package com.pointlessapps.granite.domain.note
 
-import com.pointlessapps.granite.datasource.note.NoteDatasource
-import com.pointlessapps.granite.domain.note.mapper.fromRemote
+import com.pointlessapps.granite.domain.note.mapper.fromLocal
+import com.pointlessapps.granite.domain.note.mapper.toLocal
 import com.pointlessapps.granite.domain.note.model.Note
+import com.pointlessapps.granite.local.datasource.note.LocalNoteDatasource
+import com.pointlessapps.granite.supabase.datasource.note.SupabaseNoteDatasource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 interface NoteRepository {
-    fun getNote(id: Int): Flow<Note?>
-    fun getNotes(): Flow<List<Note>>
+    fun getById(id: Int): Flow<Note?>
+    fun getAll(): Flow<List<Note>>
+
+    fun upsert(id: Int?, name: String, content: String, parentId: Int?): Flow<Int>
 }
 
 internal class NoteRepositoryImpl(
-    private val noteDatasource: NoteDatasource,
+    private val localDatasource: LocalNoteDatasource,
+    private val remoteDatasource: SupabaseNoteDatasource,
 ) : NoteRepository {
-    override fun getNote(id: Int) = flow {
-        emit(noteDatasource.getNote(id)?.fromRemote())
-    }
+    override fun getById(id: Int) = flow {
+        emit(localDatasource.getById(id)?.fromLocal())
+    }.flowOn(Dispatchers.IO)
 
-    override fun getNotes() = flow {
-        emit(noteDatasource.getNotes().map { it.fromRemote() })
+    override fun getAll() = flow {
+        emit(localDatasource.getAll().map { it.fromLocal() })
+    }.flowOn(Dispatchers.IO)
+
+    override fun upsert(id: Int?, name: String, content: String, parentId: Int?) = flow {
+        emit(localDatasource.upsert(id, name, content, parentId))
     }.flowOn(Dispatchers.IO)
 }

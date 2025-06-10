@@ -107,6 +107,7 @@ dependencies {
 
     implementation(projects.domain)
     implementation(projects.supabaseDatasource)
+    implementation(projects.localDatasource)
     implementation(projects.uiComponents)
     implementation(projects.markdownRenderer)
 }

@@ -57,9 +57,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.IntOffset
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.model.Folder
 import com.pointlessapps.granite.home.model.Item
@@ -84,18 +82,21 @@ internal fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onNavigateTo: (Route) -> Unit,
 ) {
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
     val focusManager = LocalFocusManager.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        lifecycle.repeatOnLifecycle(state = Lifecycle.State.RESUMED) {
+    LifecycleResumeEffect(Unit) {
+        coroutineScope.launch {
             viewModel.events.collect {
                 when (it) {
                     is HomeEvent.CloseDrawer -> drawerState.close()
                 }
             }
+        }
+
+        onPauseOrDispose {
+            viewModel.saveNote()
         }
     }
 
@@ -138,7 +139,7 @@ internal fun HomeScreen(
                             vertical = dimensionResource(RC.dimen.margin_tiny),
                         )
                         .padding(it),
-                    value = viewModel.state.textValue,
+                    value = viewModel.state.noteContent,
                     onValueChange = viewModel::onTextValueChanged,
                     textFieldStyle = defaultComposeTextFieldStyle(),
                 )

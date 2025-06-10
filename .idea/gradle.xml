@@ -11,8 +11,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/datasource" />
             <option value="$PROJECT_DIR$/domain" />
+            <option value="$PROJECT_DIR$/local-datasource" />
             <option value="$PROJECT_DIR$/markdown-obsidian-parser" />
             <option value="$PROJECT_DIR$/markdown-renderer" />
             <option value="$PROJECT_DIR$/supabase-datasource" />
