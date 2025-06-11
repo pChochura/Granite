@@ -6,9 +6,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,9 +29,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +41,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,8 +64,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.home.model.Folder
 import com.pointlessapps.granite.home.model.Item
+import com.pointlessapps.granite.home.utils.NoOpBringIntoViewSpec
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.ui_components.components.ComposeIcon
 import com.pointlessapps.granite.ui_components.components.ComposeIconButton
@@ -77,6 +82,7 @@ import org.koin.androidx.compose.koinViewModel
 import kotlin.math.roundToInt
 import com.pointlessapps.granite.ui_components.R as RC
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
@@ -110,7 +116,8 @@ internal fun HomeScreen(
             ModalDrawerSheet(drawerState) {
                 DrawerMenu(
                     selectedItemId = viewModel.state.selectedItemId,
-                    items = viewModel.getFlattenItems(),
+                    items = viewModel.getFilteredItems(),
+                    openedFolderIds = viewModel.state.openedFolderIds,
                     onItemSelected = viewModel::onItemSelected,
                 )
             }
@@ -129,20 +136,49 @@ internal fun HomeScreen(
                 topBar = {
                     TopBar(onMenuClicked = { coroutineScope.launch { drawerState.open() } })
                 },
-                fab = { BottomBar({}) },
             ) {
-                ComposeMarkdownTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = dimensionResource(RC.dimen.margin_semi_big),
-                            vertical = dimensionResource(RC.dimen.margin_tiny),
+                CompositionLocalProvider(LocalBringIntoViewSpec provides NoOpBringIntoViewSpec) {
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .padding(it),
+                    ) {
+                        ComposeTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = dimensionResource(RC.dimen.margin_semi_big),
+                                    vertical = dimensionResource(RC.dimen.margin_tiny),
+                                ),
+                            value = viewModel.state.noteTitle,
+                            onValueChange = viewModel::onNoteTitleChanged,
+                            textFieldStyle = defaultComposeTextFieldStyle().copy(
+                                textStyle = MaterialTheme.typography.titleLarge,
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    autoCorrectEnabled = true,
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Next,
+                                    showKeyboardOnFocus = true,
+                                ),
+                                placeholder = stringResource(R.string.title),
+                                maxLines = 1,
+                            ),
                         )
-                        .padding(it),
-                    value = viewModel.state.noteContent,
-                    onValueChange = viewModel::onTextValueChanged,
-                    textFieldStyle = defaultComposeTextFieldStyle(),
-                )
+
+                        ComposeMarkdownTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = dimensionResource(RC.dimen.margin_semi_big),
+                                    vertical = dimensionResource(RC.dimen.margin_tiny),
+                                ),
+                            value = viewModel.state.noteContent,
+                            onValueChange = viewModel::onNoteContentChanged,
+                            textFieldStyle = defaultComposeTextFieldStyle(),
+                        )
+                    }
+                }
             }
 
             ComposeLoader(viewModel.state.isLoading)
@@ -171,7 +207,7 @@ private fun TopBar(onMenuClicked: () -> Unit) {
             ),
         )
         ComposeText(
-            text = stringResource(R.string.title_note),
+            text = stringResource(R.string.note),
             modifier = Modifier.weight(1f),
             textStyle = defaultComposeTextStyle().copy(
                 textColor = MaterialTheme.colorScheme.onSurface,
@@ -192,7 +228,12 @@ private fun TopBar(onMenuClicked: () -> Unit) {
 }
 
 @Composable
-private fun DrawerMenu(selectedItemId: Int, items: List<Item>, onItemSelected: (Item) -> Unit) {
+private fun DrawerMenu(
+    selectedItemId: Int,
+    items: List<Item>,
+    openedFolderIds: Set<Int>,
+    onItemSelected: (Item) -> Unit,
+) {
     var searchValue by remember { mutableStateOf("") }
 
     Column(
@@ -307,8 +348,8 @@ private fun DrawerMenu(selectedItemId: Int, items: List<Item>, onItemSelected: (
                         ),
                     horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
                 ) {
-                    if (item is Folder) {
-                        val rotation by animateFloatAsState(if (item.opened) 90f else 0f)
+                    if (item.isFolder) {
+                        val rotation by animateFloatAsState(if (openedFolderIds.contains(item.id)) 90f else 0f)
                         ComposeIcon(
                             modifier = Modifier
                                 .size(dimensionResource(R.dimen.folder_icon_size))

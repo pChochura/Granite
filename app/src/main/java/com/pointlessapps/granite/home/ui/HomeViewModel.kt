@@ -2,16 +2,13 @@ package com.pointlessapps.granite.home.ui
 
 import android.os.Parcelable
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.util.fastFlatMap
-import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpsertNoteUseCase
-import com.pointlessapps.granite.home.model.File
-import com.pointlessapps.granite.home.model.Folder
+import com.pointlessapps.granite.home.mapper.toSortedItems
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.mutableStateOf
@@ -29,6 +26,7 @@ internal data class HomeState(
     val noteTitle: String = "",
     val noteContent: @WriteWith<TextFieldValueParceler> TextFieldValue = TextFieldValue(),
     val items: List<Item> = emptyList(),
+    val openedFolderIds: Set<Int> = emptySet(),
     val selectedItemId: Int = -1,
     val isLoading: Boolean = false,
 ) : Parcelable
@@ -52,74 +50,63 @@ internal class HomeViewModel(
 
     init {
         getNotesUseCase()
-            .onStart { /* add loading */ }
+            .onStart { state = state.copy(isLoading = true) }
             .onEach {
-                /* remove loading */
                 state = state.copy(
-                    items = it.fastMap {
-                        File(
-                            id = it.id,
-                            name = it.name,
-                            updatedAt = "",
-                            createdAt = "",
-                            indent = 1,
-                            content = it.content.orEmpty(),
-                        )
-                    }
+                    isLoading = false,
+                    items = it.toSortedItems(),
                 )
             }
             .catch {
-                /* add error handling */
+                state = state.copy(isLoading = false)
                 it.printStackTrace()
             }
             .launchIn(viewModelScope)
     }
 
-    fun onTextValueChanged(value: TextFieldValue) {
+    fun getFilteredItems() = state.items.filter {
+        it.parentId in state.openedFolderIds || it.parentId == null
+    }
+
+    fun onNoteContentChanged(value: TextFieldValue) {
         state = state.copy(noteContent = value)
     }
 
+    fun onNoteTitleChanged(value: String) {
+        state = state.copy(noteTitle = value)
+    }
+
     fun onItemSelected(item: Item) {
-        when (item) {
-            is File -> {
-                state = state.copy(selectedItemId = item.id)
-                eventChannel.trySend(HomeEvent.CloseDrawer)
+        if (!item.isFolder) {
+            state = state.copy(selectedItemId = item.id)
+            eventChannel.trySend(HomeEvent.CloseDrawer)
 
-                getNoteUseCase(item.id)
-                    .onStart { state = state.copy(isLoading = true) }
-                    .onEach {
-                        state = state.copy(isLoading = false)
-                        state = state.copy(
-                            noteContent = TextFieldValue(text = it?.content.orEmpty()),
-                        )
-                    }
-                    .catch {
-                        state = state.copy(isLoading = false)
-                        it.printStackTrace()
-                    }
-                    .launchIn(viewModelScope)
-            }
-
-            is Folder -> state = state.copy(
-                items = state.items.fastMap {
-                    if (it.id == item.id) {
-                        item.copy(opened = !item.opened)
-                    } else {
-                        it
-                    }
+            getNoteUseCase(item.id)
+                .onStart { state = state.copy(isLoading = true) }
+                .onEach {
+                    state = state.copy(
+                        isLoading = false,
+                        noteTitle = it?.name.orEmpty(),
+                        noteContent = TextFieldValue(text = it?.content.orEmpty()),
+                    )
                 }
+                .catch {
+                    state = state.copy(isLoading = false)
+                    it.printStackTrace()
+                }
+                .launchIn(viewModelScope)
+        } else {
+            state = state.copy(
+                openedFolderIds = if (state.openedFolderIds.contains(item.id)) {
+                    state.openedFolderIds - state.items.drop(state.items.indexOf(item))
+                        .takeWhile {
+                            it.indent > item.indent
+                        }.mapNotNull { if (it.isFolder) it.id else null }
+                } else {
+                    state.openedFolderIds + item.id
+                },
             )
         }
-    }
-
-    private fun Folder.flatten(): List<Item> = listOf(this) + items.fastFlatMap {
-        if (it is Folder && it.opened) it.flatten() else listOf(it)
-    }
-
-    fun getFlattenItems() = state.items.fastFlatMap {
-        if (it is Folder && it.opened) {
-            it.flatten()
-        } else listOf(it)
     }
 
     fun saveNote() {
