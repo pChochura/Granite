@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpsertNoteUseCase
+import com.pointlessapps.granite.home.mapper.toItem
 import com.pointlessapps.granite.home.mapper.toSortedItems
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.utils.TextFieldValueParceler
@@ -117,10 +118,17 @@ internal class HomeViewModel(
             parentId = null,
         )
             .onStart { state = state.copy(isLoading = true) }
-            .onEach {
+            .onEach { note ->
                 state = state.copy(
                     isLoading = false,
-                    selectedItemId = it,
+                    selectedItemId = note.id,
+                    items = state.items.map {
+                        if (it.id == note.id) {
+                            note.toItem(it.indent)
+                        } else {
+                            it
+                        }
+                    }
                 )
             }
             .catch {

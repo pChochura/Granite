@@ -52,8 +52,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -89,6 +92,9 @@ internal fun HomeScreen(
     onNavigateTo: (Route) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val editorFocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 
@@ -140,8 +146,17 @@ internal fun HomeScreen(
                 CompositionLocalProvider(LocalBringIntoViewSpec provides NoOpBringIntoViewSpec) {
                     Column(
                         modifier = Modifier
+                            .fillMaxSize()
                             .verticalScroll(rememberScrollState())
-                            .padding(it),
+                            .padding(it)
+                            .clickable(
+                                interactionSource = null,
+                                indication = null,
+                                onClick = {
+                                    editorFocusRequester.requestFocus()
+                                    keyboardController?.show()
+                                },
+                            ),
                     ) {
                         ComposeTextField(
                             modifier = Modifier
@@ -172,7 +187,8 @@ internal fun HomeScreen(
                                 .padding(
                                     horizontal = dimensionResource(RC.dimen.margin_semi_big),
                                     vertical = dimensionResource(RC.dimen.margin_tiny),
-                                ),
+                                )
+                                .focusRequester(editorFocusRequester),
                             value = viewModel.state.noteContent,
                             onValueChange = viewModel::onNoteContentChanged,
                             textFieldStyle = defaultComposeTextFieldStyle(),

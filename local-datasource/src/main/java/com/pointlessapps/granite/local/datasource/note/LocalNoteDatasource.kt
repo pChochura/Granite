@@ -8,7 +8,7 @@ interface LocalNoteDatasource {
     suspend fun getById(id: Int): NoteEntity?
     suspend fun getAll(): List<NoteEntity>
 
-    suspend fun upsert(id: Int?, name: String, content: String, parentId: Int?): Int
+    suspend fun upsert(id: Int?, name: String, content: String, parentId: Int?): NoteEntity?
 }
 
 internal class LocalNoteDatasourceImpl(
@@ -17,15 +17,15 @@ internal class LocalNoteDatasourceImpl(
     override suspend fun getById(id: Int) = noteDao.getById(id)
     override suspend fun getAll() = noteDao.getAll()
 
-    override suspend fun upsert(id: Int?, name: String, content: String, parentId: Int?): Int {
+    override suspend fun upsert(id: Int?, name: String, content: String, parentId: Int?): NoteEntity? {
         val currentTimestamp = getCurrentTimestamp()
+
+        val noteId = id ?: noteDao.insert(name, content, parentId, currentTimestamp).toInt()
 
         if (id != null) {
             noteDao.upsert(id, name, content, parentId, currentTimestamp)
-
-            return id
-        } else {
-            return noteDao.insert(name, content, parentId, currentTimestamp).toInt()
         }
+
+        return noteDao.getById(noteId)
     }
 }
