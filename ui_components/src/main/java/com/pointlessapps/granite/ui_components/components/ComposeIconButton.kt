@@ -1,6 +1,7 @@
 package com.pointlessapps.granite.ui_components.components
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -9,7 +10,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,15 +31,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.toSize
 import com.pointlessapps.granite.ui_components.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComposeIconButton(
     @DrawableRes iconRes: Int,
+    @StringRes tooltipLabel: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: () -> Unit = {},
@@ -42,61 +52,67 @@ fun ComposeIconButton(
 
     var radius by remember { mutableFloatStateOf(0f) }
 
-    ComposeIcon(
-        modifier = modifier
-            .onGloballyPositioned { radius = it.size.toSize().maxDimension * 0.5f }
-            .clip(iconButtonStyle.shape)
-            .border(
-                width = dimensionResource(R.dimen.icon_button_border_width),
-                color = if (iconButtonStyle.enabled) {
-                    iconButtonStyle.outlineColor
-                } else {
-                    iconButtonStyle.disabledOutlineColor
-                },
-                shape = iconButtonStyle.shape,
-            )
-            .background(
-                if (iconButtonStyle.enabled) {
-                    iconButtonStyle.containerColor
-                } else {
-                    iconButtonStyle.disabledContainerColor
-                },
-            )
-            .padding(dimensionResource(R.dimen.margin_small))
-            .semantics { role = Role.Button }
-            .pointerInput(iconButtonStyle.enabled) {
-                if (!iconButtonStyle.enabled) return@pointerInput
-
-                detectTapGestures(
-                    onPress = {
-                        val press = PressInteraction.Press(it)
-                        interactionSource.emit(press)
-                        if (tryAwaitRelease()) {
-                            interactionSource.emit(PressInteraction.Release(press))
-                        } else {
-                            interactionSource.emit(PressInteraction.Cancel(press))
-                        }
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(stringResource(tooltipLabel)) } },
+        state = rememberTooltipState(),
+    ) {
+        ComposeIcon(
+            modifier = modifier
+                .onGloballyPositioned { radius = it.size.toSize().maxDimension * 0.5f }
+                .clip(iconButtonStyle.shape)
+                .border(
+                    width = dimensionResource(R.dimen.icon_button_border_width),
+                    color = if (iconButtonStyle.enabled) {
+                        iconButtonStyle.outlineColor
+                    } else {
+                        iconButtonStyle.disabledOutlineColor
                     },
-                    onTap = { onClick() },
-                    onLongPress = { onLongClick() },
+                    shape = iconButtonStyle.shape,
                 )
-            }
-            .indication(
-                interactionSource = interactionSource,
-                indication = ripple(
-                    bounded = false,
-                    radius = with(LocalDensity.current) { radius.toDp() },
+                .background(
+                    if (iconButtonStyle.enabled) {
+                        iconButtonStyle.containerColor
+                    } else {
+                        iconButtonStyle.disabledContainerColor
+                    },
+                )
+                .padding(dimensionResource(R.dimen.margin_small))
+                .semantics { role = Role.Button }
+                .pointerInput(iconButtonStyle.enabled) {
+                    if (!iconButtonStyle.enabled) return@pointerInput
+
+                    detectTapGestures(
+                        onPress = {
+                            val press = PressInteraction.Press(it)
+                            interactionSource.emit(press)
+                            if (tryAwaitRelease()) {
+                                interactionSource.emit(PressInteraction.Release(press))
+                            } else {
+                                interactionSource.emit(PressInteraction.Cancel(press))
+                            }
+                        },
+                        onTap = { onClick() },
+                        onLongPress = { onLongClick() },
+                    )
+                }
+                .indication(
+                    interactionSource = interactionSource,
+                    indication = ripple(
+                        bounded = false,
+                        radius = with(LocalDensity.current) { radius.toDp() },
+                    ),
                 ),
+            iconRes = iconRes,
+            iconStyle = defaultComposeIconStyle().copy(
+                tint = if (iconButtonStyle.enabled) {
+                    iconButtonStyle.contentColor
+                } else {
+                    iconButtonStyle.disabledContentColor
+                },
             ),
-        iconRes = iconRes,
-        iconStyle = defaultComposeIconStyle().copy(
-            tint = if (iconButtonStyle.enabled) {
-                iconButtonStyle.contentColor
-            } else {
-                iconButtonStyle.disabledContentColor
-            },
-        ),
-    )
+        )
+    }
 }
 
 @Composable

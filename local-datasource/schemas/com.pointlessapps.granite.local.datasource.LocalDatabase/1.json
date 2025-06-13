@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6fef0332859f826cc5e2df9111d46013",
+    "identityHash": "1bd4bc6b0eec5209b9bdc9f153b40ec2",
     "entities": [
       {
         "tableName": "notes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `parent_id` INTEGER, `name` TEXT NOT NULL, `updated_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, `created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, `content` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `parent_id` INTEGER, `name` TEXT NOT NULL, `updated_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, `created_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, `content` TEXT, `is_deleted` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,6 +43,13 @@
             "fieldPath": "content",
             "columnName": "content",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -55,7 +62,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6fef0332859f826cc5e2df9111d46013')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1bd4bc6b0eec5209b9bdc9f153b40ec2')"
     ]
   }
 }

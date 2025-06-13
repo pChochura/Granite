@@ -29,11 +29,9 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
@@ -41,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.home.ui.menu.LeftSideMenu
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.ui_components.components.ComposeIconButton
 import com.pointlessapps.granite.ui_components.components.ComposeLoader
@@ -59,7 +58,6 @@ internal fun HomeScreen(
     onNavigateTo: (Route) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val titleFocusRequester = remember { FocusRequester() }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 
@@ -68,7 +66,6 @@ internal fun HomeScreen(
             viewModel.events.collect {
                 when (it) {
                     is HomeEvent.CloseDrawer -> drawerState.close()
-                    is HomeEvent.FocusOnTitle -> titleFocusRequester.requestFocus()
                 }
             }
         }
@@ -112,7 +109,6 @@ internal fun HomeScreen(
                             Editor(
                                 viewModel = viewModel,
                                 contentPadding = contentPadding,
-                                titleFocusRequester = titleFocusRequester,
                             )
                         }
                     }
@@ -137,6 +133,7 @@ private fun TopBar(onMenuClicked: () -> Unit) {
     ) {
         ComposeIconButton(
             iconRes = RC.drawable.ic_move_handle,
+            tooltipLabel = R.string.menu,
             onClick = onMenuClicked,
             iconButtonStyle = defaultComposeIconButtonStyle().copy(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -155,6 +152,7 @@ private fun TopBar(onMenuClicked: () -> Unit) {
 
         ComposeIconButton(
             iconRes = RC.drawable.ic_warning,
+            tooltipLabel = R.string.file_info,
             onClick = {},
             iconButtonStyle = defaultComposeIconButtonStyle().copy(
                 containerColor = Color.Transparent,
@@ -195,6 +193,7 @@ private fun BottomBar(insertStyle: () -> Unit) {
             item {
                 ComposeIconButton(
                     iconRes = R.drawable.icon_bold,
+                    tooltipLabel = R.string.bold,
                     onClick = { },
                     iconButtonStyle = defaultComposeIconButtonStyle().copy(
                         containerColor = Color.Transparent,

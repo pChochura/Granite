@@ -13,6 +13,7 @@ internal val homeModule = module {
             getNotesUseCase = get(),
             updateItemUseCase = get(),
             createItemUseCase = get(),
+            markItemsAsDeletedUseCase = get(),
             untitledNotePlaceholder = get<Context>().getString(R.string.untitled),
         )
     }

@@ -15,6 +15,8 @@ interface NoteRepository {
 
     fun update(id: Int, name: String, content: String?, parentId: Int?): Flow<Note>
     fun create(name: String, content: String?, parentId: Int?): Flow<Note>
+
+    fun markAsDeleted(ids: Set<Int>): Flow<Unit>
 }
 
 internal class NoteRepositoryImpl(
@@ -41,5 +43,9 @@ internal class NoteRepositoryImpl(
             ?: throw NullPointerException("NoteEntity could not be created")
 
         emit(entity.fromLocal())
+    }.flowOn(Dispatchers.IO)
+
+    override fun markAsDeleted(ids: Set<Int>) = flow {
+        emit(localDatasource.markAsDeleted(ids))
     }.flowOn(Dispatchers.IO)
 }

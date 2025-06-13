@@ -34,7 +34,7 @@ internal fun StartupPage(
     ) {
         ComposeButton(
             label = stringResource(R.string.create_note),
-            onClick = viewModel::createNote,
+            onClick = viewModel::onAddFileClicked,
             modifier = Modifier.padding(
                 horizontal = dimensionResource(RC.dimen.margin_semi_big),
                 vertical = dimensionResource(RC.dimen.margin_tiny),

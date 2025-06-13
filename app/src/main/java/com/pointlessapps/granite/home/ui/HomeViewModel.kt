@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
+import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import com.pointlessapps.granite.home.mapper.insertSorted
 import com.pointlessapps.granite.home.mapper.toItem
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -48,7 +48,6 @@ internal data class HomeState(
 
 internal sealed interface HomeEvent {
     data object CloseDrawer : HomeEvent
-    data object FocusOnTitle : HomeEvent
 }
 
 internal class HomeViewModel(
@@ -56,6 +55,7 @@ internal class HomeViewModel(
     getNotesUseCase: GetNotesUseCase,
     private val updateItemUseCase: UpdateItemUseCase,
     private val createItemUseCase: CreateItemUseCase,
+    private val markItemsAsDeletedUseCase: MarkItemsAsDeletedUseCase,
     private val untitledNotePlaceholder: String,
 ) : ViewModel() {
 
@@ -113,12 +113,18 @@ internal class HomeViewModel(
         }
     }
 
-    fun onAddFileClicked() {
-        createNote()
-        viewModelScope.launch {
-            eventChannel.send(HomeEvent.CloseDrawer)
-            eventChannel.send(HomeEvent.FocusOnTitle)
-        }
+    fun onAddFileClicked(parentId: Int? = null) {
+        createNote(parentId)
+        eventChannel.trySend(HomeEvent.CloseDrawer)
+    }
+
+    fun onOrderTypeSelected(orderType: ItemOrderType) {
+        // TODO save the choice to disk
+        state = state.copy(
+            orderType = orderType,
+            items = state.items.map(Item::toNote)
+                .toSortedItems(orderType.comparator.toNoteComparator()),
+        )
     }
 
     fun onFoldClicked() {
@@ -164,11 +170,11 @@ internal class HomeViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun createNote() {
+    private fun createNote(parentId: Int?) {
         createItemUseCase(
             name = untitledNotePlaceholder,
             content = "",
-            parentId = null,
+            parentId = parentId,
         )
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
@@ -212,12 +218,65 @@ internal class HomeViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun onOrderTypeSelected(orderType: ItemOrderType) {
-        // TODO save the choice to disk
-        state = state.copy(
-            orderType = orderType,
-            items = state.items.map(Item::toNote)
-                .toSortedItems(orderType.comparator.toNoteComparator()),
+    fun renameItem(id: Int, name: String) {
+        val item = state.items.find { it.id == id }
+        updateItemUseCase(
+            id = id,
+            name = name,
+            content = item?.content,
+            parentId = item?.parentId,
         )
+            .take(1)
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach {
+                state = state.copy(
+                    isLoading = false,
+                    items = state.items.map {
+                        if (it.id == id) {
+                            it.copy(name = name).toNote()
+                        } else {
+                            it.toNote()
+                        }
+                    }.toSortedItems(state.orderType.comparator.toNoteComparator()),
+                )
+
+                if (id == state.openedItemId) {
+                    state = state.copy(noteTitle = state.noteTitle.copy(text = name))
+                }
+            }
+            .catch {
+                state = state.copy(isLoading = false)
+                it.printStackTrace()
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun deleteItem(id: Int) {
+        val item = state.items.find { it.id == id } ?: return
+        val ids = if (item.isFolder) {
+            state.items.drop(state.items.indexOf(item) + 1)
+                .takeWhile { it.indent > item.indent }
+                .map { it.id }
+                .toSet() + id
+        } else setOf(id)
+
+        markItemsAsDeletedUseCase(ids)
+            .take(1)
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach {
+                state = state.copy(
+                    isLoading = false,
+                    items = state.items.filter { it.id !in ids },
+                )
+
+                if (state.openedItemId in ids) {
+                    state = state.copy(openedItemId = null)
+                }
+            }
+            .catch {
+                state = state.copy(isLoading = false)
+                it.printStackTrace()
+            }
+            .launchIn(viewModelScope)
     }
 }

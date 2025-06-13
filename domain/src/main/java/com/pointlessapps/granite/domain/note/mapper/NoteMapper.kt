@@ -31,4 +31,5 @@ internal fun Note.toLocal() = LocalNote(
     updatedAt = updatedAt.formatTimestampAsDate(),
     createdAt = createdAt.formatTimestampAsDate(),
     content = content,
+    deleted = false,
 )

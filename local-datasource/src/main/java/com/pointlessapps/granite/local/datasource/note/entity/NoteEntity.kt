@@ -16,4 +16,6 @@ data class NoteEntity(
     @ColumnInfo("created_at", defaultValue = "CURRENT_TIMESTAMP")
     val createdAt: String,
     val content: String?,
+    @ColumnInfo("is_deleted", defaultValue = "0")
+    val deleted: Boolean,
 )

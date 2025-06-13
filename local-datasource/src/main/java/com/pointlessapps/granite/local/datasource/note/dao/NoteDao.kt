@@ -35,4 +35,7 @@ internal interface NoteDao {
         parentId: Int?,
         currentTimestamp: String,
     ): Long
+
+    @Query("UPDATE notes SET is_deleted = 1, updated_at = :currentTimestamp WHERE id in (:ids)")
+    suspend fun markAsDeleted(ids: Set<Int>, currentTimestamp: String)
 }

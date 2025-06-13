@@ -37,7 +37,6 @@ import com.pointlessapps.granite.ui_components.R as RC
 internal fun Editor(
     viewModel: HomeViewModel,
     contentPadding: PaddingValues,
-    titleFocusRequester: FocusRequester,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val editorFocusRequester = remember { FocusRequester() }
@@ -69,8 +68,7 @@ internal fun Editor(
                     .padding(
                         horizontal = dimensionResource(RC.dimen.margin_semi_big),
                         vertical = dimensionResource(RC.dimen.margin_tiny),
-                    )
-                    .focusRequester(titleFocusRequester),
+                    ),
                 value = viewModel.state.noteTitle,
                 onValueChange = viewModel::onNoteTitleChanged,
                 textFieldStyle = defaultComposeTextFieldStyle().copy(
@@ -88,12 +86,12 @@ internal fun Editor(
 
             ComposeMarkdownTextField(
                 modifier = Modifier
+                    .focusRequester(editorFocusRequester)
                     .fillMaxWidth()
                     .padding(
                         horizontal = dimensionResource(RC.dimen.margin_semi_big),
                         vertical = dimensionResource(RC.dimen.margin_tiny),
-                    )
-                    .focusRequester(editorFocusRequester),
+                    ),
                 value = viewModel.state.noteContent,
                 onValueChange = viewModel::onNoteContentChanged,
                 textFieldStyle = defaultComposeTextFieldStyle(),
