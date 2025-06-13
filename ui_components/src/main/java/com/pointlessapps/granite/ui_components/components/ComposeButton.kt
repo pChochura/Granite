@@ -122,7 +122,10 @@ fun ComposeButton(
 
         when (buttonStyle.orientation) {
             ComposeButtonOrientation.Vertical -> Column(
-                modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)),
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(R.dimen.margin_small),
+                    horizontal = dimensionResource(R.dimen.margin_medium),
+                ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(
                     dimensionResource(id = R.dimen.margin_small),
@@ -132,7 +135,10 @@ fun ComposeButton(
             }
 
             ComposeButtonOrientation.Horizontal -> Row(
-                modifier = Modifier.padding(dimensionResource(id = R.dimen.margin_small)),
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(R.dimen.margin_small),
+                    horizontal = dimensionResource(R.dimen.margin_medium),
+                ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(
                     dimensionResource(id = R.dimen.margin_small),

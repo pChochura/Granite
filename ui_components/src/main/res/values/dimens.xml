@@ -27,6 +27,8 @@
 	<dimen name="dialog_item_icon_size">16dp</dimen>
 	<dimen name="placeholder_icon_size">64dp</dimen>
 
+	<dimen name="default_border_width">1dp</dimen>
+
 	<dimen name="margin_nano">4dp</dimen>
 	<dimen name="margin_tiny">8dp</dimen>
 	<dimen name="margin_small">10dp</dimen>

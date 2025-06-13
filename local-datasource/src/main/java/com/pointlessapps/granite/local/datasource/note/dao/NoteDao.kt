@@ -17,10 +17,10 @@ internal interface NoteDao {
                 "SET name = :name, content = :content, parent_id = :parentId, updated_at = :currentTimestamp " +
                 "WHERE id = :id",
     )
-    suspend fun upsert(
+    suspend fun update(
         id: Int,
         name: String,
-        content: String,
+        content: String?,
         parentId: Int?,
         currentTimestamp: String,
     )
@@ -31,7 +31,7 @@ internal interface NoteDao {
     )
     suspend fun insert(
         name: String,
-        content: String,
+        content: String?,
         parentId: Int?,
         currentTimestamp: String,
     ): Long

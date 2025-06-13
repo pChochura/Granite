@@ -3,4 +3,15 @@
     <string name="note">Note</string>
     <string name="title">Title</string>
     <string name="search">Search</string>
+    <string name="create_note">Create a note</string>
+    <string name="create_folder">Create a folder</string>
+    <string name="untitled">Untitled</string>
+    <string name="save">Save</string>
+    <string name="item_ordering">Item ordering</string>
+    <string name="name_ascending">Name ascending (A-Z)</string>
+    <string name="name_descending">Name descending (Z-A)</string>
+    <string name="created_date_ascending">Created date ascending (oldest first)</string>
+    <string name="created_date_descending">Created date descending (newest first)</string>
+    <string name="updated_date_ascending">Updated date ascending (oldest first)</string>
+    <string name="updated_date_descending">Updated date descending (newest first)</string>
 </resources>

@@ -13,7 +13,8 @@ interface NoteRepository {
     fun getById(id: Int): Flow<Note?>
     fun getAll(): Flow<List<Note>>
 
-    fun upsert(id: Int?, name: String, content: String, parentId: Int?): Flow<Note>
+    fun update(id: Int, name: String, content: String?, parentId: Int?): Flow<Note>
+    fun create(name: String, content: String?, parentId: Int?): Flow<Note>
 }
 
 internal class NoteRepositoryImpl(
@@ -28,8 +29,15 @@ internal class NoteRepositoryImpl(
         emit(localDatasource.getAll().map { it.fromLocal() })
     }.flowOn(Dispatchers.IO)
 
-    override fun upsert(id: Int?, name: String, content: String, parentId: Int?) = flow {
-        val entity = localDatasource.upsert(id, name, content, parentId)
+    override fun update(id: Int, name: String, content: String?, parentId: Int?) = flow {
+        val entity = localDatasource.update(id, name, content, parentId)
+            ?: throw NullPointerException("NoteEntity with id ($id) could not be updated")
+
+        emit(entity.fromLocal())
+    }.flowOn(Dispatchers.IO)
+
+    override fun create(name: String, content: String?, parentId: Int?) = flow {
+        val entity = localDatasource.create(name, content, parentId)
             ?: throw NullPointerException("NoteEntity could not be created")
 
         emit(entity.fromLocal())
