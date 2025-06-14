@@ -59,6 +59,7 @@ internal fun LeftSideMenu(
             )
             ItemTree(
                 items = viewModel.state.filteredItems,
+                deletedItems = viewModel.state.filteredDeletedItems,
                 selectedItemId = viewModel.state.openedItemId,
                 openedFolderIds = viewModel.state.openedFolderIds,
                 onItemSelected = viewModel::onItemSelected,
@@ -93,28 +94,38 @@ internal fun LeftSideMenu(
         ItemPropertiesBottomSheet(
             state = itemPropertiesBottomSheetState,
             item = item,
-            onAddFileClicked = { viewModel.onAddFileClicked(item.id) },
-            onAddFolderClicked = {
-                createFolderDialogData = CreateFolderDialogData(
-                    name = TextFieldValue(
-                        text = untitledText,
-                        selection = TextRange(0, untitledText.length),
-                    ),
-                    parentId = item.id,
-                )
-                keyboardController?.show()
+            onPropertyClicked = {
+                when (it) {
+                    ItemPropertyAction.ADD_FILE -> viewModel.onAddFileClicked(item.id)
+                    ItemPropertyAction.ADD_FOLDER -> {
+                        createFolderDialogData = CreateFolderDialogData(
+                            name = TextFieldValue(
+                                text = untitledText,
+                                selection = TextRange(0, untitledText.length),
+                            ),
+                            parentId = item.id,
+                        )
+                        keyboardController?.show()
+                    }
+
+                    ItemPropertyAction.MOVE -> {}
+                    ItemPropertyAction.DUPLICATE -> {}
+                    ItemPropertyAction.SHARE -> {}
+                    ItemPropertyAction.RENAME -> {
+                        renameDialogData = RenameDialogData(
+                            name = TextFieldValue(
+                                text = item.name,
+                                selection = TextRange(0, item.name.length),
+                            ),
+                            id = item.id,
+                        )
+                    }
+
+                    ItemPropertyAction.RESTORE -> viewModel.restoreItem(item.id)
+                    ItemPropertyAction.DELETE -> viewModel.deleteItem(item.id)
+                    ItemPropertyAction.DELETE_PERMANENTLY -> viewModel.deleteItemPermanently(item.id)
+                }
             },
-            onMoveClicked = {},
-            onRenameClicked = {
-                renameDialogData = RenameDialogData(
-                    name = TextFieldValue(
-                        text = item.name,
-                        selection = TextRange(0, item.name.length),
-                    ),
-                    id = item.id,
-                )
-            },
-            onDeleteClicked = { viewModel.deleteItem(item.id) },
             onDismissRequest = {
                 coroutineScope.launch {
                     itemPropertiesBottomSheetState.hide()

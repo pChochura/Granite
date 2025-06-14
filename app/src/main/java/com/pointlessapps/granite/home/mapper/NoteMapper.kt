@@ -2,6 +2,7 @@ package com.pointlessapps.granite.home.mapper
 
 import com.pointlessapps.granite.domain.note.model.Note
 import com.pointlessapps.granite.home.model.Item
+import com.pointlessapps.granite.home.utils.indexToInsert
 
 internal fun List<Note>.toSortedItems(comparator: Comparator<Note>): List<Item> {
     val sortedList = mutableListOf<Item>()
@@ -28,38 +29,8 @@ internal fun List<Item>.insertSorted(note: Note, comparator: Comparator<Item>): 
     val parentIndex = indexOfFirst { it.id == note.parentId }.takeIf { it >= 0 }
     val indent = (parentIndex?.let(::get)?.indent ?: -1) + 1
     val itemToInsert = note.toItem(indent)
-    val isFolder = itemToInsert.isFolder
 
-    var index = (parentIndex ?: -1) + 1
-    while (index < size) {
-        val currentItem = get(index)
-        val currentIndent = currentItem.indent
-        if (currentIndent < indent) {
-            // Found and item that does not belong to the parent folder
-            break
-        }
-
-        if (currentIndent == indent && isFolder != currentItem.isFolder) {
-            if (isFolder) {
-                break
-            }
-
-            index++
-            continue
-        }
-
-        if (
-            currentIndent == indent &&
-            comparator.compare(itemToInsert, currentItem) < 0
-        ) {
-            // Found an item that belongs to the parent folder, but is alphabetically before
-            break
-        }
-
-        index++
-    }
-
-    return toMutableList().also { it.add(index, itemToInsert) }
+    return toMutableList().also { it.add(indexToInsert(note, comparator), itemToInsert) }
 }
 
 internal fun Item.toNote() = Note(
@@ -69,6 +40,7 @@ internal fun Item.toNote() = Note(
     updatedAt = updatedAt.toLong(),
     createdAt = createdAt.toLong(),
     content = content,
+    deleted = deleted,
 )
 
 internal fun Note.toItem(indent: Int) = Item(
@@ -79,4 +51,5 @@ internal fun Note.toItem(indent: Int) = Item(
     createdAt = createdAt.toString(),
     content = content,
     indent = indent,
+    deleted = deleted,
 )

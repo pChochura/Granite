@@ -2,9 +2,8 @@ package com.pointlessapps.granite.domain.note.usecase
 
 import com.pointlessapps.granite.domain.note.NoteRepository
 
-class MarkItemsAsDeletedUseCase(
+class DeleteItemsUseCase(
     private val noteRepository: NoteRepository,
 ) {
-    operator fun invoke(ids: Set<Int>, deleted: Boolean) =
-        noteRepository.markAsDeleted(ids, deleted)
+    operator fun invoke(ids: Set<Int>) = noteRepository.delete(ids)
 }

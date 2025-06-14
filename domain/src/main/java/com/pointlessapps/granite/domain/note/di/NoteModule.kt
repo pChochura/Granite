@@ -3,6 +3,7 @@ package com.pointlessapps.granite.domain.note.di
 import com.pointlessapps.granite.domain.note.NoteRepository
 import com.pointlessapps.granite.domain.note.NoteRepositoryImpl
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
+import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
@@ -18,6 +19,7 @@ internal val noteModule = module {
     factoryOf(::UpdateItemUseCase)
     factoryOf(::CreateItemUseCase)
     factoryOf(::MarkItemsAsDeletedUseCase)
+    factoryOf(::DeleteItemsUseCase)
 
     singleOf(::NoteRepositoryImpl).bind(NoteRepository::class)
 }

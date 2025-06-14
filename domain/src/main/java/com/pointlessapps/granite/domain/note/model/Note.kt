@@ -7,4 +7,5 @@ data class Note(
     val updatedAt: Long,
     val createdAt: Long,
     val content: String?,
+    val deleted: Boolean,
 )

@@ -17,6 +17,7 @@ internal data class Item(
     val createdAt: String,
     val content: String?,
     val indent: Int,
+    val deleted: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel

@@ -13,6 +13,7 @@ internal fun RemoteNote.fromRemote() = Note(
     updatedAt = updatedAt.formatDateAsTimestamp(),
     createdAt = createdAt.formatDateAsTimestamp(),
     content = content,
+    deleted = deleted,
 )
 
 internal fun LocalNote.fromLocal() = Note(
@@ -22,6 +23,7 @@ internal fun LocalNote.fromLocal() = Note(
     updatedAt = updatedAt.formatDateAsTimestamp(),
     createdAt = createdAt.formatDateAsTimestamp(),
     content = content,
+    deleted = deleted,
 )
 
 internal fun Note.toLocal() = LocalNote(

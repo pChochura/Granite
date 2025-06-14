@@ -6,7 +6,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pointlessapps.granite.domain.note.model.Note
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
+import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
@@ -17,6 +19,7 @@ import com.pointlessapps.granite.home.mapper.toNoteComparator
 import com.pointlessapps.granite.home.mapper.toSortedItems
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.model.ItemOrderType
+import com.pointlessapps.granite.home.utils.indexToInsert
 import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.mutableStateOf
 import kotlinx.coroutines.channels.Channel
@@ -38,10 +41,16 @@ internal data class HomeState(
     val openedItemId: Int? = null,
     val orderType: ItemOrderType = ItemOrderType.NameAscending,
     val items: List<Item> = emptyList(),
+    val deletedItems: List<Item> = emptyList(),
     val isLoading: Boolean = false,
 ) : Parcelable {
     @IgnoredOnParcel
     val filteredItems = items.filter {
+        it.parentId in openedFolderIds || it.parentId == null
+    }
+
+    @IgnoredOnParcel
+    val filteredDeletedItems = deletedItems.filter {
         it.parentId in openedFolderIds || it.parentId == null
     }
 }
@@ -56,6 +65,7 @@ internal class HomeViewModel(
     private val updateItemUseCase: UpdateItemUseCase,
     private val createItemUseCase: CreateItemUseCase,
     private val markItemsAsDeletedUseCase: MarkItemsAsDeletedUseCase,
+    private val deleteItemsUseCase: DeleteItemsUseCase,
     private val untitledNotePlaceholder: String,
 ) : ViewModel() {
 
@@ -70,9 +80,15 @@ internal class HomeViewModel(
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
             .onEach {
+                val (deletedItems, items) = it.partition(Note::deleted)
                 state = state.copy(
                     isLoading = false,
-                    items = it.toSortedItems(state.orderType.comparator.toNoteComparator()),
+                    items = items.toSortedItems(
+                        state.orderType.comparator.toNoteComparator(),
+                    ),
+                    deletedItems = deletedItems.toSortedItems(
+                        state.orderType.comparator.toNoteComparator(),
+                    ),
                 )
             }
             .catch {
@@ -103,14 +119,19 @@ internal class HomeViewModel(
         }
 
         if (state.openedFolderIds.contains(item.id)) {
-            val innerFoldersIds = state.items.drop(state.items.indexOf(item) + 1)
-                .takeWhile { it.indent > item.indent }
-                .mapNotNull { if (it.isFolder) it.id else null }
-
-            state = state.copy(openedFolderIds = state.openedFolderIds - innerFoldersIds - item.id)
+            closeNestedFolder(item)
         } else {
             state = state.copy(openedFolderIds = state.openedFolderIds + item.id)
         }
+    }
+
+    private fun closeNestedFolder(item: Item) {
+        val items = if (item.deleted) state.deletedItems else state.items
+        val innerFoldersIds = items.drop(items.indexOf(item) + 1)
+            .takeWhile { it.indent > item.indent }
+            .mapNotNull { if (it.isFolder) it.id else null }
+
+        state = state.copy(openedFolderIds = state.openedFolderIds - innerFoldersIds - item.id)
     }
 
     fun onAddFileClicked(parentId: Int? = null) {
@@ -253,25 +274,101 @@ internal class HomeViewModel(
 
     fun deleteItem(id: Int) {
         val item = state.items.find { it.id == id } ?: return
-        val ids = if (item.isFolder) {
-            state.items.drop(state.items.indexOf(item) + 1)
-                .takeWhile { it.indent > item.indent }
-                .map { it.id }
-                .toSet() + id
-        } else setOf(id)
+        val items = listOf(item.copy(deleted = true, parentId = null, indent = 0)) +
+                if (item.isFolder) {
+                    state.items.drop(state.items.indexOf(item) + 1)
+                        .takeWhile { it.indent > item.indent }
+                        .map { it.copy(deleted = true, indent = it.indent - item.indent) }
+                } else {
+                    emptyList()
+                }
+        val ids = items.map(Item::id).toSet()
 
-        markItemsAsDeletedUseCase(ids)
+        markItemsAsDeletedUseCase(ids, deleted = true)
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
             .onEach {
+                closeNestedFolder(item)
+                val indexToInsert = state.deletedItems.indexToInsert(
+                    note = item.toNote(),
+                    comparator = state.orderType.comparator,
+                )
                 state = state.copy(
                     isLoading = false,
                     items = state.items.filter { it.id !in ids },
+                    deletedItems = state.deletedItems.subList(0, indexToInsert) +
+                            items +
+                            state.deletedItems.subList(indexToInsert, state.deletedItems.size),
                 )
 
                 if (state.openedItemId in ids) {
                     state = state.copy(openedItemId = null)
                 }
+            }
+            .catch {
+                state = state.copy(isLoading = false)
+                it.printStackTrace()
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun deleteItemPermanently(id: Int) {
+        val item = state.deletedItems.find { it.id == id } ?: return
+        val ids = if (item.isFolder) {
+            state.items.drop(state.deletedItems.indexOf(item) + 1)
+                .takeWhile { it.indent > item.indent }
+                .map(Item::id)
+                .toSet() + id
+        } else setOf(id)
+
+        deleteItemsUseCase(ids)
+            .take(1)
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach {
+                closeNestedFolder(item)
+                state = state.copy(
+                    isLoading = false,
+                    deletedItems = state.deletedItems.filter { it.id !in ids },
+                )
+
+                if (state.openedItemId in ids) {
+                    state = state.copy(openedItemId = null)
+                }
+            }
+            .catch {
+                state = state.copy(isLoading = false)
+                it.printStackTrace()
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun restoreItem(id: Int) {
+        val item = state.deletedItems.find { it.id == id } ?: return
+        val items = listOf(item.copy(deleted = false, parentId = null, indent = 0)) +
+                if (item.isFolder) {
+                    state.deletedItems.drop(state.deletedItems.indexOf(item) + 1)
+                        .takeWhile { it.indent > item.indent }
+                        .map { it.copy(deleted = false, indent = it.indent - item.indent) }
+                } else {
+                    emptyList()
+                }
+        val ids = items.map(Item::id).toSet()
+
+        markItemsAsDeletedUseCase(ids, deleted = false)
+            .take(1)
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach {
+                val indexToInsert = state.items.indexToInsert(
+                    note = item.toNote(),
+                    comparator = state.orderType.comparator,
+                )
+                state = state.copy(
+                    isLoading = false,
+                    items = state.items.subList(0, indexToInsert) +
+                            items +
+                            state.items.subList(indexToInsert, state.items.size),
+                    deletedItems = state.deletedItems.filter { it.id !in ids },
+                )
             }
             .catch {
                 state = state.copy(isLoading = false)

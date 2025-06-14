@@ -11,7 +11,8 @@ interface LocalNoteDatasource {
     suspend fun update(id: Int, name: String, content: String?, parentId: Int?): NoteEntity?
     suspend fun create(name: String, content: String?, parentId: Int?): NoteEntity?
 
-    suspend fun markAsDeleted(ids: Set<Int>)
+    suspend fun markAsDeleted(ids: Set<Int>, deleted: Boolean)
+    suspend fun delete(ids: Set<Int>)
 }
 
 internal class LocalNoteDatasourceImpl(
@@ -38,5 +39,12 @@ internal class LocalNoteDatasourceImpl(
         return noteDao.getById(noteId)
     }
 
-    override suspend fun markAsDeleted(ids: Set<Int>) = noteDao.markAsDeleted(ids, getCurrentTimestamp())
+    override suspend fun markAsDeleted(ids: Set<Int>, deleted: Boolean) {
+        noteDao.markAsDeleted(ids, deleted, getCurrentTimestamp())
+        if (deleted) {
+            noteDao.removeParent(ids.first(), getCurrentTimestamp())
+        }
+    }
+
+    override suspend fun delete(ids: Set<Int>) = noteDao.delete(ids)
 }

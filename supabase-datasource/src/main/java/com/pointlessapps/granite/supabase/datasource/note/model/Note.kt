@@ -14,4 +14,5 @@ data class Note(
     @SerialName("created_at")
     val createdAt: String,
     val content: String? = null,
+    val deleted: Boolean = false,
 )

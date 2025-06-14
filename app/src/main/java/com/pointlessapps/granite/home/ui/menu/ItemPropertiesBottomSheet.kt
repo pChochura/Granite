@@ -35,11 +35,7 @@ import com.pointlessapps.granite.ui_components.R as RC
 internal fun ItemPropertiesBottomSheet(
     state: SheetState,
     item: Item,
-    onAddFileClicked: () -> Unit,
-    onAddFolderClicked: () -> Unit,
-    onMoveClicked: () -> Unit,
-    onRenameClicked: () -> Unit,
-    onDeleteClicked: () -> Unit,
+    onPropertyClicked: (ItemPropertyAction) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -85,57 +81,98 @@ internal fun ItemPropertiesBottomSheet(
 
             HorizontalDivider()
 
-            if (item.isFolder) {
+            if (item.deleted) {
                 ItemPropertiesButton(
-                    iconRes = RC.drawable.ic_add_file,
-                    label = R.string.create_note,
+                    iconRes = RC.drawable.ic_restore,
+                    label = R.string.restore,
                     color = MaterialTheme.colorScheme.onSurface,
                     onClick = {
-                        onAddFileClicked()
+                        onPropertyClicked(ItemPropertyAction.RESTORE)
                         onDismissRequest()
                     },
                 )
                 ItemPropertiesButton(
-                    iconRes = RC.drawable.ic_add_folder,
-                    label = R.string.create_folder,
+                    iconRes = RC.drawable.ic_delete_permanently,
+                    label = R.string.delete_permanently,
+                    description = R.string.delete_item_permanently_description,
+                    color = colorResource(R.color.red),
+                    onClick = {
+                        onPropertyClicked(ItemPropertyAction.DELETE_PERMANENTLY)
+                        onDismissRequest()
+                    },
+                )
+            } else {
+                if (item.isFolder) {
+                    ItemPropertiesButton(
+                        iconRes = RC.drawable.ic_add_file,
+                        label = R.string.create_note,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        onClick = {
+                            onPropertyClicked(ItemPropertyAction.ADD_FILE)
+                            onDismissRequest()
+                        },
+                    )
+                    ItemPropertiesButton(
+                        iconRes = RC.drawable.ic_add_folder,
+                        label = R.string.create_folder,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        onClick = {
+                            onPropertyClicked(ItemPropertyAction.ADD_FOLDER)
+                            onDismissRequest()
+                        },
+                    )
+                    HorizontalDivider()
+                }
+
+                ItemPropertiesButton(
+                    iconRes = RC.drawable.ic_move_handle,
+                    label = if (item.isFolder) R.string.move_folder else R.string.move_file,
                     color = MaterialTheme.colorScheme.onSurface,
                     onClick = {
-                        onAddFolderClicked()
+                        onPropertyClicked(ItemPropertyAction.MOVE)
+                        onDismissRequest()
+                    },
+                )
+                ItemPropertiesButton(
+                    iconRes = RC.drawable.ic_duplicate,
+                    label = R.string.duplicate,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    onClick = {
+                        onPropertyClicked(ItemPropertyAction.DUPLICATE)
                         onDismissRequest()
                     },
                 )
                 HorizontalDivider()
+                ItemPropertiesButton(
+                    iconRes = RC.drawable.ic_share,
+                    label = R.string.share,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    onClick = {
+                        onPropertyClicked(ItemPropertyAction.SHARE)
+                        onDismissRequest()
+                    },
+                )
+                HorizontalDivider()
+                ItemPropertiesButton(
+                    iconRes = RC.drawable.ic_edit,
+                    label = R.string.rename,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    onClick = {
+                        onPropertyClicked(ItemPropertyAction.RENAME)
+                        onDismissRequest()
+                    },
+                )
+                ItemPropertiesButton(
+                    iconRes = RC.drawable.ic_delete,
+                    label = R.string.delete,
+                    description = R.string.delete_item_description,
+                    color = colorResource(R.color.red),
+                    onClick = {
+                        onPropertyClicked(ItemPropertyAction.DELETE)
+                        onDismissRequest()
+                    },
+                )
             }
-
-            ItemPropertiesButton(
-                iconRes = RC.drawable.ic_move_handle,
-                label = if (item.isFolder) R.string.move_folder else R.string.move_file,
-                color = MaterialTheme.colorScheme.onSurface,
-                onClick = {
-                    onMoveClicked()
-                    onDismissRequest()
-                },
-            )
-            HorizontalDivider()
-            ItemPropertiesButton(
-                iconRes = RC.drawable.ic_edit,
-                label = R.string.rename,
-                color = MaterialTheme.colorScheme.onSurface,
-                onClick = {
-                    onRenameClicked()
-                    onDismissRequest()
-                },
-            )
-            HorizontalDivider()
-            ItemPropertiesButton(
-                iconRes = RC.drawable.ic_delete,
-                label = R.string.delete,
-                color = colorResource(R.color.red),
-                onClick = {
-                    onDeleteClicked()
-                    onDismissRequest()
-                },
-            )
         }
     }
 }
@@ -144,6 +181,7 @@ internal fun ItemPropertiesBottomSheet(
 private fun ItemPropertiesButton(
     @DrawableRes iconRes: Int,
     @StringRes label: Int,
+    @StringRes description: Int? = null,
     color: Color,
     onClick: () -> Unit,
 ) {
@@ -161,12 +199,32 @@ private fun ItemPropertiesButton(
             iconStyle = defaultComposeIconStyle().copy(tint = color),
         )
 
-        ComposeText(
-            text = stringResource(label),
-            textStyle = defaultComposeTextStyle().copy(
-                textColor = color,
-                typography = MaterialTheme.typography.labelLarge,
-            ),
-        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+        ) {
+            ComposeText(
+                text = stringResource(label),
+                textStyle = defaultComposeTextStyle().copy(
+                    textColor = color,
+                    typography = MaterialTheme.typography.labelLarge,
+                ),
+            )
+
+            if (description != null) {
+                ComposeText(
+                    text = stringResource(description),
+                    textStyle = defaultComposeTextStyle().copy(
+                        textColor = color.copy(0.6f),
+                        typography = MaterialTheme.typography.labelSmall,
+                    ),
+                )
+            }
+        }
     }
+}
+
+
+internal enum class ItemPropertyAction {
+    ADD_FILE, ADD_FOLDER, MOVE, DUPLICATE, SHARE, RENAME, RESTORE, DELETE, DELETE_PERMANENTLY
 }
