@@ -74,6 +74,7 @@ internal fun RenameDialog(
                     imeAction = ImeAction.Done,
                     showKeyboardOnFocus = true,
                 ),
+                placeholder = stringResource(R.string.file_name),
             ),
         )
 

@@ -74,6 +74,7 @@ internal fun CreateFolderDialog(
                     imeAction = ImeAction.Done,
                     showKeyboardOnFocus = true,
                 ),
+                placeholder = stringResource(R.string.folder_name),
             ),
         )
 

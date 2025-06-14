@@ -81,6 +81,7 @@ internal fun Editor(
                         showKeyboardOnFocus = true,
                     ),
                     placeholder = stringResource(R.string.title),
+                    placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.5f),
                 ),
             )
 

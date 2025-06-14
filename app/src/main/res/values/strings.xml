@@ -27,4 +27,6 @@
     <string name="move_folder">Move folder</string>
     <string name="delete">Delete</string>
     <string name="rename">Rename</string>
+    <string name="folder_name">Folder name…</string>
+    <string name="file_name">File name…</string>
 </resources>
