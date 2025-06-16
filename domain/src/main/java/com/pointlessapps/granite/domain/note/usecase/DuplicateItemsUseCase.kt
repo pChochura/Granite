@@ -2,8 +2,8 @@ package com.pointlessapps.granite.domain.note.usecase
 
 import com.pointlessapps.granite.domain.note.NoteRepository
 
-class DeleteItemsUseCase(
+class DuplicateItemsUseCase(
     private val noteRepository: NoteRepository,
 ) {
-    operator fun invoke(ids: List<Int>) = noteRepository.delete(ids)
+    operator fun invoke(ids: List<Int>) = noteRepository.duplicate(ids)
 }

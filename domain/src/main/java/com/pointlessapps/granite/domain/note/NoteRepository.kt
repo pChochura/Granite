@@ -16,8 +16,10 @@ interface NoteRepository {
     fun update(id: Int, name: String, content: String?, parentId: Int?): Flow<Note>
     fun create(name: String, content: String?, parentId: Int?): Flow<Note>
 
-    fun markAsDeleted(ids: Set<Int>, deleted: Boolean): Flow<Unit>
-    fun delete(ids: Set<Int>): Flow<Unit>
+    fun markAsDeleted(ids: List<Int>, deleted: Boolean): Flow<Unit>
+    fun delete(ids: List<Int>): Flow<Unit>
+
+    fun duplicate(ids: List<Int>): Flow<List<Note>>
 }
 
 internal class NoteRepositoryImpl(
@@ -46,11 +48,15 @@ internal class NoteRepositoryImpl(
         emit(entity.fromLocal())
     }.flowOn(Dispatchers.IO)
 
-    override fun markAsDeleted(ids: Set<Int>, deleted: Boolean) = flow {
+    override fun markAsDeleted(ids: List<Int>, deleted: Boolean) = flow {
         emit(localDatasource.markAsDeleted(ids, deleted))
     }.flowOn(Dispatchers.IO)
 
-    override fun delete(ids: Set<Int>) = flow {
+    override fun delete(ids: List<Int>) = flow {
         emit(localDatasource.delete(ids))
+    }.flowOn(Dispatchers.IO)
+
+    override fun duplicate(ids: List<Int>) = flow {
+        emit(localDatasource.duplicate(ids).map { it.fromLocal() })
     }.flowOn(Dispatchers.IO)
 }

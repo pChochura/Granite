@@ -1,13 +1,8 @@
 package com.pointlessapps.granite.local.datasource.note.entity
 
 import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "notes")
-data class NoteEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+internal data class NoteEntityPartial(
     @ColumnInfo("parent_id")
     val parentId: Int?,
     val name: String,
@@ -16,6 +11,4 @@ data class NoteEntity(
     @ColumnInfo("created_at")
     val createdAt: String,
     val content: String?,
-    @ColumnInfo("is_deleted", defaultValue = "0")
-    val deleted: Boolean,
 )

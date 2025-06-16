@@ -48,7 +48,6 @@ internal fun LeftSideMenu(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(start = dimensionResource(RC.dimen.margin_tiny))
                 .padding(all = dimensionResource(RC.dimen.margin_medium)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_medium)),
         ) {
@@ -109,7 +108,7 @@ internal fun LeftSideMenu(
                     }
 
                     ItemPropertyAction.MOVE -> {}
-                    ItemPropertyAction.DUPLICATE -> {}
+                    ItemPropertyAction.DUPLICATE -> viewModel.duplicateItem(item.id)
                     ItemPropertyAction.SHARE -> {}
                     ItemPropertyAction.RENAME -> {
                         renameDialogData = RenameDialogData(

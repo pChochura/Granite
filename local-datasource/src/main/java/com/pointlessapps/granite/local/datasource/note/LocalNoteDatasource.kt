@@ -2,6 +2,8 @@ package com.pointlessapps.granite.local.datasource.note
 
 import com.pointlessapps.granite.local.datasource.note.dao.NoteDao
 import com.pointlessapps.granite.local.datasource.note.entity.NoteEntity
+import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityParentIdPartial
+import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityPartial
 import com.pointlessapps.granite.local.datasource.note.utils.getCurrentTimestamp
 
 interface LocalNoteDatasource {
@@ -11,8 +13,10 @@ interface LocalNoteDatasource {
     suspend fun update(id: Int, name: String, content: String?, parentId: Int?): NoteEntity?
     suspend fun create(name: String, content: String?, parentId: Int?): NoteEntity?
 
-    suspend fun markAsDeleted(ids: Set<Int>, deleted: Boolean)
-    suspend fun delete(ids: Set<Int>)
+    suspend fun markAsDeleted(ids: List<Int>, deleted: Boolean)
+    suspend fun delete(ids: List<Int>)
+
+    suspend fun duplicate(ids: List<Int>): List<NoteEntity>
 }
 
 internal class LocalNoteDatasourceImpl(
@@ -39,12 +43,35 @@ internal class LocalNoteDatasourceImpl(
         return noteDao.getById(noteId)
     }
 
-    override suspend fun markAsDeleted(ids: Set<Int>, deleted: Boolean) {
+    override suspend fun markAsDeleted(ids: List<Int>, deleted: Boolean) =
         noteDao.markAsDeleted(ids, deleted, getCurrentTimestamp())
-        if (deleted) {
-            noteDao.removeParent(ids.first(), getCurrentTimestamp())
-        }
+
+    override suspend fun delete(ids: List<Int>) {
+        noteDao.delete(ids)
+        noteDao.removeParents(ids, getCurrentTimestamp())
     }
 
-    override suspend fun delete(ids: Set<Int>) = noteDao.delete(ids)
+    override suspend fun duplicate(ids: List<Int>): List<NoteEntity> {
+        val currentTimestamp = getCurrentTimestamp()
+        val notes = noteDao.getByIds(ids).map { entity ->
+            NoteEntityPartial(
+                parentId = entity.parentId,
+                name = entity.name,
+                content = entity.content,
+                updatedAt = currentTimestamp,
+                createdAt = currentTimestamp,
+            )
+        }
+        val newIds = noteDao.insertMany(notes).map(Long::toInt)
+        val idMapping = ids.zip(newIds).toMap()
+        val newParentIds = notes.mapIndexed { index, note ->
+            NoteEntityParentIdPartial(
+                id = newIds[index],
+                parentId = note.parentId?.let { idMapping[it] } ?: note.parentId,
+            )
+        }
+        noteDao.updateManyParentIds(newParentIds)
+
+        return noteDao.getByIds(newIds)
+    }
 }

@@ -1,13 +1,23 @@
 package com.pointlessapps.granite.local.datasource.note.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.pointlessapps.granite.local.datasource.note.entity.NoteEntity
+import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityParentIdPartial
+import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityPartial
 
 @Dao
 internal interface NoteDao {
+    @Query("SELECT (id) FROM notes ORDER BY id DESC LIMIT 1")
+    suspend fun getLastId(): Long?
+
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getById(id: Int): NoteEntity?
+
+    @Query("SELECT * FROM notes WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<Int>): List<NoteEntity>
 
     @Query("SELECT * FROM notes")
     suspend fun getAll(): List<NoteEntity>
@@ -36,12 +46,18 @@ internal interface NoteDao {
         currentTimestamp: String,
     ): Long
 
-    @Query("UPDATE notes SET is_deleted = :deleted, updated_at = :currentTimestamp WHERE id in (:ids)")
-    suspend fun markAsDeleted(ids: Set<Int>, deleted: Boolean, currentTimestamp: String)
+    @Insert(entity = NoteEntity::class)
+    suspend fun insertMany(notes: List<NoteEntityPartial>): List<Long>
 
-    @Query("UPDATE notes SET parent_id = NULL, updated_at = :currentTimestamp WHERE id = :id")
-    suspend fun removeParent(id: Int, currentTimestamp: String)
+    @Update(entity = NoteEntity::class)
+    suspend fun updateManyParentIds(notes: List<NoteEntityParentIdPartial>)
+
+    @Query("UPDATE notes SET is_deleted = :deleted, updated_at = :currentTimestamp WHERE id in (:ids)")
+    suspend fun markAsDeleted(ids: List<Int>, deleted: Boolean, currentTimestamp: String)
 
     @Query("DELETE FROM notes WHERE id IN (:ids)")
-    suspend fun delete(ids: Set<Int>)
+    suspend fun delete(ids: List<Int>)
+
+    @Query("UPDATE notes SET parent_id = NULL, updated_at = :currentTimestamp WHERE parent_id in (:ids)")
+    suspend fun removeParents(ids: List<Int>, currentTimestamp: String)
 }

@@ -13,7 +13,7 @@ coroutines = "1.10.2"
 ksp = "2.1.21-2.0.2"
 
 #Android
-gradlePlugin = "8.10.1"
+gradlePlugin = "8.11.0-rc02"
 
 #AndroidX
 androidxCore = "1.16.0"

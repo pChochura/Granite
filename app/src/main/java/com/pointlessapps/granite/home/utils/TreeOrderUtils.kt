@@ -1,43 +1,31 @@
 package com.pointlessapps.granite.home.utils
 
-import com.pointlessapps.granite.domain.note.model.Note
-import com.pointlessapps.granite.home.mapper.toItem
 import com.pointlessapps.granite.home.model.Item
 
-internal fun List<Item>.indexToInsert(note: Note, comparator: Comparator<Item>): Int {
-    val parentIndex = indexOfFirst { it.id == note.parentId }.takeIf { it >= 0 }
-    val indent = (parentIndex?.let(::get)?.indent ?: -1) + 1
-    val itemToInsert = note.toItem(indent)
-    val isFolder = itemToInsert.isFolder
+internal fun List<Item>.toSortedTree(comparator: Comparator<Item>): List<Item> {
+    val sortedList = mutableListOf<Item>()
+    val notesIds = map { it.id }.toSet()
+    val notesByParentId = groupBy { it.parentId }
 
-    var index = (parentIndex ?: -1) + 1
-    while (index < size) {
-        val currentItem = get(index)
-        val currentIndent = currentItem.indent
-        if (currentIndent < indent) {
-            // Found and item that does not belong to the parent folder
-            break
+    fun addChildrenOf(parentId: Int?, indent: Int) {
+        val children = notesByParentId[parentId] ?: return
+
+        val (folders, notesInLevel) = children.partition { it.content == null }
+        folders.sortedWith(comparator).forEach { folder ->
+            sortedList.add(folder.copy(indent = indent))
+            addChildrenOf(folder.id, indent + 1)
         }
 
-        if (currentIndent == indent && isFolder != currentItem.isFolder) {
-            if (isFolder) {
-                break
-            }
-
-            index++
-            continue
-        }
-
-        if (
-            currentIndent == indent &&
-            comparator.compare(itemToInsert, currentItem) < 0
-        ) {
-            // Found an item that belongs to the parent folder, but is alphabetically before
-            break
-        }
-
-        index++
+        sortedList.addAll(notesInLevel.sortedWith(comparator).map { it.copy(indent = indent) })
     }
 
-    return index
+    addChildrenOf(null, 0)
+
+    // Add orphan notes and folders
+    notesByParentId.keys.filter { it != null && it !in notesIds }.forEach { addChildrenOf(it, 0) }
+
+    return sortedList
 }
+
+internal fun List<Item>.childrenOf(folder: Item) = drop(indexOf(folder) + 1)
+    .takeWhile { it.indent > folder.indent }
