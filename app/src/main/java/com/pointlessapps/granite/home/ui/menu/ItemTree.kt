@@ -7,6 +7,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -57,6 +58,9 @@ internal fun ColumnScope.ItemTree(
             .weight(1f)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+        contentPadding = PaddingValues(
+            bottom = dimensionResource(RC.dimen.margin_huge),
+        ),
     ) {
         items(items, key = { it.id }) { item ->
             Item(
@@ -69,41 +73,45 @@ internal fun ColumnScope.ItemTree(
             )
         }
 
-        item(key = "Deleted") {
-            Column {
-                HorizontalDivider(modifier = Modifier.animateItem())
-                Row(
-                    modifier = Modifier
-                        .animateItem()
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable(role = Role.Button, onClick = { isTrashOpened = !isTrashOpened })
-                        .padding(
-                            vertical = dimensionResource(RC.dimen.margin_tiny),
-                            horizontal = dimensionResource(RC.dimen.margin_nano),
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val rotation by animateFloatAsState(
-                        if (isTrashOpened && searchValue.isBlank()) 90f else 0f,
-                    )
-                    ComposeIcon(
+        if (deletedItems.isNotEmpty()) {
+            item(key = "Deleted") {
+                Column {
+                    HorizontalDivider(modifier = Modifier.animateItem())
+                    Row(
                         modifier = Modifier
-                            .size(dimensionResource(R.dimen.folder_icon_size))
-                            .rotate(rotation),
-                        iconRes = RC.drawable.ic_arrow_right,
-                        iconStyle = defaultComposeIconStyle().copy(
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ),
-                    )
-                    ComposeText(
-                        text = stringResource(R.string.deleted),
-                        textStyle = defaultComposeTextStyle().copy(
-                            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            typography = MaterialTheme.typography.titleMedium,
-                        ),
-                    )
+                            .animateItem()
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable(
+                                role = Role.Button,
+                                onClick = { isTrashOpened = !isTrashOpened })
+                            .padding(
+                                vertical = dimensionResource(RC.dimen.margin_tiny),
+                                horizontal = dimensionResource(RC.dimen.margin_nano),
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val rotation by animateFloatAsState(
+                            if (isTrashOpened && searchValue.isBlank()) 90f else 0f,
+                        )
+                        ComposeIcon(
+                            modifier = Modifier
+                                .size(dimensionResource(R.dimen.folder_icon_size))
+                                .rotate(rotation),
+                            iconRes = RC.drawable.ic_arrow_right,
+                            iconStyle = defaultComposeIconStyle().copy(
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                        )
+                        ComposeText(
+                            text = stringResource(R.string.deleted),
+                            textStyle = defaultComposeTextStyle().copy(
+                                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                typography = MaterialTheme.typography.titleMedium,
+                            ),
+                        )
+                    }
                 }
             }
         }

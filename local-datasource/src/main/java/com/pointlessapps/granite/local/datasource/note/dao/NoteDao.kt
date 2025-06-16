@@ -60,4 +60,7 @@ internal interface NoteDao {
 
     @Query("UPDATE notes SET parent_id = NULL, updated_at = :currentTimestamp WHERE parent_id in (:ids)")
     suspend fun removeParents(ids: List<Int>, currentTimestamp: String)
+
+    @Query("UPDATE notes SET parent_id = :newParentId, updated_at = :currentTimestamp WHERE id = :id")
+    suspend fun move(id: Int, newParentId: Int, currentTimestamp: String)
 }

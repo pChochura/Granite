@@ -20,6 +20,8 @@ interface NoteRepository {
     fun delete(ids: List<Int>): Flow<Unit>
 
     fun duplicate(ids: List<Int>): Flow<List<Note>>
+
+    fun move(id: Int, newParentId: Int): Flow<Unit>
 }
 
 internal class NoteRepositoryImpl(
@@ -58,5 +60,9 @@ internal class NoteRepositoryImpl(
 
     override fun duplicate(ids: List<Int>) = flow {
         emit(localDatasource.duplicate(ids).map { it.fromLocal() })
+    }.flowOn(Dispatchers.IO)
+
+    override fun move(id: Int, newParentId: Int) = flow {
+        emit(localDatasource.move(id, newParentId))
     }.flowOn(Dispatchers.IO)
 }

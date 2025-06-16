@@ -17,6 +17,8 @@ interface LocalNoteDatasource {
     suspend fun delete(ids: List<Int>)
 
     suspend fun duplicate(ids: List<Int>): List<NoteEntity>
+
+    suspend fun move(id: Int, newParentId: Int)
 }
 
 internal class LocalNoteDatasourceImpl(
@@ -53,7 +55,9 @@ internal class LocalNoteDatasourceImpl(
 
     override suspend fun duplicate(ids: List<Int>): List<NoteEntity> {
         val currentTimestamp = getCurrentTimestamp()
-        val notes = noteDao.getByIds(ids).map { entity ->
+        val originalNotes = noteDao.getByIds(ids)
+        val idMapping = mutableMapOf<Int, Int>()
+        val newNotesToInsert = noteDao.getByIds(ids).map { entity ->
             NoteEntityPartial(
                 parentId = entity.parentId,
                 name = entity.name,
@@ -62,16 +66,34 @@ internal class LocalNoteDatasourceImpl(
                 createdAt = currentTimestamp,
             )
         }
-        val newIds = noteDao.insertMany(notes).map(Long::toInt)
-        val idMapping = ids.zip(newIds).toMap()
-        val newParentIds = notes.mapIndexed { index, note ->
-            NoteEntityParentIdPartial(
-                id = newIds[index],
-                parentId = note.parentId?.let { idMapping[it] } ?: note.parentId,
-            )
+
+        val newIds = noteDao.insertMany(newNotesToInsert).map(Long::toInt)
+        originalNotes.forEachIndexed { index, originalNote ->
+            idMapping[originalNote.id] = newIds[index]
         }
-        noteDao.updateManyParentIds(newParentIds)
+
+        val notesToUpdateParentId = mutableListOf<NoteEntityParentIdPartial>()
+        originalNotes.forEachIndexed { index, originalNote ->
+            val newNoteId = newIds[index]
+            val originalParentId = originalNote.parentId
+            val newParentId = originalParentId?.let { idMapping[it] }
+            if (newParentId != null && newParentId != originalParentId) {
+                notesToUpdateParentId.add(
+                    NoteEntityParentIdPartial(
+                        id = newNoteId,
+                        parentId = newParentId,
+                    ),
+                )
+            }
+        }
+
+        if (notesToUpdateParentId.isNotEmpty()) {
+            noteDao.updateManyParentIds(notesToUpdateParentId)
+        }
 
         return noteDao.getByIds(newIds)
     }
+
+    override suspend fun move(id: Int, newParentId: Int) =
+        noteDao.move(id, newParentId, getCurrentTimestamp())
 }

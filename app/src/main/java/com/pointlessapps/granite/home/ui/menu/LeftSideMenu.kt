@@ -22,6 +22,8 @@ import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.ui.HomeViewModel
 import com.pointlessapps.granite.home.ui.menu.dialog.CreateFolderDialog
 import com.pointlessapps.granite.home.ui.menu.dialog.CreateFolderDialogData
+import com.pointlessapps.granite.home.ui.menu.dialog.MoveDialog
+import com.pointlessapps.granite.home.ui.menu.dialog.MoveDialogData
 import com.pointlessapps.granite.home.ui.menu.dialog.OrderTypeDialog
 import com.pointlessapps.granite.home.ui.menu.dialog.RenameDialog
 import com.pointlessapps.granite.home.ui.menu.dialog.RenameDialogData
@@ -38,6 +40,7 @@ internal fun LeftSideMenu(
 
     var createFolderDialogData by remember { mutableStateOf<CreateFolderDialogData?>(null) }
     var renameDialogData by remember { mutableStateOf<RenameDialogData?>(null) }
+    var moveDialogData by remember { mutableStateOf<MoveDialogData?>(null) }
     var showOrderTypeDialog by remember { mutableStateOf(false) }
     var itemPropertiesBottomSheetData by remember { mutableStateOf<Item?>(null) }
     val itemPropertiesBottomSheetState = rememberModalBottomSheetState()
@@ -47,7 +50,8 @@ internal fun LeftSideMenu(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(all = dimensionResource(RC.dimen.margin_medium)),
+                .padding(horizontal = dimensionResource(RC.dimen.margin_medium))
+                .padding(top = dimensionResource(RC.dimen.margin_medium)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_medium)),
         ) {
             TitleBar()
@@ -96,7 +100,7 @@ internal fun LeftSideMenu(
             onPropertyClicked = {
                 when (it) {
                     ItemPropertyAction.ADD_FILE -> viewModel.onAddFileClicked(item.id)
-                    ItemPropertyAction.ADD_FOLDER -> {
+                    ItemPropertyAction.ADD_FOLDER ->
                         createFolderDialogData = CreateFolderDialogData(
                             name = TextFieldValue(
                                 text = untitledText,
@@ -104,21 +108,21 @@ internal fun LeftSideMenu(
                             ),
                             parentId = item.id,
                         )
-                        keyboardController?.show()
-                    }
 
-                    ItemPropertyAction.MOVE -> {}
+                    ItemPropertyAction.MOVE -> moveDialogData = MoveDialogData(
+                        itemId = item.id,
+                        folders = viewModel.state.foldersWithParents,
+                    )
+
                     ItemPropertyAction.DUPLICATE -> viewModel.duplicateItem(item.id)
                     ItemPropertyAction.SHARE -> {}
-                    ItemPropertyAction.RENAME -> {
-                        renameDialogData = RenameDialogData(
-                            name = TextFieldValue(
-                                text = item.name,
-                                selection = TextRange(0, item.name.length),
-                            ),
-                            id = item.id,
-                        )
-                    }
+                    ItemPropertyAction.RENAME -> renameDialogData = RenameDialogData(
+                        name = TextFieldValue(
+                            text = item.name,
+                            selection = TextRange(0, item.name.length),
+                        ),
+                        id = item.id,
+                    )
 
                     ItemPropertyAction.RESTORE -> viewModel.restoreItem(item.id)
                     ItemPropertyAction.DELETE -> viewModel.deleteItem(item.id)
@@ -166,6 +170,18 @@ internal fun LeftSideMenu(
                 renameDialogData = null
             },
             onDismissRequest = { renameDialogData = null },
+        )
+    }
+
+    moveDialogData?.let { data ->
+        MoveDialog(
+            data = data,
+            onInputChanged = { moveDialogData = moveDialogData?.copy(search = it) },
+            onItemClicked = {
+                viewModel.moveItem(data.itemId, it.id)
+                moveDialogData = null
+            },
+            onDismissRequest = { moveDialogData = null },
         )
     }
 }

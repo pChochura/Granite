@@ -9,4 +9,5 @@
 	<dimen name="folder_icon_size">16dp</dimen>
 
 	<dimen name="editor_bottom_padding">128dp</dimen>
+    <dimen name="dialog_height">400dp</dimen>
 </resources>

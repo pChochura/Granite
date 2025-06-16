@@ -12,10 +12,13 @@ import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.DuplicateItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
+import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import com.pointlessapps.granite.home.mapper.toItem
+import com.pointlessapps.granite.home.mapper.toItemWithParents
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.model.ItemOrderType
+import com.pointlessapps.granite.home.model.ItemWithParents
 import com.pointlessapps.granite.home.utils.childrenOf
 import com.pointlessapps.granite.home.utils.toSortedTree
 import com.pointlessapps.granite.utils.TextFieldValueParceler
@@ -44,7 +47,7 @@ internal data class HomeState(
     val isLoading: Boolean = false,
 ) : Parcelable {
 
-    fun List<Item>.filtered() = filter {
+    private fun List<Item>.filtered() = filter {
         val matchesSearch = it.name.contains(searchValue, ignoreCase = true) ||
                 it.content?.contains(searchValue, ignoreCase = true) == true
 
@@ -60,6 +63,27 @@ internal data class HomeState(
 
     @IgnoredOnParcel
     val filteredDeletedItems = deletedItems.filtered()
+
+    @IgnoredOnParcel
+    val foldersWithParents = run {
+        val itemsById = items.associateBy(Item::id)
+        val result = mutableListOf<ItemWithParents>()
+        items.filter(Item::isFolder).forEach { folder ->
+            val parents = mutableListOf<Item>()
+            var currentParentId = folder.parentId
+            while (currentParentId != null) {
+                val parentItem = itemsById[currentParentId]
+                if (parentItem != null) {
+                    parents.add(parentItem)
+                    currentParentId = parentItem.parentId
+                } else {
+                    break
+                }
+            }
+            result.add(folder.toItemWithParents(parents.reversed()))
+        }
+        result.toList()
+    }
 }
 
 internal sealed interface HomeEvent {
@@ -74,6 +98,7 @@ internal class HomeViewModel(
     private val markItemsAsDeletedUseCase: MarkItemsAsDeletedUseCase,
     private val duplicateItemsUseCase: DuplicateItemsUseCase,
     private val deleteItemsUseCase: DeleteItemsUseCase,
+    private val moveItemUseCase: MoveItemUseCase,
     private val untitledNotePlaceholder: String,
 ) : ViewModel() {
 
@@ -214,7 +239,8 @@ internal class HomeViewModel(
                         selection = TextRange(0, note.name.length),
                     ),
                     noteContent = TextFieldValue(text = note.content.orEmpty()),
-                    items = (state.items + note.toItem()).toSortedTree(state.orderType.comparator),
+                    items = (state.items + note.toItem())
+                        .toSortedTree(state.orderType.comparator),
                 )
             }
             .catch {
@@ -235,7 +261,8 @@ internal class HomeViewModel(
             .onEach { folder ->
                 state = state.copy(
                     isLoading = false,
-                    items = (state.items + folder.toItem()).toSortedTree(state.orderType.comparator),
+                    items = (state.items + folder.toItem())
+                        .toSortedTree(state.orderType.comparator),
                 )
             }
             .catch {
@@ -274,13 +301,9 @@ internal class HomeViewModel(
 
     fun deleteItem(id: Int) {
         val item = state.items.find { it.id == id } ?: return
-        val items = listOf(item.copy(deleted = true, indent = 0)) +
-                if (item.isFolder) {
-                    state.items.childrenOf(item)
-                        .map { it.copy(deleted = true, indent = it.indent - item.indent) }
-                } else {
-                    emptyList()
-                }
+        val items = listOf(item.copy(deleted = true)) + if (item.isFolder) {
+            state.items.childrenOf(item).map { it.copy(deleted = true) }
+        } else emptyList()
         val ids = items.map(Item::id)
 
         markItemsAsDeletedUseCase(ids, deleted = true)
@@ -309,7 +332,7 @@ internal class HomeViewModel(
     fun deleteItemPermanently(id: Int) {
         val item = state.deletedItems.find { it.id == id } ?: return
         val ids = if (item.isFolder) {
-            state.items.childrenOf(item).map(Item::id) + id
+            state.deletedItems.childrenOf(item).map(Item::id) + id
         } else listOf(id)
 
         deleteItemsUseCase(ids)
@@ -344,6 +367,7 @@ internal class HomeViewModel(
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
             .onEach {
+                closeNestedFolder(item)
                 state = state.copy(
                     isLoading = false,
                     items = (state.items + items).toSortedTree(state.orderType.comparator),
@@ -361,9 +385,7 @@ internal class HomeViewModel(
         val item = state.items.find { it.id == id } ?: return
         val ids = listOf(id) + if (item.isFolder) {
             state.items.childrenOf(item).map(Item::id)
-        } else {
-            emptyList()
-        }
+        } else emptyList()
 
         duplicateItemsUseCase(ids)
             .take(1)
@@ -371,8 +393,31 @@ internal class HomeViewModel(
             .onEach { notes ->
                 state = state.copy(
                     isLoading = false,
-                    items = (state.items + notes.map { it.toItem() })
+                    items = (state.items + notes.map(Note::toItem))
                         .toSortedTree(state.orderType.comparator),
+                )
+            }
+            .catch {
+                state = state.copy(isLoading = false)
+                it.printStackTrace()
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun moveItem(id: Int, newParentId: Int) {
+        moveItemUseCase(id, newParentId)
+            .take(1)
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach {
+                state = state.copy(
+                    isLoading = false,
+                    items = state.items.map {
+                        if (it.id == id) {
+                            it.copy(parentId = newParentId)
+                        } else {
+                            it
+                        }
+                    }.toSortedTree(state.orderType.comparator),
                 )
             }
             .catch {

@@ -8,6 +8,7 @@ import com.pointlessapps.granite.domain.note.usecase.DuplicateItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
+import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
@@ -22,6 +23,7 @@ internal val noteModule = module {
     factoryOf(::MarkItemsAsDeletedUseCase)
     factoryOf(::DuplicateItemsUseCase)
     factoryOf(::DeleteItemsUseCase)
+    factoryOf(::MoveItemUseCase)
 
     singleOf(::NoteRepositoryImpl).bind(NoteRepository::class)
 }
