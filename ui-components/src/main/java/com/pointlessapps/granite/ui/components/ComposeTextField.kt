@@ -60,10 +60,10 @@ fun ComposeTextField(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box {
+    Box(modifier = modifier) {
         if (value.text.isEmpty()) {
             ComposeText(
-                modifier = modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 text = textFieldStyle.placeholder,
                 textStyle = defaultComposeTextStyle().copy(
                     typography = textFieldStyle.textStyle,
@@ -74,7 +74,7 @@ fun ComposeTextField(
             )
         }
         BasicTextField(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
             keyboardOptions = textFieldStyle.keyboardOptions,

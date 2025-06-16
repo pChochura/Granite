@@ -38,23 +38,28 @@ internal data class HomeState(
     val openedFolderIds: Set<Int> = emptySet(),
     val openedItemId: Int? = null,
     val orderType: ItemOrderType = ItemOrderType.NameAscending,
+    val searchValue: String = "",
     val items: List<Item> = emptyList(),
     val deletedItems: List<Item> = emptyList(),
     val isLoading: Boolean = false,
 ) : Parcelable {
-    @IgnoredOnParcel
-    val filteredItems = items.filter {
-        it.parentId !in items.map(Item::id) ||
+
+    fun List<Item>.filtered() = filter {
+        val matchesSearch = it.name.contains(searchValue, ignoreCase = true) ||
+                it.content?.contains(searchValue, ignoreCase = true) == true
+
+        val isParentOpened = it.parentId !in this.map(Item::id) ||
                 it.parentId in openedFolderIds ||
                 it.parentId == null
+
+        return@filter (searchValue.isNotBlank() && matchesSearch) || (searchValue.isBlank() && isParentOpened)
     }
 
     @IgnoredOnParcel
-    val filteredDeletedItems = deletedItems.filter {
-        it.parentId !in deletedItems.map(Item::id) ||
-                it.parentId in openedFolderIds ||
-                it.parentId == null
-    }
+    val filteredItems = items.filtered()
+
+    @IgnoredOnParcel
+    val filteredDeletedItems = deletedItems.filtered()
 }
 
 internal sealed interface HomeEvent {
@@ -155,6 +160,10 @@ internal class HomeViewModel(
                     .toSet()
             },
         )
+    }
+
+    fun onSearchChanged(value: String) {
+        state = state.copy(searchValue = value)
     }
 
     fun saveNote(silently: Boolean = false) {

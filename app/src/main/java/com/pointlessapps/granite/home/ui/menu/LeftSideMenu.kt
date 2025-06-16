@@ -36,7 +36,6 @@ internal fun LeftSideMenu(
     val keyboardController = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()
 
-    var searchValue by remember { mutableStateOf("") }
     var createFolderDialogData by remember { mutableStateOf<CreateFolderDialogData?>(null) }
     var renameDialogData by remember { mutableStateOf<RenameDialogData?>(null) }
     var showOrderTypeDialog by remember { mutableStateOf(false) }
@@ -53,12 +52,13 @@ internal fun LeftSideMenu(
         ) {
             TitleBar()
             SearchBar(
-                searchValue = searchValue,
-                onSearchValueChanged = { searchValue = it },
+                searchValue = viewModel.state.searchValue,
+                onSearchValueChanged = viewModel::onSearchChanged,
             )
             ItemTree(
                 items = viewModel.state.filteredItems,
                 deletedItems = viewModel.state.filteredDeletedItems,
+                searchValue = viewModel.state.searchValue,
                 selectedItemId = viewModel.state.openedItemId,
                 openedFolderIds = viewModel.state.openedFolderIds,
                 onItemSelected = viewModel::onItemSelected,

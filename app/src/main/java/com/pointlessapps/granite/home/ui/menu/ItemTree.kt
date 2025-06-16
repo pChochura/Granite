@@ -29,6 +29,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.ui.components.ComposeIcon
@@ -41,6 +44,7 @@ import com.pointlessapps.granite.ui.R as RC
 internal fun ColumnScope.ItemTree(
     items: List<Item>,
     deletedItems: List<Item>,
+    searchValue: String,
     selectedItemId: Int?,
     openedFolderIds: Set<Int>,
     onItemSelected: (Item) -> Unit,
@@ -57,6 +61,7 @@ internal fun ColumnScope.ItemTree(
         items(items, key = { it.id }) { item ->
             Item(
                 item = item,
+                searchValue = searchValue,
                 isFileOpened = selectedItemId == item.id,
                 isFolderOpened = openedFolderIds.contains(item.id),
                 onItemSelected = onItemSelected,
@@ -64,7 +69,7 @@ internal fun ColumnScope.ItemTree(
             )
         }
 
-        item {
+        item(key = "Deleted") {
             Column {
                 HorizontalDivider(modifier = Modifier.animateItem())
                 Row(
@@ -80,7 +85,9 @@ internal fun ColumnScope.ItemTree(
                     horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val rotation by animateFloatAsState(if (isTrashOpened) 90f else 0f)
+                    val rotation by animateFloatAsState(
+                        if (isTrashOpened && searchValue.isBlank()) 90f else 0f,
+                    )
                     ComposeIcon(
                         modifier = Modifier
                             .size(dimensionResource(R.dimen.folder_icon_size))
@@ -101,10 +108,11 @@ internal fun ColumnScope.ItemTree(
             }
         }
 
-        if (isTrashOpened) {
+        if (isTrashOpened || searchValue.isNotBlank()) {
             items(deletedItems, key = { it.id }) { item ->
                 Item(
                     item = item,
+                    searchValue = searchValue,
                     isFileOpened = selectedItemId == item.id,
                     isFolderOpened = openedFolderIds.contains(item.id),
                     onItemSelected = onItemSelected,
@@ -118,6 +126,7 @@ internal fun ColumnScope.ItemTree(
 @Composable
 private fun LazyItemScope.Item(
     item: Item,
+    searchValue: String,
     isFileOpened: Boolean,
     isFolderOpened: Boolean,
     onItemSelected: (Item) -> Unit,
@@ -145,12 +154,20 @@ private fun LazyItemScope.Item(
                 vertical = dimensionResource(RC.dimen.margin_tiny),
                 horizontal = dimensionResource(RC.dimen.margin_nano),
             )
-            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent)),
+            .then(
+                if (searchValue.isBlank()) {
+                    Modifier.padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
+                } else {
+                    Modifier
+                }
+            ),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (item.isFolder) {
-            val rotation by animateFloatAsState(if (isFolderOpened) 90f else 0f)
+            val rotation by animateFloatAsState(
+                if (isFolderOpened && searchValue.isBlank()) 90f else 0f,
+            )
             ComposeIcon(
                 modifier = Modifier
                     .size(dimensionResource(R.dimen.folder_icon_size))
@@ -167,7 +184,18 @@ private fun LazyItemScope.Item(
         }
 
         ComposeText(
-            text = item.name,
+            text = buildAnnotatedString {
+                append(item.name)
+                if (searchValue.isNotBlank()) {
+                    searchValue.toRegex().findAll(item.name).forEach {
+                        addStyle(
+                            style = SpanStyle(fontWeight = FontWeight.Bold),
+                            start = it.range.min(),
+                            end = it.range.max() + 1,
+                        )
+                    }
+                }
+            },
             textStyle = defaultComposeTextStyle().copy(
                 textColor = if (isFileOpened) {
                     MaterialTheme.colorScheme.onSurfaceVariant
