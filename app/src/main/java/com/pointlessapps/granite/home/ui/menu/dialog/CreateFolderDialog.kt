@@ -19,15 +19,15 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.ui_components.R as RC
-import com.pointlessapps.granite.ui_components.components.ComposeButton
-import com.pointlessapps.granite.ui_components.components.ComposeDialog
-import com.pointlessapps.granite.ui_components.components.ComposeDialogDismissible
-import com.pointlessapps.granite.ui_components.components.ComposeTextField
-import com.pointlessapps.granite.ui_components.components.defaultComposeButtonStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeButtonTextStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeDialogStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextFieldStyle
+import com.pointlessapps.granite.ui.R as RC
+import com.pointlessapps.granite.ui.components.ComposeButton
+import com.pointlessapps.granite.ui.components.ComposeDialog
+import com.pointlessapps.granite.ui.components.ComposeDialogDismissible
+import com.pointlessapps.granite.ui.components.ComposeTextField
+import com.pointlessapps.granite.ui.components.defaultComposeButtonStyle
+import com.pointlessapps.granite.ui.components.defaultComposeButtonTextStyle
+import com.pointlessapps.granite.ui.components.defaultComposeDialogStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextFieldStyle
 
 @Composable
 internal fun CreateFolderDialog(

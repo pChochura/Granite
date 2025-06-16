@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
-import com.pointlessapps.granite.ui_components.R
+import com.pointlessapps.granite.ui.R
 
 @Composable
 fun ComposeSnackbar(

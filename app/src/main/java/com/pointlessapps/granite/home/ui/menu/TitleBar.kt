@@ -18,11 +18,11 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.ui_components.components.ComposeIconButton
-import com.pointlessapps.granite.ui_components.components.ComposeText
-import com.pointlessapps.granite.ui_components.components.defaultComposeIconButtonStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextStyle
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.components.ComposeIconButton
+import com.pointlessapps.granite.ui.components.ComposeText
+import com.pointlessapps.granite.ui.components.defaultComposeIconButtonStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun TitleBar() {

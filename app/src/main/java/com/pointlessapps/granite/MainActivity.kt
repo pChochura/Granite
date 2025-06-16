@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.pointlessapps.granite.navigation.Navigation
-import com.pointlessapps.granite.ui_components.theme.ProjectTheme
+import com.pointlessapps.granite.ui.components.theme.ProjectTheme
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.KoinAndroidContext
 

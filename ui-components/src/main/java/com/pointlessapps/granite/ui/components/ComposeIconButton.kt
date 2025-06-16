@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -36,7 +36,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.toSize
-import com.pointlessapps.granite.ui_components.R
+import com.pointlessapps.granite.ui.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

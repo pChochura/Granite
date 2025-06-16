@@ -27,10 +27,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.utils.NoOpBringIntoViewSpec
-import com.pointlessapps.granite.ui_components.components.ComposeMarkdownTextField
-import com.pointlessapps.granite.ui_components.components.ComposeTextField
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextFieldStyle
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.components.ComposeMarkdownTextField
+import com.pointlessapps.granite.ui.components.ComposeTextField
+import com.pointlessapps.granite.ui.components.defaultComposeTextFieldStyle
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)

@@ -15,12 +15,12 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.model.ItemOrderType
-import com.pointlessapps.granite.ui_components.components.ComposeDialog
-import com.pointlessapps.granite.ui_components.components.ComposeDialogDismissible
-import com.pointlessapps.granite.ui_components.components.ComposeText
-import com.pointlessapps.granite.ui_components.components.defaultComposeDialogStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextStyle
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.components.ComposeDialog
+import com.pointlessapps.granite.ui.components.ComposeDialogDismissible
+import com.pointlessapps.granite.ui.components.ComposeText
+import com.pointlessapps.granite.ui.components.defaultComposeDialogStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun OrderTypeDialog(

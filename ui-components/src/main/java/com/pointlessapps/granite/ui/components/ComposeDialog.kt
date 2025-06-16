@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.pointlessapps.granite.ui_components.R
+import com.pointlessapps.granite.ui.R
 
 @Composable
 fun ComposeDialog(

@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable

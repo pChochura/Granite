@@ -18,12 +18,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.pointlessapps.granite.navigation.Route
-import com.pointlessapps.granite.ui_components.R
-import com.pointlessapps.granite.ui_components.components.ComposeButton
-import com.pointlessapps.granite.ui_components.components.ComposeLoader
-import com.pointlessapps.granite.ui_components.components.ComposeScaffoldLayout
-import com.pointlessapps.granite.ui_components.components.ComposeTextField
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextFieldStyle
+import com.pointlessapps.granite.ui.R
+import com.pointlessapps.granite.ui.components.ComposeButton
+import com.pointlessapps.granite.ui.components.ComposeLoader
+import com.pointlessapps.granite.ui.components.ComposeScaffoldLayout
+import com.pointlessapps.granite.ui.components.ComposeTextField
+import com.pointlessapps.granite.ui.components.defaultComposeTextFieldStyle
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

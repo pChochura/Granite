@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import android.text.Html
 import androidx.compose.material3.MaterialTheme
@@ -13,8 +13,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import com.pointlessapps.granite.ui_components.R
-import com.pointlessapps.granite.ui_components.utils.toAnnotatedString
+import com.pointlessapps.granite.ui.R
+import com.pointlessapps.granite.ui.components.utils.toAnnotatedString
 
 @Composable
 fun ComposeText(

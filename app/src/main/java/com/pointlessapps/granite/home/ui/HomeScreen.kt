@@ -41,16 +41,16 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.ui.menu.LeftSideMenu
 import com.pointlessapps.granite.navigation.Route
-import com.pointlessapps.granite.ui_components.components.ComposeIconButton
-import com.pointlessapps.granite.ui_components.components.ComposeLoader
-import com.pointlessapps.granite.ui_components.components.ComposeScaffoldLayout
-import com.pointlessapps.granite.ui_components.components.ComposeText
-import com.pointlessapps.granite.ui_components.components.defaultComposeIconButtonStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextStyle
+import com.pointlessapps.granite.ui.components.ComposeIconButton
+import com.pointlessapps.granite.ui.components.ComposeLoader
+import com.pointlessapps.granite.ui.components.ComposeScaffoldLayout
+import com.pointlessapps.granite.ui.components.ComposeText
+import com.pointlessapps.granite.ui.components.defaultComposeIconButtonStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.roundToInt
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun HomeScreen(

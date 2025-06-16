@@ -6,7 +6,7 @@ plugins {
 
 android {
     compileSdk = libs.versions.targetSdk.get().toInt()
-    namespace = "${libs.versions.packageName.get()}.ui_components"
+    namespace = "${libs.versions.packageName.get()}.ui"
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()

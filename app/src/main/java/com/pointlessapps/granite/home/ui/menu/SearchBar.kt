@@ -20,12 +20,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.ui_components.components.ComposeIcon
-import com.pointlessapps.granite.ui_components.components.ComposeIconButton
-import com.pointlessapps.granite.ui_components.components.ComposeTextField
-import com.pointlessapps.granite.ui_components.components.defaultComposeIconButtonStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextFieldStyle
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.components.ComposeIcon
+import com.pointlessapps.granite.ui.components.ComposeIconButton
+import com.pointlessapps.granite.ui.components.ComposeTextField
+import com.pointlessapps.granite.ui.components.defaultComposeIconButtonStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextFieldStyle
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun SearchBar(searchValue: String, onSearchValueChanged: (String) -> Unit) {

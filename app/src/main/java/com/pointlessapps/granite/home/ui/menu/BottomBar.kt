@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.ui_components.components.ComposeIconButton
-import com.pointlessapps.granite.ui_components.components.defaultComposeIconButtonStyle
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.components.ComposeIconButton
+import com.pointlessapps.granite.ui.components.defaultComposeIconButtonStyle
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun BottomBar(

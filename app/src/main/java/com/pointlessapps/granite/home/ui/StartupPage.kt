@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.ui_components.components.ComposeButton
-import com.pointlessapps.granite.ui_components.components.defaultComposeButtonStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextStyle
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.components.ComposeButton
+import com.pointlessapps.granite.ui.components.defaultComposeButtonStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun StartupPage(

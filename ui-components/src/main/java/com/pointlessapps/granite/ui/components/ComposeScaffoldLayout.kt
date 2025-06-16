@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.PaddingValues

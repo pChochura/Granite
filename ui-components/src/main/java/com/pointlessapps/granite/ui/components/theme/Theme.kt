@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.theme
+package com.pointlessapps.granite.ui.components.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -18,7 +18,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import com.pointlessapps.granite.ui_components.R
+import com.pointlessapps.granite.ui.R
 
 private val fontFamily = FontFamily(
     Font(

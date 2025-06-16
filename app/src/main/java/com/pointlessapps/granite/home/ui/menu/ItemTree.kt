@@ -31,11 +31,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.model.Item
-import com.pointlessapps.granite.ui_components.components.ComposeIcon
-import com.pointlessapps.granite.ui_components.components.ComposeText
-import com.pointlessapps.granite.ui_components.components.defaultComposeIconStyle
-import com.pointlessapps.granite.ui_components.components.defaultComposeTextStyle
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.components.ComposeIcon
+import com.pointlessapps.granite.ui.components.ComposeText
+import com.pointlessapps.granite.ui.components.defaultComposeIconStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun ColumnScope.ItemTree(

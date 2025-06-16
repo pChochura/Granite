@@ -24,7 +24,7 @@ include(
     ":domain",
     ":local-datasource",
     ":supabase-datasource",
-    ":ui_components",
+    ":ui-components",
     ":markdown-renderer",
     ":markdown-obsidian-parser",
 )

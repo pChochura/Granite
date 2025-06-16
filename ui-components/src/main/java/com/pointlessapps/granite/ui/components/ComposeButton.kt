@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
@@ -31,7 +31,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.toSize
-import com.pointlessapps.granite.ui_components.R
+import com.pointlessapps.granite.ui.R
 
 @Composable
 fun ComposeButton(

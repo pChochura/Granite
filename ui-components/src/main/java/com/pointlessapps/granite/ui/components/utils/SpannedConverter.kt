@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.utils
+package com.pointlessapps.granite.ui.components.utils
 
 import android.graphics.Typeface
 import android.text.Spanned

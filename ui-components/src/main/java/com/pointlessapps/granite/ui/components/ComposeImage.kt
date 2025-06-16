@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.ui_components.components
+package com.pointlessapps.granite.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.pointlessapps.granite.ui_components.R
+import com.pointlessapps.granite.ui.R
 
 @Composable
 fun ComposeImage(

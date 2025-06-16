@@ -26,7 +26,7 @@ import com.pointlessapps.granite.home.ui.menu.dialog.OrderTypeDialog
 import com.pointlessapps.granite.home.ui.menu.dialog.RenameDialog
 import com.pointlessapps.granite.home.ui.menu.dialog.RenameDialogData
 import kotlinx.coroutines.launch
-import com.pointlessapps.granite.ui_components.R as RC
+import com.pointlessapps.granite.ui.R as RC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
