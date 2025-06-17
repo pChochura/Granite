@@ -67,7 +67,7 @@ internal data class HomeState(
     @IgnoredOnParcel
     val foldersWithParents = run {
         val itemsById = items.associateBy(Item::id)
-        val result = mutableListOf<ItemWithParents>()
+        val result = mutableListOf(ItemWithParents(null, "/", ""))
         items.filter(Item::isFolder).forEach { folder ->
             val parents = mutableListOf<Item>()
             var currentParentId = folder.parentId
@@ -404,7 +404,7 @@ internal class HomeViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun moveItem(id: Int, newParentId: Int) {
+    fun moveItem(id: Int, newParentId: Int?) {
         moveItemUseCase(id, newParentId)
             .take(1)
             .onStart { state = state.copy(isLoading = true) }

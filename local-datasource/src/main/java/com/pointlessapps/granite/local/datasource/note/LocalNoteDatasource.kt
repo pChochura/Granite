@@ -18,7 +18,7 @@ interface LocalNoteDatasource {
 
     suspend fun duplicate(ids: List<Int>): List<NoteEntity>
 
-    suspend fun move(id: Int, newParentId: Int)
+    suspend fun move(id: Int, newParentId: Int?)
 }
 
 internal class LocalNoteDatasourceImpl(
@@ -94,6 +94,6 @@ internal class LocalNoteDatasourceImpl(
         return noteDao.getByIds(newIds)
     }
 
-    override suspend fun move(id: Int, newParentId: Int) =
+    override suspend fun move(id: Int, newParentId: Int?) =
         noteDao.move(id, newParentId, getCurrentTimestamp())
 }

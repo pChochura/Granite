@@ -5,5 +5,5 @@ import com.pointlessapps.granite.domain.note.NoteRepository
 class MoveItemUseCase(
     private val noteRepository: NoteRepository,
 ) {
-    operator fun invoke(id: Int, newParentId: Int) = noteRepository.move(id, newParentId)
+    operator fun invoke(id: Int, newParentId: Int?) = noteRepository.move(id, newParentId)
 }

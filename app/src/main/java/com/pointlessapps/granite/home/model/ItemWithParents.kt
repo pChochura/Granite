@@ -9,9 +9,9 @@ import kotlinx.parcelize.Parcelize
 @Immutable
 @Parcelize
 internal data class ItemWithParents(
-    val id: Int,
+    val id: Int?,
     val name: String,
     val parentsNames: String,
 ) : Parcelable {
-    val wholeName = "$parentsNames$name"
+    override fun toString() = "${parentsNames}${name}"
 }

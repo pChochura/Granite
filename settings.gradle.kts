@@ -27,4 +27,5 @@ include(
     ":ui-components",
     ":markdown-renderer",
     ":markdown-obsidian-parser",
+    ":fuzzy-search",
 )

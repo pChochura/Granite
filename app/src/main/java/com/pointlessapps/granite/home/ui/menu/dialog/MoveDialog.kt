@@ -28,8 +28,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.withStyle
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.fuzzy.search.FuzzyMatch
+import com.pointlessapps.granite.fuzzy.search.FuzzySearch
 import com.pointlessapps.granite.home.model.ItemWithParents
 import com.pointlessapps.granite.ui.components.ComposeDialog
 import com.pointlessapps.granite.ui.components.ComposeDialogDismissible
@@ -71,17 +72,16 @@ internal fun MoveDialog(
             ),
             reverseLayout = true,
         ) {
-            items(data.filteredFolders, key = { it.id }) {
+            items(data.filteredFolders, key = { it.item.id ?: 0 }) {
                 Item(
-                    item = it,
-                    searchValue = data.search,
+                    match = it,
                     onItemSelected = onItemClicked,
                 )
             }
         }
 
         ComposeTextField(
-            value = data.search,
+            value = data.query,
             onValueChange = { onInputChanged(it) },
             modifier = Modifier
                 .focusRequester(nameFocusRequester)
@@ -103,8 +103,7 @@ internal fun MoveDialog(
 
 @Composable
 private fun LazyItemScope.Item(
-    item: ItemWithParents,
-    searchValue: String,
+    match: FuzzyMatch<ItemWithParents>,
     onItemSelected: (ItemWithParents) -> Unit,
 ) {
     Row(
@@ -114,7 +113,7 @@ private fun LazyItemScope.Item(
             .clip(MaterialTheme.shapes.small)
             .clickable(
                 role = Role.Button,
-                onClick = { onItemSelected(item) },
+                onClick = { onItemSelected(match.item) },
             )
             .padding(
                 vertical = dimensionResource(RC.dimen.margin_tiny),
@@ -125,18 +124,13 @@ private fun LazyItemScope.Item(
     ) {
         ComposeText(
             text = buildAnnotatedString {
-                withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                    append(item.parentsNames)
-                }
-                append(item.name)
-                if (searchValue.isNotBlank()) {
-                    searchValue.toRegex().findAll(item.wholeName).forEach {
-                        addStyle(
-                            style = SpanStyle(fontWeight = FontWeight.Bold),
-                            start = it.range.min(),
-                            end = it.range.max() + 1,
-                        )
-                    }
+                append(match.item.toString())
+                match.matches.forEach { range ->
+                    addStyle(
+                        style = SpanStyle(fontWeight = FontWeight.Bold),
+                        start = range.first,
+                        end = range.last + 1,
+                    )
                 }
             },
             textStyle = defaultComposeTextStyle().copy(
@@ -150,8 +144,12 @@ private fun LazyItemScope.Item(
 internal data class MoveDialogData(
     val itemId: Int,
     val folders: List<ItemWithParents>,
-    val search: String = "",
+    val query: String = "",
 ) {
-    val filteredFolders: List<ItemWithParents>
-        get() = folders.filter { it.wholeName.contains(search) }
+    val filteredFolders: List<FuzzyMatch<ItemWithParents>>
+        get() = if (query.isBlank()) {
+            folders.map { FuzzyMatch(item = it, matches = emptyList(), distance = 0, start = 0) }
+        } else {
+            FuzzySearch.extract(query = query, choices = folders)
+        }
 }

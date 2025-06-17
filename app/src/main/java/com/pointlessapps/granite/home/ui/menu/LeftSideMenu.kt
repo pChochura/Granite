@@ -176,7 +176,7 @@ internal fun LeftSideMenu(
     moveDialogData?.let { data ->
         MoveDialog(
             data = data,
-            onInputChanged = { moveDialogData = moveDialogData?.copy(search = it) },
+            onInputChanged = { moveDialogData = moveDialogData?.copy(query = it) },
             onItemClicked = {
                 viewModel.moveItem(data.itemId, it.id)
                 moveDialogData = null

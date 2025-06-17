@@ -111,4 +111,5 @@ dependencies {
     implementation(projects.localDatasource)
     implementation(projects.uiComponents)
     implementation(projects.markdownRenderer)
+    implementation(projects.fuzzySearch)
 }
