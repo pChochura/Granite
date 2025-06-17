@@ -180,7 +180,7 @@ internal class HomeViewModel(
             openedFolderIds = if (state.openedFolderIds.isNotEmpty()) {
                 emptySet()
             } else {
-                state.items
+                (state.items + state.deletedItems)
                     .mapNotNull { if (it.isFolder) it.id else null }
                     .toSet()
             },
