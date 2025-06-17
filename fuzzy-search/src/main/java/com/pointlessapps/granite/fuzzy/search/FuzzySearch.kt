@@ -57,4 +57,14 @@ object FuzzySearch {
 
         return results.sorted()
     }
+
+    fun <T> extractPath(
+        query: String,
+        paths: List<T>,
+        maxDist: Int = 1,
+    ): List<FuzzyPathMatch<T>> = paths.mapNotNull { p ->
+        pathFuzzyMatch(p.toString(), query, maxDist)?.let { segs ->
+            FuzzyPathMatch(p, segs)
+        }
+    }.sorted()
 }
