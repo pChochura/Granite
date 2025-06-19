@@ -289,7 +289,13 @@ internal class HomeViewModel(
             .onEach {
                 state = state.copy(
                     isLoading = false,
-                    items = state.items.toSortedTree(state.orderType.comparator),
+                    items = state.items.map {
+                        if (it.id == id) {
+                            it.copy(name = name)
+                        } else {
+                            it
+                        }
+                    }.toSortedTree(state.orderType.comparator),
                 )
 
                 if (id == state.openedItemId) {
