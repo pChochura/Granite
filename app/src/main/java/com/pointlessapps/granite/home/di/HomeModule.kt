@@ -11,6 +11,8 @@ internal val homeModule = module {
         HomeViewModel(
             savedStateHandle = get(),
             getNotesUseCase = get(),
+            getLastOpenedFileUseCase = get(),
+            setLastOpenedFileUseCase = get(),
             updateItemUseCase = get(),
             createItemUseCase = get(),
             markItemsAsDeletedUseCase = get(),

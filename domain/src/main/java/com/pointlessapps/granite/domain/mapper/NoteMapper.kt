@@ -1,6 +1,6 @@
-package com.pointlessapps.granite.domain.note.mapper
+package com.pointlessapps.granite.domain.mapper
 
-import com.pointlessapps.granite.domain.note.model.Note
+import com.pointlessapps.granite.domain.model.Note
 import com.pointlessapps.granite.domain.utils.formatDateAsTimestamp
 import com.pointlessapps.granite.domain.utils.formatTimestampAsDate
 import com.pointlessapps.granite.local.datasource.note.entity.NoteEntity as LocalNote

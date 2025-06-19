@@ -6,7 +6,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pointlessapps.granite.domain.note.model.Note
+import com.pointlessapps.granite.domain.model.Note
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.DuplicateItemsUseCase
@@ -14,6 +14,8 @@ import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
 import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.GetLastOpenedFileUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.SetLastOpenedFileUseCase
 import com.pointlessapps.granite.home.mapper.toItem
 import com.pointlessapps.granite.home.mapper.toItemWithParents
 import com.pointlessapps.granite.home.model.Item
@@ -27,6 +29,7 @@ import com.pointlessapps.granite.utils.mutableStateOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -103,6 +106,8 @@ internal sealed interface HomeEvent {
 internal class HomeViewModel(
     savedStateHandle: SavedStateHandle,
     getNotesUseCase: GetNotesUseCase,
+    getLastOpenedFileUseCase: GetLastOpenedFileUseCase,
+    private val setLastOpenedFileUseCase: SetLastOpenedFileUseCase,
     private val updateItemUseCase: UpdateItemUseCase,
     private val createItemUseCase: CreateItemUseCase,
     private val markItemsAsDeletedUseCase: MarkItemsAsDeletedUseCase,
@@ -121,15 +126,21 @@ internal class HomeViewModel(
     private var openedFilesStack by savedStateHandle.mutableStateOf(emptyList<Int>())
 
     init {
-        getNotesUseCase()
+        combine(
+            getLastOpenedFileUseCase(),
+            getNotesUseCase(),
+        ) { lastOpenedFile, notes -> lastOpenedFile to notes }
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
-            .onEach {
-                val (deletedItems, items) = it.map(Note::toItem).partition(Item::deleted)
+            .onEach { (lastOpenedFile, notes) ->
+                val (deletedItems, items) = notes.map(Note::toItem).partition(Item::deleted)
                 state = state.copy(
                     isLoading = false,
                     items = items.toSortedTree(state.orderType.comparator),
                     deletedItems = deletedItems.toSortedTree(state.orderType.comparator),
+                    openedItemId = lastOpenedFile?.id,
+                    noteTitle = TextFieldValue(text = lastOpenedFile?.name.orEmpty()),
+                    noteContent = TextFieldValue(text = lastOpenedFile?.content.orEmpty()),
                 )
             }
             .catch {
@@ -146,6 +157,7 @@ internal class HomeViewModel(
 
     fun openFileFromStack() {
         val item = peekFileFromStack() ?: return
+        setLastOpenedFileUseCase(item.id).launchIn(viewModelScope)
         openedFilesStack = openedFilesStack.dropLast(1)
         state = state.copy(
             openedItemId = item.id,
@@ -183,6 +195,7 @@ internal class HomeViewModel(
 
             if (state.openedItemId == item.id) return
 
+            setLastOpenedFileUseCase(item.id).launchIn(viewModelScope)
             state.openedItemId?.also { openedFilesStack = openedFilesStack + it }
             state = state.copy(
                 openedItemId = item.id,
@@ -279,6 +292,7 @@ internal class HomeViewModel(
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
             .onEach { note ->
+                setLastOpenedFileUseCase(note.id).launchIn(viewModelScope)
                 state = state.copy(
                     isLoading = false,
                     openedItemId = note.id,

@@ -1,7 +1,7 @@
 package com.pointlessapps.granite.domain.note
 
-import com.pointlessapps.granite.domain.note.mapper.fromLocal
-import com.pointlessapps.granite.domain.note.model.Note
+import com.pointlessapps.granite.domain.mapper.fromLocal
+import com.pointlessapps.granite.domain.model.Note
 import com.pointlessapps.granite.local.datasource.note.LocalNoteDatasource
 import com.pointlessapps.granite.supabase.datasource.note.SupabaseNoteDatasource
 import kotlinx.coroutines.Dispatchers

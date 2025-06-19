@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.domain.note.model
+package com.pointlessapps.granite.domain.model
 
 data class Note(
     val id: Int,

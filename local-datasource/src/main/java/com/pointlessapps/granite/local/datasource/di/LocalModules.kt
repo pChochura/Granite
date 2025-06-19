@@ -3,6 +3,7 @@ package com.pointlessapps.granite.local.datasource.di
 import androidx.room.Room
 import com.pointlessapps.granite.local.datasource.LocalDatabase
 import com.pointlessapps.granite.local.datasource.note.di.noteModule
+import com.pointlessapps.granite.local.datasource.prefs.di.prefsModule
 import org.koin.dsl.module
 
 private val localModule = module {
@@ -16,4 +17,4 @@ private val localModule = module {
     }
 }
 
-val localModules = listOf(localModule, noteModule)
+val localModules = listOf(localModule, noteModule, prefsModule)

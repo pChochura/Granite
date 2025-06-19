@@ -35,5 +35,7 @@ dependencies {
     implementation(libs.roomDb)
     implementation(libs.roomDbExtensions)
 
+    implementation(libs.androidxDatastore)
+
     implementation(libs.kotlinSerializationJson)
 }

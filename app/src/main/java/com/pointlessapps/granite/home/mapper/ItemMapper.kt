@@ -1,6 +1,6 @@
 package com.pointlessapps.granite.home.mapper
 
-import com.pointlessapps.granite.domain.note.model.Note
+import com.pointlessapps.granite.domain.model.Note
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.model.ItemWithParents
 
