@@ -111,7 +111,7 @@ internal fun LeftSideMenu(
 
                     ItemPropertyAction.MOVE -> moveDialogData = MoveDialogData(
                         itemId = item.id,
-                        folders = viewModel.state.foldersWithParents,
+                        folders = viewModel.state.getFoldersWithParentsExcept(item.id),
                     )
 
                     ItemPropertyAction.DUPLICATE -> viewModel.duplicateItem(item.id)

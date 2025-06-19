@@ -64,14 +64,13 @@ internal data class HomeState(
     @IgnoredOnParcel
     val filteredDeletedItems = deletedItems.filtered()
 
-    @IgnoredOnParcel
-    val foldersWithParents = run {
+    fun getFoldersWithParentsExcept(id: Int): List<ItemWithParents> {
         val itemsById = items.associateBy(Item::id)
         val result = mutableListOf(ItemWithParents(null, "/", ""))
-        items.filter(Item::isFolder).forEach { folder ->
+        items.filter(Item::isFolder).filter { it.id != id }.forEach { folder ->
             val parents = mutableListOf<Item>()
             var currentParentId = folder.parentId
-            while (currentParentId != null) {
+            while (currentParentId != null && currentParentId != id) {
                 val parentItem = itemsById[currentParentId]
                 if (parentItem != null) {
                     parents.add(parentItem)
@@ -80,9 +79,14 @@ internal data class HomeState(
                     break
                 }
             }
+            if (currentParentId == id) {
+                return@forEach
+            }
+
             result.add(folder.toItemWithParents(parents.reversed()))
         }
-        result.toList()
+
+        return result.toList()
     }
 }
 
