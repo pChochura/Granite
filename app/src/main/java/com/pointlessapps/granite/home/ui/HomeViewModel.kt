@@ -118,6 +118,8 @@ internal class HomeViewModel(
     var state by savedStateHandle.mutableStateOf(HomeState())
         private set
 
+    private var openedFilesStack by savedStateHandle.mutableStateOf(emptyList<Int>())
+
     init {
         getNotesUseCase()
             .take(1)
@@ -135,6 +137,21 @@ internal class HomeViewModel(
                 it.printStackTrace()
             }
             .launchIn(viewModelScope)
+    }
+
+    fun peekFileFromStack(): Item? {
+        val id = openedFilesStack.lastOrNull() ?: return null
+        return state.items.find { it.id == id } ?: state.deletedItems.find { it.id == id }
+    }
+
+    fun openFileFromStack() {
+        val item = peekFileFromStack() ?: return
+        openedFilesStack = openedFilesStack.dropLast(1)
+        state = state.copy(
+            openedItemId = item.id,
+            noteTitle = TextFieldValue(text = item.name),
+            noteContent = TextFieldValue(text = item.content.orEmpty()),
+        )
     }
 
     fun onNoteContentChanged(value: TextFieldValue) {
@@ -163,6 +180,10 @@ internal class HomeViewModel(
 
         if (!item.isFolder) {
             eventChannel.trySend(HomeEvent.CloseDrawer)
+
+            if (state.openedItemId == item.id) return
+
+            state.openedItemId?.also { openedFilesStack = openedFilesStack + it }
             state = state.copy(
                 openedItemId = item.id,
                 noteTitle = TextFieldValue(text = item.name),
@@ -248,6 +269,8 @@ internal class HomeViewModel(
     }
 
     private fun createNote(parentId: Int?) {
+        state.openedItemId?.also { openedFilesStack = openedFilesStack + it }
+
         createItemUseCase(
             name = untitledNotePlaceholder,
             content = "",
