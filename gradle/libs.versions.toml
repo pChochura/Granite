@@ -2,7 +2,7 @@
 #Application
 packageName = "com.pointlessapps.granite"
 minSdk = "26"
-targetSdk = "35"
+targetSdk = "36"
 
 #Kotlin
 parcelizePluginName = "kotlin-parcelize"
@@ -23,8 +23,8 @@ androidxDatastore = "1.1.7"
 
 #Compose
 composeCompiler = "1.5.15"
-composeBom = "2025.06.00"
-composeRuntime = "1.8.2"
+composeBom = "2025.06.01"
+composeRuntime = "1.8.3"
 
 #Detekt
 detekt = "1.23.8"
@@ -34,7 +34,7 @@ detektFormattingPlugin = "io.gitlab.arturbosch.detekt:detekt-formatting"
 androidVersionGit = "0.4.14"
 
 #Koin
-koin = "4.0.4"
+koin = "4.1.0"
 
 #Markdown
 markdown = "0.7.3"
@@ -47,7 +47,7 @@ coil = "2.7.0"
 supabase = "3.1.4"
 
 #RoomDB
-roomDb = "2.7.1"
+roomDb = "2.7.2"
 
 #Ktor
 ktor = "3.1.3"

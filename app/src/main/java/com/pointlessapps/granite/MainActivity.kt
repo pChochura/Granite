@@ -19,7 +19,6 @@ import androidx.navigation.compose.rememberNavController
 import com.pointlessapps.granite.navigation.Navigation
 import com.pointlessapps.granite.ui.components.theme.ProjectTheme
 import org.koin.android.ext.android.inject
-import org.koin.androidx.compose.KoinAndroidContext
 
 class MainActivity : ComponentActivity() {
 
@@ -36,21 +35,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            KoinAndroidContext {
-                ProjectTheme {
-                    val navigationController = rememberNavController()
-                    CompositionLocalProvider(
-                        LocalTextSelectionColors provides TextSelectionColors(
-                            handleColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                        ),
+            ProjectTheme {
+                val navigationController = rememberNavController()
+                CompositionLocalProvider(
+                    LocalTextSelectionColors provides TextSelectionColors(
+                        handleColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    ),
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.surface,
                     ) {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = MaterialTheme.colorScheme.surface,
-                        ) {
-                            Navigation(navigationController)
-                        }
+                        Navigation(navigationController)
                     }
                 }
             }
