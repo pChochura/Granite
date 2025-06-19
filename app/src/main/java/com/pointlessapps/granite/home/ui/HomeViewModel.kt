@@ -20,16 +20,19 @@ import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.model.ItemOrderType
 import com.pointlessapps.granite.home.model.ItemWithParents
 import com.pointlessapps.granite.home.utils.childrenOf
+import com.pointlessapps.granite.home.utils.parentsOf
 import com.pointlessapps.granite.home.utils.toSortedTree
 import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.mutableStateOf
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -45,7 +48,16 @@ internal data class HomeState(
     val items: List<Item> = emptyList(),
     val deletedItems: List<Item> = emptyList(),
     val isLoading: Boolean = false,
+
+    @IgnoredOnParcel
+    val highlightedItem: Item? = null,
 ) : Parcelable {
+
+    @IgnoredOnParcel
+    val filteredItems = items.filtered()
+
+    @IgnoredOnParcel
+    val filteredDeletedItems = deletedItems.filtered()
 
     private fun List<Item>.filtered() = filter {
         val matchesSearch = it.name.contains(searchValue, ignoreCase = true) ||
@@ -57,12 +69,6 @@ internal data class HomeState(
 
         return@filter (searchValue.isNotBlank() && matchesSearch) || (searchValue.isBlank() && isParentOpened)
     }
-
-    @IgnoredOnParcel
-    val filteredItems = items.filtered()
-
-    @IgnoredOnParcel
-    val filteredDeletedItems = deletedItems.filtered()
 
     fun getFoldersWithParentsExcept(id: Int): List<ItemWithParents> {
         val itemsById = items.associateBy(Item::id)
@@ -140,6 +146,21 @@ internal class HomeViewModel(
     }
 
     fun onItemSelected(item: Item) {
+        if (state.searchValue.isNotBlank()) {
+            state = state.copy(
+                searchValue = "",
+                highlightedItem = item,
+                openedFolderIds = state.openedFolderIds + state.items.parentsOf(item).map { it.id },
+            )
+
+            viewModelScope.launch {
+                delay(500)
+                state = state.copy(highlightedItem = null)
+            }
+
+            return
+        }
+
         if (!item.isFolder) {
             eventChannel.trySend(HomeEvent.CloseDrawer)
             state = state.copy(

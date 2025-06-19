@@ -26,11 +26,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.fuzzy.search.FuzzyPathMatch
-import com.pointlessapps.granite.fuzzy.search.FuzzySearch
+import com.pointlessapps.granite.fuzzy.search.PathMatch
+import com.pointlessapps.granite.fuzzy.search.PathSearch
 import com.pointlessapps.granite.home.model.ItemWithParents
 import com.pointlessapps.granite.ui.components.ComposeDialog
 import com.pointlessapps.granite.ui.components.ComposeDialogDismissible
@@ -90,8 +89,6 @@ internal fun MoveDialog(
                 .padding(dimensionResource(RC.dimen.margin_medium)),
             textFieldStyle = defaultComposeTextFieldStyle().copy(
                 keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    autoCorrectEnabled = true,
                     keyboardType = KeyboardType.Text,
                     showKeyboardOnFocus = true,
                 ),
@@ -103,7 +100,7 @@ internal fun MoveDialog(
 
 @Composable
 private fun LazyItemScope.Item(
-    match: FuzzyPathMatch<ItemWithParents>,
+    match: PathMatch<ItemWithParents>,
     onItemSelected: (ItemWithParents) -> Unit,
 ) {
     Row(
@@ -129,7 +126,7 @@ private fun LazyItemScope.Item(
                     addStyle(
                         style = SpanStyle(fontWeight = FontWeight.Bold),
                         start = range.first,
-                        end = range.last + 1,
+                        end = range.last,
                     )
                 }
             },
@@ -146,10 +143,10 @@ internal data class MoveDialogData(
     val folders: List<ItemWithParents>,
     val query: String = "",
 ) {
-    val filteredFolders: List<FuzzyPathMatch<ItemWithParents>>
+    val filteredFolders: List<PathMatch<ItemWithParents>>
         get() = if (query.isBlank()) {
-            folders.map { FuzzyPathMatch(it) }
+            folders.map { PathMatch(it, emptyList()) }
         } else {
-            FuzzySearch.extractPath(query = query, paths = folders)
+            PathSearch.extractSorted(query = query, paths = folders)
         }
 }

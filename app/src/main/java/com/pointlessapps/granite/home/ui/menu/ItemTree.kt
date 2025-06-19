@@ -1,7 +1,12 @@
 package com.pointlessapps.granite.home.ui.menu
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +20,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -39,10 +48,12 @@ import com.pointlessapps.granite.ui.components.ComposeIcon
 import com.pointlessapps.granite.ui.components.ComposeText
 import com.pointlessapps.granite.ui.components.defaultComposeIconStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import kotlinx.coroutines.delay
 import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun ColumnScope.ItemTree(
+    highlightedItem: Item?,
     items: List<Item>,
     deletedItems: List<Item>,
     searchValue: String,
@@ -51,9 +62,32 @@ internal fun ColumnScope.ItemTree(
     onItemSelected: (Item) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     var isTrashOpened by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(highlightedItem) {
+        highlightedItem?.let { item ->
+            // Account for the divider between sections
+            val index = if (item.deleted) deletedItems.indexOf(item) + 1 else items.indexOf(item)
+            if (item.deleted) {
+                isTrashOpened = true
+            }
+
+            // Wait for the current animations to finish
+            delay(500)
+            listState.animateScrollToItem(index)
+        }
+    }
+
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) {
+            keyboardController?.hide()
+        }
+    }
 
     LazyColumn(
+        state = listState,
         modifier = Modifier
             .weight(1f)
             .fillMaxWidth(),
@@ -66,6 +100,7 @@ internal fun ColumnScope.ItemTree(
             Item(
                 item = item,
                 searchValue = searchValue,
+                isHighlighted = item == highlightedItem,
                 isFileOpened = selectedItemId == item.id,
                 isFolderOpened = openedFolderIds.contains(item.id),
                 onItemSelected = onItemSelected,
@@ -121,6 +156,7 @@ internal fun ColumnScope.ItemTree(
                 Item(
                     item = item,
                     searchValue = searchValue,
+                    isHighlighted = item == highlightedItem,
                     isFileOpened = selectedItemId == item.id,
                     isFolderOpened = openedFolderIds.contains(item.id),
                     onItemSelected = onItemSelected,
@@ -135,17 +171,28 @@ internal fun ColumnScope.ItemTree(
 private fun LazyItemScope.Item(
     item: Item,
     searchValue: String,
+    isHighlighted: Boolean,
     isFileOpened: Boolean,
     isFolderOpened: Boolean,
     onItemSelected: (Item) -> Unit,
     onItemLongClick: (Item) -> Unit,
 ) {
+    val borderColor by animateColorAsState(
+        targetValue = if (isHighlighted) MaterialTheme.colorScheme.primary else Color.Transparent,
+        animationSpec = repeatable(1, tween(500), RepeatMode.Reverse),
+    )
+
     Row(
         modifier = Modifier
             .animateItem()
             .fillMaxWidth()
             .alpha(if (item.deleted) 0.5f else 1f)
             .clip(MaterialTheme.shapes.small)
+            .border(
+                width = dimensionResource(RC.dimen.default_border_width),
+                color = borderColor,
+                shape = MaterialTheme.shapes.small,
+            )
             .then(
                 if (isFileOpened) {
                     Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
@@ -195,7 +242,7 @@ private fun LazyItemScope.Item(
             text = buildAnnotatedString {
                 append(item.name)
                 if (searchValue.isNotBlank()) {
-                    searchValue.toRegex().findAll(item.name).forEach {
+                    searchValue.toRegex(RegexOption.IGNORE_CASE).findAll(item.name).forEach {
                         addStyle(
                             style = SpanStyle(fontWeight = FontWeight.Bold),
                             start = it.range.min(),

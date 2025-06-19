@@ -60,6 +60,7 @@ internal fun LeftSideMenu(
                 onSearchValueChanged = viewModel::onSearchChanged,
             )
             ItemTree(
+                highlightedItem = viewModel.state.highlightedItem,
                 items = viewModel.state.filteredItems,
                 deletedItems = viewModel.state.filteredDeletedItems,
                 searchValue = viewModel.state.searchValue,

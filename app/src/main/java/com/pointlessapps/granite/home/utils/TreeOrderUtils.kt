@@ -27,5 +27,18 @@ internal fun List<Item>.toSortedTree(comparator: Comparator<Item>): List<Item> {
     return sortedList
 }
 
-internal fun List<Item>.childrenOf(folder: Item) = drop(indexOf(folder) + 1)
+internal fun List<Item>.childrenOf(folder: Item) = subList(indexOf(folder) + 1, size)
     .takeWhile { it.indent > folder.indent }
+
+internal fun List<Item>.parentsOf(item: Item): List<Item> {
+    val parents = mutableListOf<Item>()
+    var lastIndent = item.indent
+    for (i in indexOf(item) - 1 downTo 0) {
+        if (this[i].indent < lastIndent) {
+            parents.add(this[i])
+            lastIndent = this[i].indent
+        }
+    }
+
+    return parents.toList()
+}
