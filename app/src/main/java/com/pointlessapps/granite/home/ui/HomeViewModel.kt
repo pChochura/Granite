@@ -310,7 +310,10 @@ internal class HomeViewModel(
         )
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
-            .onEach { note ->
+            .onEach { items ->
+                val note = items.lastOrNull() ?: throw IllegalStateException(
+                    "Note could not be created",
+                )
                 setLastOpenedFileUseCase(note.id).launchIn(viewModelScope)
                 state = state.copy(
                     isLoading = false,
@@ -320,7 +323,7 @@ internal class HomeViewModel(
                         selection = TextRange(0, note.name.length),
                     ),
                     noteContent = TextFieldValue(text = note.content.orEmpty()),
-                    items = (state.items + note.toItem())
+                    items = (state.items + items.map { it.toItem() })
                         .toSortedTree(state.orderType.comparator),
                 )
             }
@@ -340,10 +343,10 @@ internal class HomeViewModel(
         )
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
-            .onEach { folder ->
+            .onEach { folders ->
                 state = state.copy(
                     isLoading = false,
-                    items = (state.items + folder.toItem())
+                    items = (state.items + folders.map { it.toItem() })
                         .toSortedTree(state.orderType.comparator),
                 )
             }
