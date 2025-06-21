@@ -1,5 +1,6 @@
 package com.pointlessapps.granite.home.ui
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.TextRange
@@ -16,9 +17,13 @@ import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
 import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.GetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetLastOpenedFileUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.SetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetLastOpenedFileUseCase
+import com.pointlessapps.granite.home.mapper.fromItemOrderType
 import com.pointlessapps.granite.home.mapper.toItem
+import com.pointlessapps.granite.home.mapper.toItemOrderType
 import com.pointlessapps.granite.home.mapper.toItemWithParents
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.model.ItemOrderType
@@ -41,6 +46,8 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 @Parcelize
 internal data class HomeState(
@@ -110,15 +117,18 @@ internal class HomeViewModel(
     savedStateHandle: SavedStateHandle,
     getNotesUseCase: GetNotesUseCase,
     getLastOpenedFileUseCase: GetLastOpenedFileUseCase,
+    getItemsOrderTypeUseCase: GetItemsOrderTypeUseCase,
     private val setLastOpenedFileUseCase: SetLastOpenedFileUseCase,
+    private val setItemsOrderTypeUseCase: SetItemsOrderTypeUseCase,
     private val updateItemUseCase: UpdateItemUseCase,
     private val createItemUseCase: CreateItemUseCase,
     private val markItemsAsDeletedUseCase: MarkItemsAsDeletedUseCase,
     private val duplicateItemsUseCase: DuplicateItemsUseCase,
     private val deleteItemsUseCase: DeleteItemsUseCase,
     private val moveItemUseCase: MoveItemUseCase,
-    private val untitledNotePlaceholder: String,
-) : ViewModel() {
+) : ViewModel(), KoinComponent {
+
+    private val untitledNotePlaceholder = get<Context>().getString(R.string.untitled)
 
     private val eventChannel = Channel<HomeEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -131,19 +141,22 @@ internal class HomeViewModel(
     init {
         combine(
             getLastOpenedFileUseCase(),
+            getItemsOrderTypeUseCase(),
             getNotesUseCase(),
-        ) { lastOpenedFile, notes -> lastOpenedFile to notes }
+        ) { lastOpenedFile, itemsOrderType, notes -> Triple(lastOpenedFile, itemsOrderType, notes) }
             .take(1)
             .onStart { state = state.copy(isLoading = true) }
-            .onEach { (lastOpenedFile, notes) ->
+            .onEach { (lastOpenedFile, itemsOrderType, notes) ->
                 val (deletedItems, items) = notes.map(Note::toItem).partition(Item::deleted)
+                val orderType = itemsOrderType.toItemOrderType()
                 state = state.copy(
                     isLoading = false,
-                    items = items.toSortedTree(state.orderType.comparator),
-                    deletedItems = deletedItems.toSortedTree(state.orderType.comparator),
+                    items = items.toSortedTree(orderType.comparator),
+                    deletedItems = deletedItems.toSortedTree(orderType.comparator),
                     openedItemId = lastOpenedFile?.id,
                     noteTitle = TextFieldValue(text = lastOpenedFile?.name.orEmpty()),
                     noteContent = TextFieldValue(text = lastOpenedFile?.content.orEmpty()),
+                    orderType = orderType,
                 )
             }
             .catch {
@@ -231,7 +244,7 @@ internal class HomeViewModel(
     }
 
     fun onOrderTypeSelected(orderType: ItemOrderType) {
-        // TODO save the choice to disk
+        setItemsOrderTypeUseCase(orderType.fromItemOrderType()).launchIn(viewModelScope)
         state = state.copy(
             orderType = orderType,
             items = state.items.toSortedTree(orderType.comparator),

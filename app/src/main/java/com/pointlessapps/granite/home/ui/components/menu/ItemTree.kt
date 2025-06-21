@@ -110,11 +110,10 @@ internal fun ColumnScope.ItemTree(
 
         if (deletedItems.isNotEmpty()) {
             item(key = "Deleted") {
-                Column {
-                    HorizontalDivider(modifier = Modifier.animateItem())
+                Column(Modifier.animateItem()) {
+                    HorizontalDivider()
                     Row(
                         modifier = Modifier
-                            .animateItem()
                             .fillMaxWidth()
                             .clip(MaterialTheme.shapes.small)
                             .clickable(

@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.firstOrNull
 interface LocalPrefsDatasource {
     suspend fun setLastOpenedFileId(id: Int?)
     suspend fun getLastOpenedFileId(): Int?
+
+    suspend fun setItemsOrderTypeIndex(orderTypeIndex: Int)
+    suspend fun getItemsOrderTypeIndex(): Int
 }
 
 internal class LocalPrefsDatasourceImpl(
@@ -20,4 +23,13 @@ internal class LocalPrefsDatasourceImpl(
 
     override suspend fun getLastOpenedFileId() =
         prefsDataStore.data.firstOrNull()?.lastOpenedFileId
+
+    override suspend fun setItemsOrderTypeIndex(orderTypeIndex: Int) {
+        prefsDataStore.updateData { prefs ->
+            prefs.copy(itemsOrderTypeIndex = orderTypeIndex)
+        }
+    }
+
+    override suspend fun getItemsOrderTypeIndex() =
+        prefsDataStore.data.firstOrNull()?.itemsOrderTypeIndex ?: 0
 }
