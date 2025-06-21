@@ -37,4 +37,13 @@
     <string name="delete_item_permanently_description">Deletes the item and it cannot be undone</string>
     <string name="deleted">Deleted</string>
     <string name="move_to">Move to…</string>
+    <string name="error_loading_notes">Could not load the notes</string>
+    <string name="error_saving_note">Could not save the note</string>
+    <string name="error_creating_note">Could not create a note</string>
+    <string name="error_creating_folder">Could not create a folder</string>
+    <string name="error_renaming_item">Could not rename the item</string>
+    <string name="error_deleting_item">Could not delete the item</string>
+    <string name="error_restoring_item">Could not restore the item</string>
+    <string name="error_duplicating_item">Could not duplicate the item</string>
+    <string name="error_moving_item">Could not move the item</string>
 </resources>

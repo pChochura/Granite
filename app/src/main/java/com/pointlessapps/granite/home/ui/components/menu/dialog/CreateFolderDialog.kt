@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.ui.menu.dialog
+package com.pointlessapps.granite.home.ui.components.menu.dialog
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.border
@@ -30,22 +30,22 @@ import com.pointlessapps.granite.ui.components.defaultComposeDialogStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextFieldStyle
 
 @Composable
-internal fun RenameDialog(
-    data: RenameDialogData,
+internal fun CreateFolderDialog(
+    data: CreateFolderDialogData,
     onNameChanged: (TextFieldValue) -> Unit,
     onSaveClicked: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    val nameFocusRequester = remember { FocusRequester() }
-    LaunchedEffect(nameFocusRequester) {
-        nameFocusRequester.requestFocus()
+    val newFolderFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(newFolderFocusRequester) {
+        newFolderFocusRequester.requestFocus()
     }
 
     ComposeDialog(
         onDismissRequest = onDismissRequest,
         dialogStyle = defaultComposeDialogStyle().copy(
-            label = stringResource(R.string.rename),
-            iconRes = null,
+            label = stringResource(R.string.create_folder),
+            iconRes = RC.drawable.ic_add_folder,
             dismissible = ComposeDialogDismissible.OnBackPress,
         ),
     ) {
@@ -53,7 +53,7 @@ internal fun RenameDialog(
             value = data.name,
             onValueChange = { onNameChanged(it) },
             modifier = Modifier
-                .focusRequester(nameFocusRequester)
+                .focusRequester(newFolderFocusRequester)
                 .fillMaxWidth()
                 .border(
                     width = dimensionResource(RC.dimen.default_border_width),
@@ -74,7 +74,7 @@ internal fun RenameDialog(
                     imeAction = ImeAction.Done,
                     showKeyboardOnFocus = true,
                 ),
-                placeholder = stringResource(R.string.new_name),
+                placeholder = stringResource(R.string.folder_name),
             ),
         )
 
@@ -100,7 +100,7 @@ internal fun RenameDialog(
     }
 }
 
-internal data class RenameDialogData(
+internal data class CreateFolderDialogData(
     val name: TextFieldValue,
-    val id: Int,
+    val parentId: Int?,
 )

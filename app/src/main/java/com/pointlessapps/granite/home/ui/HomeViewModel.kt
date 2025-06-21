@@ -1,11 +1,13 @@
 package com.pointlessapps.granite.home.ui
 
 import android.os.Parcelable
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pointlessapps.granite.R
 import com.pointlessapps.granite.domain.model.Note
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
@@ -101,6 +103,7 @@ internal data class HomeState(
 
 internal sealed interface HomeEvent {
     data object CloseDrawer : HomeEvent
+    data class ShowSnackbar(@StringRes val message: Int) : HomeEvent
 }
 
 internal class HomeViewModel(
@@ -144,8 +147,9 @@ internal class HomeViewModel(
                 )
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_loading_notes))
             }
             .launchIn(viewModelScope)
     }
@@ -275,8 +279,9 @@ internal class HomeViewModel(
                 )
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_saving_note))
             }
             .launchIn(viewModelScope)
     }
@@ -306,8 +311,9 @@ internal class HomeViewModel(
                 )
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_creating_note))
             }
             .launchIn(viewModelScope)
     }
@@ -328,8 +334,9 @@ internal class HomeViewModel(
                 )
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_creating_folder))
             }
             .launchIn(viewModelScope)
     }
@@ -361,8 +368,9 @@ internal class HomeViewModel(
                 }
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_renaming_item))
             }
             .launchIn(viewModelScope)
     }
@@ -391,8 +399,9 @@ internal class HomeViewModel(
                 }
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_deleting_item))
             }
             .launchIn(viewModelScope)
     }
@@ -418,8 +427,9 @@ internal class HomeViewModel(
                 }
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_deleting_item))
             }
             .launchIn(viewModelScope)
     }
@@ -443,8 +453,9 @@ internal class HomeViewModel(
                 )
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_restoring_item))
             }
             .launchIn(viewModelScope)
     }
@@ -466,8 +477,9 @@ internal class HomeViewModel(
                 )
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_duplicating_item))
             }
             .launchIn(viewModelScope)
     }
@@ -489,8 +501,9 @@ internal class HomeViewModel(
                 )
             }
             .catch {
-                state = state.copy(isLoading = false)
                 it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_moving_item))
             }
             .launchIn(viewModelScope)
     }

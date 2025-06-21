@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.ui.menu
+package com.pointlessapps.granite.home.ui.components.menu
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode

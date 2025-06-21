@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.ui
+package com.pointlessapps.granite.home.ui.components
 
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.home.ui.HomeViewModel
 import com.pointlessapps.granite.home.utils.NoOpBringIntoViewSpec
 import com.pointlessapps.granite.ui.components.ComposeMarkdownTextField
 import com.pointlessapps.granite.ui.components.ComposeTextField

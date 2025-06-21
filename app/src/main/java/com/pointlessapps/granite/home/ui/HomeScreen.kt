@@ -38,8 +38,11 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.pointlessapps.granite.LocalSnackbarHostState
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.home.ui.menu.LeftSideMenu
+import com.pointlessapps.granite.home.ui.components.Editor
+import com.pointlessapps.granite.home.ui.components.StartupPage
+import com.pointlessapps.granite.home.ui.components.menu.LeftSideMenu
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.ui.components.ComposeIconButton
 import com.pointlessapps.granite.ui.components.ComposeLoader
@@ -57,6 +60,7 @@ internal fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onNavigateTo: (Route) -> Unit,
 ) {
+    val localSnackbarHostState = LocalSnackbarHostState.current
     val focusManager = LocalFocusManager.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
@@ -66,6 +70,7 @@ internal fun HomeScreen(
             viewModel.events.collect {
                 when (it) {
                     is HomeEvent.CloseDrawer -> drawerState.close()
+                    is HomeEvent.ShowSnackbar -> localSnackbarHostState.showSnackbar(it.message)
                 }
             }
         }

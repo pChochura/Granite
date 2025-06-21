@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.ui
+package com.pointlessapps.granite.home.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.home.ui.HomeViewModel
 import com.pointlessapps.granite.ui.components.ComposeButton
 import com.pointlessapps.granite.ui.components.defaultComposeButtonStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextStyle

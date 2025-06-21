@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.ui.menu.dialog
+package com.pointlessapps.granite.home.ui.components.menu.dialog
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.ui.menu
+package com.pointlessapps.granite.home.ui.components.menu
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,13 +20,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.ui.HomeViewModel
-import com.pointlessapps.granite.home.ui.menu.dialog.CreateFolderDialog
-import com.pointlessapps.granite.home.ui.menu.dialog.CreateFolderDialogData
-import com.pointlessapps.granite.home.ui.menu.dialog.MoveDialog
-import com.pointlessapps.granite.home.ui.menu.dialog.MoveDialogData
-import com.pointlessapps.granite.home.ui.menu.dialog.OrderTypeDialog
-import com.pointlessapps.granite.home.ui.menu.dialog.RenameDialog
-import com.pointlessapps.granite.home.ui.menu.dialog.RenameDialogData
+import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialogData
+import com.pointlessapps.granite.home.ui.components.menu.dialog.MoveDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.MoveDialogData
+import com.pointlessapps.granite.home.ui.components.menu.dialog.OrderTypeDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.RenameDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.RenameDialogData
 import kotlinx.coroutines.launch
 import com.pointlessapps.granite.ui.R as RC
 

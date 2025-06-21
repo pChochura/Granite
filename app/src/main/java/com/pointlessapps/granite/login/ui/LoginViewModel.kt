@@ -1,5 +1,6 @@
 package com.pointlessapps.granite.login.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 
 internal sealed interface LoginEvent {
     data class NavigateTo(val route: Route) : LoginEvent
+    data class ShowSnackbar(@StringRes val message: Int) : LoginEvent
 }
 
 internal data class HomeState(

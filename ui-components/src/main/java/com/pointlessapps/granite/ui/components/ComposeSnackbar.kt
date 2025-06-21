@@ -10,12 +10,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import com.pointlessapps.granite.ui.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun ComposeSnackbar(
@@ -87,7 +93,7 @@ class ComposeSnackbarHostState(private val onShowSnackbarListener: SnackbarHostL
         duration = duration,
     )
 
-    interface SnackbarHostListener {
+    fun interface SnackbarHostListener {
         fun showSnackbar(
             @StringRes message: Int,
             @StringRes actionLabel: Int?,
@@ -95,5 +101,40 @@ class ComposeSnackbarHostState(private val onShowSnackbarListener: SnackbarHostL
             dismissCallback: (() -> Unit)?,
             duration: SnackbarDuration,
         )
+    }
+}
+
+@Composable
+fun rememberComposeSnackbarHostState(
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+): ComposeSnackbarHostState {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    return remember {
+        ComposeSnackbarHostState { message, actionLabel, actionCallback, dismissCallback, duration ->
+            // Ignore a snackbar if the same is already displayed
+            snackbarHostState.currentSnackbarData?.let {
+                if (
+                    it.visuals.message == context.getString(message) &&
+                    it.visuals.actionLabel == actionLabel?.let(context::getString) &&
+                    it.visuals.duration == duration
+                ) {
+                    return@ComposeSnackbarHostState
+                }
+            }
+
+            coroutineScope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = context.getString(message),
+                    actionLabel = actionLabel?.let(context::getString),
+                    duration = duration,
+                )
+                when (result) {
+                    SnackbarResult.ActionPerformed -> actionCallback?.invoke()
+                    SnackbarResult.Dismissed -> dismissCallback?.invoke()
+                }
+            }
+        }
     }
 }
