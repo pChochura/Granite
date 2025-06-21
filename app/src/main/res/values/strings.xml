@@ -36,5 +36,5 @@
     <string name="delete_permanently">Delete permanently</string>
     <string name="delete_item_permanently_description">Deletes the item and it cannot be undone</string>
     <string name="deleted">Deleted</string>
-    <string name="move_to">Move to...</string>
+    <string name="move_to">Move to…</string>
 </resources>
