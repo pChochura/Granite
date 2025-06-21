@@ -1,6 +1,5 @@
 package com.pointlessapps.granite.ui.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,7 +11,6 @@ import com.pointlessapps.granite.markdown.renderer.MarkdownTransformation
 import com.pointlessapps.granite.markdown.renderer.styles.draw
 import com.pointlessapps.granite.markdown.renderer.styles.rememberMarkdownSpanStyles
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ComposeMarkdownTextField(
     value: TextFieldValue,
