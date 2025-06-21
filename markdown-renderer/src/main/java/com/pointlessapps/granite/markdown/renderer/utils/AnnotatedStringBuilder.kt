@@ -15,11 +15,15 @@ import androidx.compose.ui.util.fastForEach
  * indentation of the [ParagraphStyle].
  */
 internal fun buildAnnotatedString(
+    originalText: AnnotatedString,
     text: String,
-    styles: List<AnnotatedString.Range<AnnotatedString.Annotation>>,
+    styles: List<AnnotatedString.Range<out AnnotatedString.Annotation>>,
 ) = buildAnnotatedString {
+    val originalStyles = mutableListOf<AnnotatedString.Range<out AnnotatedString.Annotation>>()
+    originalText.mapAnnotations { it.also(originalStyles::add) }
+
     append(text)
-    val sortedStyles = styles.sortedBy { it.start }
+    val sortedStyles = (originalStyles + styles).sortedBy { it.start }
     var currentIndent: TextIndent
     val paragraphStyleStack = mutableListOf<AnnotatedString.Range<ParagraphStyle>>()
     sortedStyles.fastForEach { style ->

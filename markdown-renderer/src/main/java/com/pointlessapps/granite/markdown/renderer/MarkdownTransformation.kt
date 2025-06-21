@@ -7,8 +7,6 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.fastMapNotNull
-import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianElementTypes
-import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianFlavourDescriptor
 import com.pointlessapps.granite.markdown.renderer.models.AccumulateStylesResult
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.MarkdownParsingResult
@@ -38,6 +36,8 @@ import com.pointlessapps.granite.markdown.renderer.processors.StrikethroughProce
 import com.pointlessapps.granite.markdown.renderer.processors.UnorderedListProcessor
 import com.pointlessapps.granite.markdown.renderer.utils.buildAnnotatedString
 import com.pointlessapps.granite.markdown.renderer.utils.processNode
+import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianElementTypes
+import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianFlavourDescriptor
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
@@ -52,6 +52,7 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
     private var markdownParsingResult: MarkdownParsingResult? = null
 
     private val parser = MarkdownParser(ObsidianFlavourDescriptor())
+    private val structureHighlighter = StructureHighlighter()
     private val linkInteractionListener: LinkInteractionListener? = null
 
     private val processors: Map<IElementType, NodeProcessor> = mapOf(
@@ -174,21 +175,30 @@ class MarkdownTransformation(private var currentCursorPosition: TextRange) : Vis
         }
 
         val offsetMapping = MarkdownOffsetMapping(result.markers, originalText.length)
-        val transformedStyles = result.styles.fastMapNotNull { style ->
-            val newStart = offsetMapping.originalToTransformed(style.start)
-            val newEnd = offsetMapping.originalToTransformed(style.end)
-            if (newStart < newEnd) {
-                AnnotatedString.Range(
-                    item = style.item,
-                    start = max(0, newStart),
-                    end = min(newEnd, transformedTextBuilder.length),
-                    tag = style.tag,
-                )
-            } else null
-        }
+        val structureHighlighterStyles = structureHighlighter.processCursorPosition(
+            text = text.text,
+            cursorPosition = currentCursorPosition,
+        )
+        val transformedStyles = (result.styles + structureHighlighterStyles)
+            .fastMapNotNull { style ->
+                val newStart = offsetMapping.originalToTransformed(style.start)
+                val newEnd = offsetMapping.originalToTransformed(style.end)
+                if (newStart < newEnd) {
+                    AnnotatedString.Range(
+                        item = style.item,
+                        start = max(0, newStart),
+                        end = min(newEnd, transformedTextBuilder.length),
+                        tag = style.tag,
+                    )
+                } else null
+            }
 
         return TransformedText(
-            text = buildAnnotatedString(transformedTextBuilder.toString(), transformedStyles),
+            text = buildAnnotatedString(
+                originalText = text,
+                text = transformedTextBuilder.toString(),
+                styles = transformedStyles,
+            ),
             offsetMapping = offsetMapping,
         )
     }
