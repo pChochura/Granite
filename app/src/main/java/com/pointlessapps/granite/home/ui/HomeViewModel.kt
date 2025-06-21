@@ -21,6 +21,7 @@ import com.pointlessapps.granite.domain.prefs.usecase.GetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetLastOpenedFileUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetLastOpenedFileUseCase
+import com.pointlessapps.granite.fuzzy.search.FuzzySearch
 import com.pointlessapps.granite.home.mapper.fromItemOrderType
 import com.pointlessapps.granite.home.mapper.toItem
 import com.pointlessapps.granite.home.mapper.toItemOrderType
@@ -72,7 +73,7 @@ internal data class HomeState(
     val filteredDeletedItems = deletedItems.filtered()
 
     private fun List<Item>.filtered() = filter {
-        val matchesSearch = it.name.contains(searchValue, ignoreCase = true) ||
+        val matchesSearch = FuzzySearch.extractWords(searchValue, it.name) != null ||
                 it.content?.contains(searchValue, ignoreCase = true) == true
 
         val isParentOpened = it.parentId !in this.map(Item::id) ||

@@ -28,8 +28,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.fuzzy.search.PathMatch
-import com.pointlessapps.granite.fuzzy.search.PathSearch
+import com.pointlessapps.granite.fuzzy.search.SearchMatch
+import com.pointlessapps.granite.fuzzy.search.FuzzySearch
 import com.pointlessapps.granite.home.model.ItemWithParents
 import com.pointlessapps.granite.ui.components.ComposeDialog
 import com.pointlessapps.granite.ui.components.ComposeDialogDismissible
@@ -100,7 +100,7 @@ internal fun MoveDialog(
 
 @Composable
 private fun LazyItemScope.Item(
-    match: PathMatch<ItemWithParents>,
+    match: SearchMatch<ItemWithParents>,
     onItemSelected: (ItemWithParents) -> Unit,
 ) {
     Row(
@@ -143,10 +143,10 @@ internal data class MoveDialogData(
     val folders: List<ItemWithParents>,
     val query: String = "",
 ) {
-    val filteredFolders: List<PathMatch<ItemWithParents>>
+    val filteredFolders: List<SearchMatch<ItemWithParents>>
         get() = if (query.isBlank()) {
-            folders.map { PathMatch(it, emptyList()) }
+            folders.map { SearchMatch(it, emptyList()) }
         } else {
-            PathSearch.extractSorted(query = query, paths = folders)
+            FuzzySearch.extractPathsSorted(query = query, paths = folders)
         }
 }

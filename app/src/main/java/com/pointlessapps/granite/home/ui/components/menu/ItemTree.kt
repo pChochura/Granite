@@ -43,6 +43,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.fuzzy.search.FuzzySearch
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.ui.components.ComposeIcon
 import com.pointlessapps.granite.ui.components.ComposeText
@@ -181,6 +182,10 @@ private fun LazyItemScope.Item(
         animationSpec = repeatable(1, tween(500), RepeatMode.Reverse),
     )
 
+    val searchMatches = remember(searchValue) {
+        FuzzySearch.extractWords(searchValue, item.name)
+    }
+
     Row(
         modifier = Modifier
             .animateItem()
@@ -241,11 +246,11 @@ private fun LazyItemScope.Item(
             text = buildAnnotatedString {
                 append(item.name)
                 if (searchValue.isNotBlank()) {
-                    searchValue.toRegex(RegexOption.IGNORE_CASE).findAll(item.name).forEach {
+                    searchMatches?.matches?.forEach {
                         addStyle(
                             style = SpanStyle(fontWeight = FontWeight.Bold),
-                            start = it.range.min(),
-                            end = it.range.max() + 1,
+                            start = it.first,
+                            end = it.last,
                         )
                     }
                 }

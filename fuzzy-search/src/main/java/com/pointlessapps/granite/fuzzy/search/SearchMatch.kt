@@ -1,10 +1,10 @@
 package com.pointlessapps.granite.fuzzy.search
 
-data class PathMatch<T>(
+data class SearchMatch<T>(
     val item: T,
     val matches: List<IntRange>,
-) : Comparable<PathMatch<T>> {
-    override fun compareTo(other: PathMatch<T>): Int {
+) : Comparable<SearchMatch<T>> {
+    override fun compareTo(other: SearchMatch<T>): Int {
         val matchesSizeDiff = matches.size - other.matches.size
         if (matchesSizeDiff != 0) return matchesSizeDiff
 
