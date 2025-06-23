@@ -125,7 +125,7 @@ internal fun ItemPropertiesBottomSheet(
                 }
 
                 ItemPropertiesButton(
-                    iconRes = RC.drawable.ic_move_handle,
+                    iconRes = RC.drawable.ic_move,
                     label = if (item.isFolder) R.string.move_folder else R.string.move_file,
                     color = MaterialTheme.colorScheme.onSurface,
                     onClick = {
@@ -134,7 +134,7 @@ internal fun ItemPropertiesBottomSheet(
                     },
                 )
                 ItemPropertiesButton(
-                    iconRes = RC.drawable.ic_duplicate,
+                    iconRes = if (item.isFolder) RC.drawable.ic_duplicate_folder else RC.drawable.ic_duplicate_file,
                     label = R.string.duplicate,
                     color = MaterialTheme.colorScheme.onSurface,
                     onClick = {
