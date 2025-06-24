@@ -22,7 +22,7 @@ internal sealed interface LoginEvent {
     data class ShowSnackbar(@StringRes val message: Int) : LoginEvent
 }
 
-internal data class HomeState(
+internal data class LoginState(
     val email: String = "",
     val password: String = "",
     val isLoading: Boolean = false,
@@ -34,7 +34,7 @@ internal class LoginViewModel(
     private val signInAnonymouslyUseCase: SignInAnonymouslyUseCase,
 ) : ViewModel() {
 
-    var state by mutableStateOf(HomeState())
+    var state by mutableStateOf(LoginState())
         private set
 
     private val eventChannel = Channel<LoginEvent>()

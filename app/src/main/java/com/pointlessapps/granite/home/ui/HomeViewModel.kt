@@ -1,22 +1,15 @@
 package com.pointlessapps.granite.home.ui
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.StringRes
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.domain.model.Note
-import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
-import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
-import com.pointlessapps.granite.domain.note.usecase.DuplicateItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
-import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
 import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
-import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetLastOpenedFileUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetItemsOrderTypeUseCase
@@ -29,6 +22,8 @@ import com.pointlessapps.granite.home.mapper.toItemWithParents
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.model.ItemOrderType
 import com.pointlessapps.granite.home.model.ItemWithParents
+import com.pointlessapps.granite.home.ui.delegates.ItemCreationDelegate
+import com.pointlessapps.granite.home.ui.delegates.ItemDeletionDelegate
 import com.pointlessapps.granite.home.utils.childrenOf
 import com.pointlessapps.granite.home.utils.parentsOf
 import com.pointlessapps.granite.home.utils.toSortedTree
@@ -48,7 +43,8 @@ import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
+import org.koin.core.component.inject
+import org.koin.core.parameter.parametersOf
 
 @Parcelize
 internal data class HomeState(
@@ -119,17 +115,11 @@ internal class HomeViewModel(
     getNotesUseCase: GetNotesUseCase,
     getLastOpenedFileUseCase: GetLastOpenedFileUseCase,
     getItemsOrderTypeUseCase: GetItemsOrderTypeUseCase,
-    private val setLastOpenedFileUseCase: SetLastOpenedFileUseCase,
-    private val setItemsOrderTypeUseCase: SetItemsOrderTypeUseCase,
-    private val updateItemUseCase: UpdateItemUseCase,
-    private val createItemUseCase: CreateItemUseCase,
-    private val markItemsAsDeletedUseCase: MarkItemsAsDeletedUseCase,
-    private val duplicateItemsUseCase: DuplicateItemsUseCase,
-    private val deleteItemsUseCase: DeleteItemsUseCase,
-    private val moveItemUseCase: MoveItemUseCase,
 ) : ViewModel(), KoinComponent {
 
-    private val untitledNotePlaceholder = get<Context>().getString(R.string.untitled)
+    private val setLastOpenedFileUseCase: SetLastOpenedFileUseCase by inject()
+    private val setItemsOrderTypeUseCase: SetItemsOrderTypeUseCase by inject()
+    private val moveItemUseCase: MoveItemUseCase by inject()
 
     private val eventChannel = Channel<HomeEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -137,7 +127,14 @@ internal class HomeViewModel(
     var state by savedStateHandle.mutableStateOf(HomeState())
         private set
 
-    private var openedFilesStack by savedStateHandle.mutableStateOf(emptyList<Int>())
+    private val itemCreationDelegate: ItemCreationDelegate by inject { parametersOf(savedStateHandle) }
+    private val itemDeletionDelegate: ItemDeletionDelegate by inject()
+
+    private var openedFilesStack: List<Int>
+        get() = itemCreationDelegate.openedFilesStack
+        set(value) {
+            itemCreationDelegate.openedFilesStack = value
+        }
 
     init {
         combine(
@@ -225,18 +222,14 @@ internal class HomeViewModel(
         }
 
         if (state.openedFolderIds.contains(item.id)) {
-            closeNestedFolder(item)
+            val items = if (item.deleted) state.deletedItems else state.items
+            val innerFoldersIds = items.childrenOf(item)
+                .mapNotNull { if (it.isFolder) it.id else null }
+
+            state = state.copy(openedFolderIds = state.openedFolderIds - innerFoldersIds - item.id)
         } else {
             state = state.copy(openedFolderIds = state.openedFolderIds + item.id)
         }
-    }
-
-    private fun closeNestedFolder(item: Item) {
-        val items = if (item.deleted) state.deletedItems else state.items
-        val innerFoldersIds = items.childrenOf(item)
-            .mapNotNull { if (it.isFolder) it.id else null }
-
-        state = state.copy(openedFolderIds = state.openedFolderIds - innerFoldersIds - item.id)
     }
 
     fun onAddFileClicked(parentId: Int? = null) {
@@ -269,236 +262,77 @@ internal class HomeViewModel(
     }
 
     fun saveNote(silently: Boolean = false) {
-        updateItemUseCase(
-            id = state.openedItemId ?: return,
-            name = state.noteTitle.text.ifBlank { untitledNotePlaceholder },
-            content = state.noteContent.text,
-            parentId = state.items.find { it.id == state.openedItemId }?.parentId,
-        )
-            .take(1)
-            .onStart { if (!silently) state = state.copy(isLoading = true) }
-            .onEach { note ->
-                state = state.copy(
-                    isLoading = false,
-                    openedItemId = note.id,
-                    noteTitle = state.noteTitle.copy(text = note.name),
-                    noteContent = state.noteContent.copy(text = note.content.orEmpty()),
-                    items = state.items.map {
-                        if (it.id == note.id) {
-                            note.toItem().copy(indent = it.indent)
-                        } else {
-                            it
-                        }
-                    },
-                )
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_saving_note))
-            }
-            .launchIn(viewModelScope)
+        itemCreationDelegate.saveNote(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
+            silently = silently,
+        )?.launchIn(viewModelScope)
     }
 
     private fun createNote(parentId: Int?) {
-        state.openedItemId?.also { openedFilesStack = openedFilesStack + it }
-
-        createItemUseCase(
-            name = untitledNotePlaceholder,
-            content = "",
+        itemCreationDelegate.createNote(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
             parentId = parentId,
-        )
-            .take(1)
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach { items ->
-                val note = items.lastOrNull() ?: throw IllegalStateException(
-                    "Note could not be created",
-                )
-                setLastOpenedFileUseCase(note.id).launchIn(viewModelScope)
-                state = state.copy(
-                    isLoading = false,
-                    openedItemId = note.id,
-                    noteTitle = TextFieldValue(
-                        text = note.name,
-                        selection = TextRange(0, note.name.length),
-                    ),
-                    noteContent = TextFieldValue(text = note.content.orEmpty()),
-                    items = (state.items + items.map { it.toItem() })
-                        .toSortedTree(state.orderType.comparator),
-                )
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_creating_note))
-            }
-            .launchIn(viewModelScope)
+        ).launchIn(viewModelScope)
     }
 
     fun createFolder(name: String, parentId: Int?) {
-        createItemUseCase(
+        itemCreationDelegate.createFolder(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
             name = name,
-            content = null,
             parentId = parentId,
-        )
-            .take(1)
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach { folders ->
-                state = state.copy(
-                    isLoading = false,
-                    items = (state.items + folders.map { it.toItem() })
-                        .toSortedTree(state.orderType.comparator),
-                )
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_creating_folder))
-            }
-            .launchIn(viewModelScope)
+        ).launchIn(viewModelScope)
     }
 
     fun renameItem(id: Int, name: String) {
-        val item = state.items.find { it.id == id }
-        updateItemUseCase(
+        itemCreationDelegate.renameItem(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
             id = id,
             name = name,
-            content = item?.content,
-            parentId = item?.parentId,
-        )
-            .take(1)
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach {
-                state = state.copy(
-                    isLoading = false,
-                    items = state.items.map {
-                        if (it.id == id) {
-                            it.copy(name = name)
-                        } else {
-                            it
-                        }
-                    }.toSortedTree(state.orderType.comparator),
-                )
-
-                if (id == state.openedItemId) {
-                    state = state.copy(noteTitle = state.noteTitle.copy(text = name))
-                }
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_renaming_item))
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun deleteItem(id: Int) {
-        val item = state.items.find { it.id == id } ?: return
-        val items = listOf(item.copy(deleted = true)) + if (item.isFolder) {
-            state.items.childrenOf(item).map { it.copy(deleted = true) }
-        } else emptyList()
-        val ids = items.map(Item::id)
-
-        markItemsAsDeletedUseCase(ids, deleted = true)
-            .take(1)
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach {
-                closeNestedFolder(item)
-                state = state.copy(
-                    isLoading = false,
-                    items = state.items.filter { it.id !in ids },
-                    deletedItems = (state.deletedItems + items)
-                        .toSortedTree(state.orderType.comparator),
-                )
-
-                if (state.openedItemId in ids) {
-                    state = state.copy(openedItemId = null)
-                }
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_deleting_item))
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun deleteItemPermanently(id: Int) {
-        val item = state.deletedItems.find { it.id == id } ?: return
-        val ids = if (item.isFolder) {
-            state.deletedItems.childrenOf(item).map(Item::id) + id
-        } else listOf(id)
-
-        deleteItemsUseCase(ids)
-            .take(1)
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach {
-                closeNestedFolder(item)
-                state = state.copy(
-                    isLoading = false,
-                    deletedItems = state.deletedItems.filter { it.id !in ids },
-                )
-
-                if (state.openedItemId in ids) {
-                    state = state.copy(openedItemId = null)
-                }
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_deleting_item))
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun restoreItem(id: Int) {
-        val item = state.deletedItems.find { it.id == id } ?: return
-        val items = listOf(item.copy(deleted = false)) + if (item.isFolder) {
-            state.deletedItems.childrenOf(item).map { it.copy(deleted = false) }
-        } else emptyList()
-        val ids = items.map(Item::id)
-
-        markItemsAsDeletedUseCase(ids, deleted = false)
-            .take(1)
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach {
-                closeNestedFolder(item)
-                state = state.copy(
-                    isLoading = false,
-                    items = (state.items + items).toSortedTree(state.orderType.comparator),
-                    deletedItems = state.deletedItems.filter { it.id !in ids },
-                )
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_restoring_item))
-            }
-            .launchIn(viewModelScope)
+        ).launchIn(viewModelScope)
     }
 
     fun duplicateItem(id: Int) {
-        val item = state.items.find { it.id == id } ?: return
-        val ids = listOf(id) + if (item.isFolder) {
-            state.items.childrenOf(item).map(Item::id)
-        } else emptyList()
+        itemCreationDelegate.duplicateItem(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
+            id = id,
+        )?.launchIn(viewModelScope)
+    }
 
-        duplicateItemsUseCase(ids)
-            .take(1)
-            .onStart { state = state.copy(isLoading = true) }
-            .onEach { notes ->
-                state = state.copy(
-                    isLoading = false,
-                    items = (state.items + notes.map(Note::toItem))
-                        .toSortedTree(state.orderType.comparator),
-                )
-            }
-            .catch {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_duplicating_item))
-            }
-            .launchIn(viewModelScope)
+    fun deleteItem(id: Int) {
+        itemDeletionDelegate.deleteItem(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
+            id = id,
+        )?.launchIn(viewModelScope)
+    }
+
+    fun deleteItemPermanently(id: Int) {
+        itemDeletionDelegate.deleteItemPermanently(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
+            id = id,
+        )?.launchIn(viewModelScope)
+    }
+
+    fun restoreItem(id: Int) {
+        itemDeletionDelegate.restoreItem(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
+            id = id,
+        )?.launchIn(viewModelScope)
     }
 
     fun moveItem(id: Int, newParentId: Int?) {
