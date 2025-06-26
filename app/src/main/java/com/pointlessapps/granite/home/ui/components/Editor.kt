@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -48,6 +49,7 @@ import com.pointlessapps.granite.ui.R as RC
 internal fun Editor(
     viewModel: HomeViewModel,
     contentPadding: PaddingValues,
+    drawerState: DrawerState,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val editorFocusRequester = remember { FocusRequester() }
@@ -55,7 +57,7 @@ internal fun Editor(
     var previousNoteTitle by remember { mutableStateOf(TextFieldValue()) }
     var previousNoteContent by remember { mutableStateOf(TextFieldValue()) }
 
-    PredictiveBackHandler(viewModel.peekFileFromStack() != null) { progress ->
+    PredictiveBackHandler(drawerState.isClosed && viewModel.peekFileFromStack() != null) { progress ->
         val nextItem = viewModel.peekFileFromStack() ?: return@PredictiveBackHandler progress.collect()
         previousNoteTitle = TextFieldValue(nextItem.name)
         previousNoteContent = TextFieldValue(nextItem.content.orEmpty())

@@ -123,6 +123,7 @@ internal fun HomeScreen(
                             Editor(
                                 viewModel = viewModel,
                                 contentPadding = contentPadding,
+                                drawerState = drawerState,
                             )
                         }
                     }
