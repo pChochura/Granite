@@ -29,7 +29,11 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +47,8 @@ import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.ui.components.Editor
 import com.pointlessapps.granite.home.ui.components.StartupPage
 import com.pointlessapps.granite.home.ui.components.menu.LeftSideMenu
+import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialogData
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.ui.components.ComposeIconButton
 import com.pointlessapps.granite.ui.components.ComposeLoader
@@ -65,12 +71,15 @@ internal fun HomeScreen(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 
+    var confirmationDialogData by remember { mutableStateOf<ConfirmationDialogData?>(null) }
+
     LifecycleResumeEffect(Unit) {
         coroutineScope.launch {
             viewModel.events.collect {
                 when (it) {
                     is HomeEvent.CloseDrawer -> drawerState.close()
                     is HomeEvent.ShowSnackbar -> localSnackbarHostState.showSnackbar(it.message)
+                    is HomeEvent.ShowConfirmationDialog -> confirmationDialogData = it.data
                 }
             }
         }
@@ -123,6 +132,13 @@ internal fun HomeScreen(
             ComposeLoader(viewModel.state.isLoading)
         }
     )
+
+    confirmationDialogData?.let { data ->
+        ConfirmationDialog(
+            data = data,
+            onDismissRequest = { confirmationDialogData = null },
+        )
+    }
 }
 
 @Composable

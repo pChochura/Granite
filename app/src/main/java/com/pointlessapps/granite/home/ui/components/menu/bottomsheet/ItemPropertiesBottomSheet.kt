@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.ui.components.menu
+package com.pointlessapps.granite.home.ui.components.menu.bottomsheet
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -79,7 +79,7 @@ internal fun ItemPropertiesBottomSheet(
                 )
             }
 
-            HorizontalDivider()
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
 
             if (item.deleted) {
                 ItemPropertiesButton(
@@ -121,7 +121,7 @@ internal fun ItemPropertiesBottomSheet(
                             onDismissRequest()
                         },
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 }
 
                 ItemPropertiesButton(
@@ -142,7 +142,7 @@ internal fun ItemPropertiesBottomSheet(
                         onDismissRequest()
                     },
                 )
-                HorizontalDivider()
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ItemPropertiesButton(
                     iconRes = RC.drawable.ic_share,
                     label = R.string.share,
@@ -152,7 +152,7 @@ internal fun ItemPropertiesBottomSheet(
                         onDismissRequest()
                     },
                 )
-                HorizontalDivider()
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ItemPropertiesButton(
                     iconRes = RC.drawable.ic_edit,
                     label = R.string.rename,

@@ -94,6 +94,7 @@ internal fun ColumnScope.ItemTree(
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
         contentPadding = PaddingValues(
+            top = dimensionResource(RC.dimen.margin_medium),
             bottom = dimensionResource(RC.dimen.margin_huge),
         ),
     ) {
@@ -112,14 +113,15 @@ internal fun ColumnScope.ItemTree(
         if (deletedItems.isNotEmpty()) {
             item(key = "Deleted") {
                 Column(Modifier.animateItem()) {
-                    HorizontalDivider()
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(MaterialTheme.shapes.small)
                             .clickable(
                                 role = Role.Button,
-                                onClick = { isTrashOpened = !isTrashOpened })
+                                onClick = { isTrashOpened = !isTrashOpened },
+                            )
                             .padding(
                                 vertical = dimensionResource(RC.dimen.margin_tiny),
                                 horizontal = dimensionResource(RC.dimen.margin_nano),

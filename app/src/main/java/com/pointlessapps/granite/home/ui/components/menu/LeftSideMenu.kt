@@ -1,7 +1,8 @@
 package com.pointlessapps.granite.home.ui.components.menu
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -20,6 +21,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.ui.HomeViewModel
+import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertiesBottomSheet
+import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertyAction
 import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialog
 import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialogData
 import com.pointlessapps.granite.home.ui.components.menu.dialog.MoveDialog
@@ -52,9 +55,9 @@ internal fun LeftSideMenu(
                 .weight(1f)
                 .padding(horizontal = dimensionResource(RC.dimen.margin_medium))
                 .padding(top = dimensionResource(RC.dimen.margin_medium)),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_medium)),
         ) {
             TitleBar()
+            Spacer(Modifier.height(dimensionResource(RC.dimen.margin_medium)))
             SearchBar(
                 searchValue = viewModel.state.searchValue,
                 onSearchValueChanged = viewModel::onSearchChanged,
@@ -73,6 +76,13 @@ internal fun LeftSideMenu(
                         itemPropertiesBottomSheetState.show()
                     }
                 },
+            )
+        }
+
+        if (viewModel.state.dailyNotesEnabled) {
+            DailyNoteButton(
+                exists = viewModel.state.todayDailyNoteExists,
+                onClick = viewModel::onDailyNoteClicked,
             )
         }
 

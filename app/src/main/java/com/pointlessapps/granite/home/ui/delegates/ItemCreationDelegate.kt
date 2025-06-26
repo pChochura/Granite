@@ -82,21 +82,22 @@ internal class ItemCreationDelegate(
         state: HomeState,
         setState: (HomeState) -> Unit,
         eventChannel: Channel<HomeEvent>,
+        name: String = untitledNotePlaceholder,
         parentId: Int?,
     ): Flow<*> {
         state.openedItemId?.also { openedFilesStack = openedFilesStack + it }
 
         return createItemUseCase(
-            name = untitledNotePlaceholder,
+            name = name,
             content = "",
             parentId = parentId,
         )
             .take(1)
             .onStart { setState(state.copy(isLoading = true)) }
             .onEach { items ->
-                val note = items.lastOrNull() ?: throw IllegalStateException(
-                    "Note could not be created",
-                )
+                // It has to contain at least one element
+                // Otherwise throw an error
+                val note = items.last()
                 setState(
                     state.copy(
                         isLoading = false,
@@ -111,7 +112,7 @@ internal class ItemCreationDelegate(
                     ),
                 )
             }
-            .flatMapMerge { setLastOpenedFileUseCase(it.lastOrNull()?.id) }
+            .flatMapMerge { setLastOpenedFileUseCase(it.last().id) }
             .catch {
                 it.printStackTrace()
                 setState(state.copy(isLoading = false))

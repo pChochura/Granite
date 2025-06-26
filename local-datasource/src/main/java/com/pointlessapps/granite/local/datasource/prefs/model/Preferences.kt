@@ -6,4 +6,7 @@ import kotlinx.serialization.Serializable
 internal data class Preferences(
     val lastOpenedFileId: Int? = null,
     val itemsOrderTypeIndex: Int = 0,
+    val dailyNotesEnabled: Boolean = true,
+    val dailyNotesFolderName: String = "Journal",
+    val dailyNotesFolderId: Int? = null,
 )

@@ -10,6 +10,9 @@ import com.pointlessapps.granite.R
 import com.pointlessapps.granite.domain.model.Note
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.CreateDailyNotesFolderUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.GetDailyNotesEnabledUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.GetDailyNotesFolderUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetLastOpenedFileUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetItemsOrderTypeUseCase
@@ -22,6 +25,7 @@ import com.pointlessapps.granite.home.mapper.toItemWithParents
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.model.ItemOrderType
 import com.pointlessapps.granite.home.model.ItemWithParents
+import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialogData
 import com.pointlessapps.granite.home.ui.delegates.ItemCreationDelegate
 import com.pointlessapps.granite.home.ui.delegates.ItemDeletionDelegate
 import com.pointlessapps.granite.home.utils.childrenOf
@@ -29,10 +33,13 @@ import com.pointlessapps.granite.home.utils.parentsOf
 import com.pointlessapps.granite.home.utils.toSortedTree
 import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.mutableStateOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -45,6 +52,9 @@ import kotlinx.parcelize.WriteWith
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Parcelize
 internal data class HomeState(
@@ -57,6 +67,8 @@ internal data class HomeState(
     val items: List<Item> = emptyList(),
     val deletedItems: List<Item> = emptyList(),
     val isLoading: Boolean = false,
+    val todayDailyNoteExists: Boolean = false,
+    val dailyNotesEnabled: Boolean = true,
 
     @IgnoredOnParcel
     val highlightedItem: Item? = null,
@@ -80,6 +92,7 @@ internal data class HomeState(
     }
 
     fun getFoldersWithParentsExcept(id: Int): List<ItemWithParents> {
+        // TODO remove the parent folder as well
         val itemsById = items.associateBy(Item::id)
         val result = mutableListOf(ItemWithParents(null, "/", ""))
         items.filter(Item::isFolder).filter { it.id != id }.forEach { folder ->
@@ -108,6 +121,7 @@ internal data class HomeState(
 internal sealed interface HomeEvent {
     data object CloseDrawer : HomeEvent
     data class ShowSnackbar(@StringRes val message: Int) : HomeEvent
+    data class ShowConfirmationDialog(val data: ConfirmationDialogData) : HomeEvent
 }
 
 internal class HomeViewModel(
@@ -115,8 +129,11 @@ internal class HomeViewModel(
     getNotesUseCase: GetNotesUseCase,
     getLastOpenedFileUseCase: GetLastOpenedFileUseCase,
     getItemsOrderTypeUseCase: GetItemsOrderTypeUseCase,
+    getDailyNotesEnabledUseCase: GetDailyNotesEnabledUseCase,
 ) : ViewModel(), KoinComponent {
 
+    private val getDailyNotesFolderUseCase: GetDailyNotesFolderUseCase by inject()
+    private val createDailyNotesFolderUseCase: CreateDailyNotesFolderUseCase by inject()
     private val setLastOpenedFileUseCase: SetLastOpenedFileUseCase by inject()
     private val setItemsOrderTypeUseCase: SetItemsOrderTypeUseCase by inject()
     private val moveItemUseCase: MoveItemUseCase by inject()
@@ -140,23 +157,23 @@ internal class HomeViewModel(
         combine(
             getLastOpenedFileUseCase(),
             getItemsOrderTypeUseCase(),
+            getDailyNotesEnabledUseCase(),
             getNotesUseCase(),
-        ) { lastOpenedFile, itemsOrderType, notes -> Triple(lastOpenedFile, itemsOrderType, notes) }
-            .take(1)
+        ) { lastOpenedFile, itemsOrderType, dailyNotesEnabled, notes ->
+            val (deletedItems, items) = notes.map(Note::toItem).partition(Item::deleted)
+            val orderType = itemsOrderType.toItemOrderType()
+            state = state.copy(
+                isLoading = false,
+                items = items.toSortedTree(orderType.comparator),
+                deletedItems = deletedItems.toSortedTree(orderType.comparator),
+                openedItemId = lastOpenedFile?.id,
+                noteTitle = TextFieldValue(text = lastOpenedFile?.name.orEmpty()),
+                noteContent = TextFieldValue(text = lastOpenedFile?.content.orEmpty()),
+                orderType = orderType,
+                dailyNotesEnabled = dailyNotesEnabled,
+            )
+        }.take(1)
             .onStart { state = state.copy(isLoading = true) }
-            .onEach { (lastOpenedFile, itemsOrderType, notes) ->
-                val (deletedItems, items) = notes.map(Note::toItem).partition(Item::deleted)
-                val orderType = itemsOrderType.toItemOrderType()
-                state = state.copy(
-                    isLoading = false,
-                    items = items.toSortedTree(orderType.comparator),
-                    deletedItems = deletedItems.toSortedTree(orderType.comparator),
-                    openedItemId = lastOpenedFile?.id,
-                    noteTitle = TextFieldValue(text = lastOpenedFile?.name.orEmpty()),
-                    noteContent = TextFieldValue(text = lastOpenedFile?.content.orEmpty()),
-                    orderType = orderType,
-                )
-            }
             .catch {
                 it.printStackTrace()
                 state = state.copy(isLoading = false)
@@ -187,6 +204,10 @@ internal class HomeViewModel(
 
     fun onNoteTitleChanged(value: TextFieldValue) {
         state = state.copy(noteTitle = value)
+    }
+
+    fun onSearchChanged(value: String) {
+        state = state.copy(searchValue = value)
     }
 
     fun onItemSelected(item: Item) {
@@ -233,8 +254,13 @@ internal class HomeViewModel(
     }
 
     fun onAddFileClicked(parentId: Int? = null) {
-        createNote(parentId)
-        eventChannel.trySend(HomeEvent.CloseDrawer)
+        itemCreationDelegate.createNote(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
+            parentId = parentId,
+        ).onEach { eventChannel.trySend(HomeEvent.CloseDrawer) }
+            .launchIn(viewModelScope)
     }
 
     fun onOrderTypeSelected(orderType: ItemOrderType) {
@@ -257,8 +283,89 @@ internal class HomeViewModel(
         )
     }
 
-    fun onSearchChanged(value: String) {
-        state = state.copy(searchValue = value)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun onDailyNoteClicked() {
+        if (!state.todayDailyNoteExists) {
+            getDailyNotesFolderUseCase()
+                .take(1)
+                .onStart { state = state.copy(isLoading = true) }
+                .filter { item ->
+                    if (item?.deleted != false) {
+                        if (item == null) {
+                            createDailyNotesFolder()
+
+                            return@filter false
+                        }
+
+                        eventChannel.send(
+                            HomeEvent.ShowConfirmationDialog(
+                                data = ConfirmationDialogData(
+                                    title = R.string.restore_folder,
+                                    description = R.string.restore_daily_notes_folder_description,
+                                    confirmText = R.string.restore,
+                                    cancelText = R.string.create_new,
+                                    onConfirmClicked = { restoreDailyNotesFolder(item.id) },
+                                    onCancelClicked = ::createDailyNotesFolder,
+                                ),
+                            ),
+                        )
+
+                        return@filter false
+                    }
+
+                    true
+                }
+                .flatMapMerge { item ->
+                    val item = requireNotNull(item).toItem()
+                    if (state.items.find { it.id == item.id } == null) {
+                        state = state.copy(
+                            items = (state.items + item).toSortedTree(state.orderType.comparator),
+                        )
+                    }
+
+                    state = state.copy(openedFolderIds = state.openedFolderIds + item.id)
+
+                    itemCreationDelegate.createNote(
+                        state = state,
+                        setState = { state = it },
+                        eventChannel = eventChannel,
+                        // TODO store this as preferences
+                        name = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date()),
+                        parentId = item.id,
+                    )
+                }
+                .onEach { eventChannel.send(HomeEvent.CloseDrawer) }
+                .catch {
+                    it.printStackTrace()
+                    state = state.copy(isLoading = false)
+                    eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_creating_note))
+                }
+                .launchIn(viewModelScope)
+        }
+    }
+
+    private fun restoreDailyNotesFolder(id: Int) {
+        itemDeletionDelegate.restoreItem(
+            state = state,
+            setState = { state = it },
+            eventChannel = eventChannel,
+            id = id,
+        )
+            ?.onEach { onDailyNoteClicked() }
+            ?.launchIn(viewModelScope)
+    }
+
+    private fun createDailyNotesFolder() {
+        createDailyNotesFolderUseCase()
+            .take(1)
+            .onStart { state = state.copy(isLoading = true) }
+            .onEach { onDailyNoteClicked() }
+            .catch {
+                it.printStackTrace()
+                state = state.copy(isLoading = false)
+                eventChannel.send(HomeEvent.ShowSnackbar(R.string.error_creating_folder))
+            }
+            .launchIn(viewModelScope)
     }
 
     fun saveNote(silently: Boolean = false) {
@@ -268,15 +375,6 @@ internal class HomeViewModel(
             eventChannel = eventChannel,
             silently = silently,
         )?.launchIn(viewModelScope)
-    }
-
-    private fun createNote(parentId: Int?) {
-        itemCreationDelegate.createNote(
-            state = state,
-            setState = { state = it },
-            eventChannel = eventChannel,
-            parentId = parentId,
-        ).launchIn(viewModelScope)
     }
 
     fun createFolder(name: String, parentId: Int?) {
