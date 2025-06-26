@@ -4,13 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.domain.auth.usecase.InitializeSupabaseUseCase
 import com.pointlessapps.granite.domain.auth.usecase.IsSignedInUseCase
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
+import com.pointlessapps.granite.utils.launch
 
 internal class MainViewModel(
     initializeSupabaseUseCase: InitializeSupabaseUseCase,
@@ -20,11 +16,10 @@ internal class MainViewModel(
     var isInitialized by mutableStateOf(false)
 
     init {
-        initializeSupabaseUseCase()
-            .onStart { isInitialized = false }
-            .onEach { isInitialized = true }
-            .catch { isInitialized = true }
-            .launchIn(viewModelScope)
+        launch(onException = { isInitialized = false }) {
+            initializeSupabaseUseCase()
+            isInitialized = true
+        }
     }
 
     fun isSignedIn() = isSignedInUseCase()

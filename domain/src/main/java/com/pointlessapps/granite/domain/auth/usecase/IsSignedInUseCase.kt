@@ -1,9 +1,9 @@
 package com.pointlessapps.granite.domain.auth.usecase
 
-import com.pointlessapps.granite.domain.auth.AuthRepository
+import com.pointlessapps.granite.supabase.datasource.auth.SupabaseAuthDatasource
 
 class IsSignedInUseCase(
-    private val authRepository: AuthRepository,
+    private val authDatasource: SupabaseAuthDatasource,
 ) {
-    operator fun invoke() = authRepository.isSignedIn()
+    operator fun invoke() = authDatasource.isSignedIn()
 }

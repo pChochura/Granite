@@ -1,9 +1,15 @@
 package com.pointlessapps.granite.domain.note.usecase
 
-import com.pointlessapps.granite.domain.note.NoteRepository
+import com.pointlessapps.granite.domain.mapper.fromLocal
+import com.pointlessapps.granite.local.datasource.note.LocalNoteDatasource
+import com.pointlessapps.granite.local.datasource.note.entity.NoteEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class GetNotesUseCase(
-    private val noteRepository: NoteRepository,
+    private val localDatasource: LocalNoteDatasource,
 ) {
-    operator fun invoke() = noteRepository.getAll()
+    suspend operator fun invoke() = withContext(Dispatchers.IO) {
+        localDatasource.getAll().map(NoteEntity::fromLocal)
+    }
 }

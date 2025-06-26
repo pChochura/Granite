@@ -5,6 +5,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 
+// TODO add datasource module that contains both local and remote datasource as a repository
 interface SupabaseNoteDatasource {
     suspend fun getById(id: Int): Note?
     suspend fun getAll(): List<Note>

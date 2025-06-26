@@ -1,9 +1,13 @@
 package com.pointlessapps.granite.domain.prefs.usecase
 
-import com.pointlessapps.granite.domain.prefs.PrefsRepository
+import com.pointlessapps.granite.local.datasource.prefs.LocalPrefsDatasource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SetLastOpenedFileUseCase(
-    private val prefsRepository: PrefsRepository,
+    private val localPrefsDatasource: LocalPrefsDatasource,
 ) {
-    operator fun invoke(id: Int?) = prefsRepository.setLastOpenedFileId(id)
+    suspend operator fun invoke(id: Int?) = withContext(Dispatchers.IO) {
+        localPrefsDatasource.setLastOpenedFileId(id)
+    }
 }

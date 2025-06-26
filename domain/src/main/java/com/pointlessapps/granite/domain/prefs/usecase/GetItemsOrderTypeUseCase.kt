@@ -1,9 +1,14 @@
 package com.pointlessapps.granite.domain.prefs.usecase
 
-import com.pointlessapps.granite.domain.prefs.PrefsRepository
+import com.pointlessapps.granite.domain.prefs.model.ItemOrderType
+import com.pointlessapps.granite.local.datasource.prefs.LocalPrefsDatasource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class GetItemsOrderTypeUseCase(
-    private val prefsRepository: PrefsRepository,
+    private val localPrefsDatasource: LocalPrefsDatasource,
 ) {
-    operator fun invoke() = prefsRepository.getItemsOrderType()
+    suspend operator fun invoke() = withContext(Dispatchers.IO) {
+        ItemOrderType.fromIndex(localPrefsDatasource.getItemsOrderTypeIndex())
+    }
 }

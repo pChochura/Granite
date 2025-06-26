@@ -1,9 +1,15 @@
 package com.pointlessapps.granite.domain.note.usecase
 
-import com.pointlessapps.granite.domain.note.NoteRepository
+import com.pointlessapps.granite.domain.mapper.fromLocal
+import com.pointlessapps.granite.local.datasource.note.LocalNoteDatasource
+import com.pointlessapps.granite.local.datasource.note.entity.NoteEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class DuplicateItemsUseCase(
-    private val noteRepository: NoteRepository,
+    private val localDatasource: LocalNoteDatasource,
 ) {
-    operator fun invoke(ids: List<Int>) = noteRepository.duplicate(ids)
+    suspend operator fun invoke(ids: List<Int>) = withContext(Dispatchers.IO) {
+        localDatasource.duplicate(ids).map(NoteEntity::fromLocal)
+    }
 }

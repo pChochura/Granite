@@ -1,9 +1,13 @@
 package com.pointlessapps.granite.domain.prefs.usecase
 
-import com.pointlessapps.granite.domain.prefs.PrefsRepository
+import com.pointlessapps.granite.local.datasource.prefs.LocalPrefsDatasource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SetDailyNotesEnabledUseCase(
-    private val prefsRepository: PrefsRepository,
+    private val localPrefsDatasource: LocalPrefsDatasource,
 ) {
-    operator fun invoke(enabled: Boolean) = prefsRepository.setDailyNotesEnabled(enabled)
+    suspend operator fun invoke(enabled: Boolean) = withContext(Dispatchers.IO) {
+        localPrefsDatasource.setDailyNotesEnabled(enabled)
+    }
 }

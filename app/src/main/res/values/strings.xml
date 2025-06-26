@@ -46,6 +46,7 @@
     <string name="error_restoring_item">Could not restore the item</string>
     <string name="error_duplicating_item">Could not duplicate the item</string>
     <string name="error_moving_item">Could not move the item</string>
+    <string name="error_signing_in">Could not sign you in</string>
     <string name="todays_daily_note">Today\'s daily note</string>
     <string name="todays_daily_note_description">%1$td %1$tB %1$tY</string>
     <string name="restore_folder">Restore the folder?</string>

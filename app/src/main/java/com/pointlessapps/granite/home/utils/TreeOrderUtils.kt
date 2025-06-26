@@ -27,8 +27,26 @@ internal fun List<Item>.toSortedTree(comparator: Comparator<Item>): List<Item> {
     return sortedList
 }
 
-internal fun List<Item>.childrenOf(folder: Item) = subList(indexOf(folder) + 1, size)
-    .takeWhile { it.indent > folder.indent }
+internal fun List<Item>.withChildrenOf(id: Int): List<Item>? {
+    val index = indexOfFirst { it.id == id }.takeIf { it != -1 } ?: return null
+    if (!this[index].isFolder) {
+        return subList(index, index + 1)
+    }
+
+    var lastIndex = index + 1
+    while (lastIndex <= this.lastIndex) {
+        if (this[lastIndex].indent <= this[index].indent) {
+            break
+        }
+
+        lastIndex++
+    }
+
+    return subList(index, lastIndex)
+}
+
+internal fun List<Item>.withChildrenOf(item: Item): List<Item> =
+    withChildrenOf(item.id) ?: listOf(item)
 
 internal fun List<Item>.parentsOf(item: Item): List<Item> {
     val parents = mutableListOf<Item>()
