@@ -214,7 +214,9 @@ internal class HomeViewModel(
         state = state.copy(
             searchValue = "",
             highlightedItem = item,
-            openedFolderIds = state.openedFolderIds + state.items.parentsOf(item).map { it.id },
+            openedFolderIds = state.openedFolderIds +
+                    (if (item.deleted) state.deletedItems else state.items)
+                        .parentsOf(item).map { it.id },
         )
 
         viewModelScope.launch {
