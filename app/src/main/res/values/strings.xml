@@ -38,6 +38,7 @@
     <string name="deleted">Deleted</string>
     <string name="move_to">Move to…</string>
     <string name="error_loading_notes">Could not load the notes</string>
+    <string name="error_loading_note">Could not load the note</string>
     <string name="error_saving_note">Could not save the note</string>
     <string name="error_creating_note">Could not create a note</string>
     <string name="error_creating_folder">Could not create a folder</string>
@@ -52,4 +53,5 @@
     <string name="restore_folder">Restore the folder?</string>
     <string name="restore_daily_notes_folder_description">Do you want to restore the existing Daily Notes folder (with all of its notes) or create a new one?</string>
     <string name="create_new">Create new</string>
+    <string name="not_implemented_yet">Not implemented yet</string>
 </resources>

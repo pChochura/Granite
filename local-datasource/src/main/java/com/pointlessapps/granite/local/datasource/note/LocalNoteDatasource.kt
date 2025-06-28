@@ -10,6 +10,8 @@ interface LocalNoteDatasource {
     suspend fun getById(id: Int): NoteEntity?
     suspend fun getAll(): List<NoteEntity>
 
+    suspend fun findInFolderByName(name: String, folderId: Int?): NoteEntity?
+
     suspend fun updateName(id: Int, name: String): NoteEntity?
     suspend fun update(id: Int, name: String, content: String?, parentId: Int?): NoteEntity?
     suspend fun create(name: String, content: String?, parentId: Int?): NoteEntity?
@@ -27,6 +29,9 @@ internal class LocalNoteDatasourceImpl(
 ) : LocalNoteDatasource {
     override suspend fun getById(id: Int) = noteDao.getById(id)
     override suspend fun getAll() = noteDao.getAll()
+
+    override suspend fun findInFolderByName(name: String, folderId: Int?) =
+        noteDao.findInFolderByName(name, folderId)
 
     override suspend fun updateName(id: Int, name: String): NoteEntity? {
         noteDao.updateName(id, name, getCurrentTimestamp())

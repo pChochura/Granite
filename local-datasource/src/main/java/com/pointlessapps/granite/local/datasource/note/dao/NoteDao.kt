@@ -10,14 +10,14 @@ import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityPartial
 
 @Dao
 internal interface NoteDao {
-    @Query("SELECT (id) FROM notes ORDER BY id DESC LIMIT 1")
-    suspend fun getLastId(): Long?
-
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getById(id: Int): NoteEntity?
 
     @Query("SELECT * FROM notes WHERE id IN (:ids)")
     suspend fun getByIds(ids: List<Int>): List<NoteEntity>
+
+    @Query("SELECT * FROM notes WHERE name = :name AND parent_id = :folderId")
+    suspend fun findInFolderByName(name: String, folderId: Int?): NoteEntity?
 
     @Query("SELECT * FROM notes")
     suspend fun getAll(): List<NoteEntity>

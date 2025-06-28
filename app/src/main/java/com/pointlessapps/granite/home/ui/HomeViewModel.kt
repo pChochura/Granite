@@ -10,9 +10,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.domain.model.Note
+import com.pointlessapps.granite.domain.note.usecase.CreateDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.DuplicateItemsUseCase
+import com.pointlessapps.granite.domain.note.usecase.GetDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
 import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
@@ -22,6 +24,7 @@ import com.pointlessapps.granite.domain.prefs.usecase.GetDailyNotesEnabledUseCas
 import com.pointlessapps.granite.domain.prefs.usecase.GetDailyNotesFolderUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetLastOpenedFileUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.IsDailyNoteExistingUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetLastOpenedFileUseCase
 import com.pointlessapps.granite.fuzzy.search.FuzzySearch
@@ -48,9 +51,6 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Parcelize
 internal data class HomeState(
@@ -131,7 +131,10 @@ internal class HomeViewModel(
 
     private val untitledNotePlaceholder = application.getString(R.string.untitled)
 
+    private val isDailyNoteExistingUseCase: IsDailyNoteExistingUseCase by inject()
     private val getDailyNotesFolderUseCase: GetDailyNotesFolderUseCase by inject()
+    private val createDailyNoteUseCase: CreateDailyNoteUseCase by inject()
+    private val getDailyNoteUseCase: GetDailyNoteUseCase by inject()
     private val createDailyNotesFolderUseCase: CreateDailyNotesFolderUseCase by inject()
     private val setLastOpenedFileUseCase: SetLastOpenedFileUseCase by inject()
     private val setItemsOrderTypeUseCase: SetItemsOrderTypeUseCase by inject()
@@ -151,13 +154,7 @@ internal class HomeViewModel(
     private var openedFilesStack by savedStateHandle.mutableStateOf(emptyList<Int>())
 
     init {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_loading_notes))
-            },
-        ) {
+        launch(handleErrors(R.string.error_loading_notes)) {
             state = state.copy(isLoading = true)
 
             val (deletedItems, items) = getNotesUseCase().map(Note::toItem).partition(Item::deleted)
@@ -172,6 +169,7 @@ internal class HomeViewModel(
                 noteContent = TextFieldValue(text = lastOpenedFile?.content.orEmpty()),
                 orderType = orderType,
                 dailyNotesEnabled = getDailyNotesEnabledUseCase(),
+                todayDailyNoteExists = isDailyNoteExistingUseCase(),
             )
         }
     }
@@ -205,37 +203,47 @@ internal class HomeViewModel(
     }
 
     fun onItemSelected(item: Item) {
-        if (state.searchValue.isNotBlank()) {
-            state = state.copy(
-                searchValue = "",
-                highlightedItem = item,
-                openedFolderIds = state.openedFolderIds + state.items.parentsOf(item).map { it.id },
-            )
+        when {
+            state.searchValue.isNotBlank() -> onSearchItemSelected(item)
+            !item.isFolder -> onFileSelected(item)
+            else -> onFolderSelected(item)
+        }
+    }
 
-            viewModelScope.launch {
-                delay(500)
-                state = state.copy(highlightedItem = null)
-            }
+    private fun onSearchItemSelected(item: Item) {
+        state = state.copy(
+            searchValue = "",
+            highlightedItem = item,
+            openedFolderIds = state.openedFolderIds + state.items.parentsOf(item).map { it.id },
+        )
 
+        viewModelScope.launch {
+            delay(500)
+            state = state.copy(highlightedItem = null)
+        }
+    }
+
+    private fun onFileSelected(item: Item) {
+        if (item.deleted) {
+            // TODO show a dialog whether to restore the item
+            eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.not_implemented_yet))
             return
         }
 
-        if (!item.isFolder) {
-            eventChannel.trySend(HomeEvent.CloseDrawer)
+        eventChannel.trySend(HomeEvent.CloseDrawer)
 
-            if (state.openedItemId == item.id) return
+        if (state.openedItemId == item.id) return
 
-            launch { setLastOpenedFileUseCase(item.id) }
-            state.openedItemId?.also { openedFilesStack = openedFilesStack + it }
-            state = state.copy(
-                openedItemId = item.id,
-                noteTitle = TextFieldValue(text = item.name),
-                noteContent = TextFieldValue(text = item.content.orEmpty()),
-            )
+        launch { setLastOpenedFileUseCase(item.id) }
+        state.openedItemId?.also { openedFilesStack = openedFilesStack + it }
+        state = state.copy(
+            openedItemId = item.id,
+            noteTitle = TextFieldValue(text = item.name),
+            noteContent = TextFieldValue(text = item.content.orEmpty()),
+        )
+    }
 
-            return
-        }
-
+    private fun onFolderSelected(item: Item) {
         if (state.openedFolderIds.contains(item.id)) {
             val items = if (item.deleted) state.deletedItems else state.items
 
@@ -248,13 +256,7 @@ internal class HomeViewModel(
     }
 
     fun onAddFileClicked(parentId: Int? = null) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_creating_note))
-            },
-        ) {
+        launch(handleErrors(R.string.error_creating_note)) {
             state = state.copy(isLoading = true)
             val items = createItemUseCase(untitledNotePlaceholder, "", parentId)
             val note = items.last()
@@ -297,80 +299,82 @@ internal class HomeViewModel(
     }
 
     fun onDailyNoteClicked() {
-        if (!state.todayDailyNoteExists) {
-            launch(
-                onException = {
-                    it.printStackTrace()
-                    state = state.copy(isLoading = false)
-                    eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_creating_note))
-                }
-            ) {
-                state = state.copy(isLoading = true)
+        launch(handleErrors(R.string.error_loading_note)) {
+            state = state.copy(isLoading = true)
 
-                val item =
-                    (getDailyNotesFolderUseCase() ?: createDailyNotesFolderUseCase()).toItem()
-
-                if (item.deleted) {
-                    state = state.copy(isLoading = false)
-
-                    return@launch eventChannel.send(
-                        HomeEvent.ShowConfirmationDialog(
-                            data = ConfirmationDialogData(
-                                title = R.string.restore_folder,
-                                description = R.string.restore_daily_notes_folder_description,
-                                confirmText = R.string.restore,
-                                cancelText = R.string.create_new,
-                                onConfirmClicked = { restoreDailyNotesFolder(item.id) },
-                                onCancelClicked = ::createDailyNotesFolder,
-                            ),
-                        ),
-                    )
-                }
-
-                // If the folder was created add it to the tree
-                if (state.items.find { it.id == item.id } == null) {
-                    state = state.copy(
-                        items = (state.items + item).toSortedTree(state.orderType.comparator),
-                    )
-                }
-
-                // Make sure it is opened
-                state = state.copy(openedFolderIds = state.openedFolderIds + item.id)
-
-                val items = createItemUseCase(
-                    // TODO store this as preferences
-                    name = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date()),
-                    content = "",
-                    parentId = item.id,
-                )
-                val note = items.last()
-                state = state.copy(
-                    isLoading = false,
-                    openedItemId = note.id,
-                    noteTitle = TextFieldValue(
-                        text = note.name,
-                        selection = TextRange(0, note.name.length),
-                    ),
-                    noteContent = TextFieldValue(text = note.content.orEmpty()),
-                    items = (state.items + items.map(Note::toItem))
-                        .toSortedTree(state.orderType.comparator),
-                )
-
-                setLastOpenedFileUseCase(note.id)
-
-                eventChannel.send(HomeEvent.CloseDrawer)
+            if (isDailyNoteExistingUseCase()) {
+                openDailyNote()
+            } else {
+                createDailyNote()
             }
+
+            state = state.copy(isLoading = false)
+        }
+    }
+
+    private fun openDailyNote() {
+        launch(handleErrors(R.string.error_loading_note)) {
+            state = state.copy(isLoading = true)
+            onFileSelected(getDailyNoteUseCase().toItem())
+            state = state.copy(isLoading = false)
+        }
+    }
+
+    private fun createDailyNote() {
+        launch(handleErrors(R.string.error_creating_note)) {
+            state = state.copy(isLoading = true)
+
+            val item =
+                (getDailyNotesFolderUseCase() ?: createDailyNotesFolderUseCase()).toItem()
+
+            if (item.deleted) {
+                state = state.copy(isLoading = false)
+
+                return@launch eventChannel.send(
+                    HomeEvent.ShowConfirmationDialog(
+                        data = ConfirmationDialogData(
+                            title = R.string.restore_folder,
+                            description = R.string.restore_daily_notes_folder_description,
+                            confirmText = R.string.restore,
+                            cancelText = R.string.create_new,
+                            onConfirmClicked = { restoreDailyNotesFolder(item.id) },
+                            onCancelClicked = ::createDailyNotesFolder,
+                        ),
+                    ),
+                )
+            }
+
+            // If the folder was created add it to the tree
+            if (state.items.find { it.id == item.id } == null) {
+                state = state.copy(
+                    items = (state.items + item).toSortedTree(state.orderType.comparator),
+                )
+            }
+
+            // Make sure it is opened
+            state = state.copy(openedFolderIds = state.openedFolderIds + item.id)
+
+            val note = createDailyNoteUseCase()
+            state = state.copy(
+                isLoading = false,
+                openedItemId = note.id,
+                noteTitle = TextFieldValue(
+                    text = note.name,
+                    selection = TextRange(0, note.name.length),
+                ),
+                noteContent = TextFieldValue(text = note.content.orEmpty()),
+                items = (state.items + note.toItem()).toSortedTree(state.orderType.comparator),
+                todayDailyNoteExists = true,
+            )
+
+            setLastOpenedFileUseCase(note.id)
+
+            eventChannel.send(HomeEvent.CloseDrawer)
         }
     }
 
     private fun restoreDailyNotesFolder(id: Int) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_restoring_item))
-            },
-        ) {
+        launch(handleErrors(R.string.error_restoring_item)) {
             val items = state.deletedItems.withChildrenOf(id)
                 ?.map { it.copy(deleted = false) } ?: return@launch
             val ids = items.map(Item::id)
@@ -389,13 +393,7 @@ internal class HomeViewModel(
     }
 
     private fun createDailyNotesFolder() {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_creating_folder))
-            },
-        ) {
+        launch(handleErrors(R.string.error_creating_folder)) {
             state = state.copy(isLoading = true)
             createDailyNotesFolderUseCase()
             state = state.copy(isLoading = false)
@@ -405,13 +403,7 @@ internal class HomeViewModel(
     }
 
     fun saveNote(silently: Boolean = false) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_saving_note))
-            },
-        ) {
+        launch(handleErrors(R.string.error_saving_note)) {
             val openedItemId = state.openedItemId ?: return@launch
 
             if (!silently) state = state.copy(isLoading = true)
@@ -435,13 +427,7 @@ internal class HomeViewModel(
     }
 
     fun createFolder(name: String, parentId: Int?) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_creating_folder))
-            },
-        ) {
+        launch(handleErrors(R.string.error_creating_folder)) {
             val folders = createItemUseCase(name = name, content = null, parentId = parentId)
             state = state.copy(
                 isLoading = false,
@@ -452,13 +438,7 @@ internal class HomeViewModel(
     }
 
     fun renameItem(id: Int, name: String) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_renaming_item))
-            },
-        ) {
+        launch(handleErrors(R.string.error_renaming_item)) {
             state = state.copy(isLoading = true)
             val item = state.items.find { it.id == id }
             updateItemUseCase(
@@ -486,13 +466,7 @@ internal class HomeViewModel(
     }
 
     fun duplicateItem(id: Int) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_duplicating_item))
-            },
-        ) {
+        launch(handleErrors(R.string.error_duplicating_item)) {
             val ids = state.items.withChildrenOf(id)?.map(Item::id) ?: return@launch
 
             state = state.copy(isLoading = true)
@@ -506,13 +480,7 @@ internal class HomeViewModel(
     }
 
     fun deleteItem(id: Int) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_deleting_item))
-            },
-        ) {
+        launch(handleErrors(R.string.error_deleting_item)) {
             val items = state.items.withChildrenOf(id)
                 ?.map { it.copy(deleted = true) } ?: return@launch
             val ids = items.map(Item::id)
@@ -532,13 +500,7 @@ internal class HomeViewModel(
     }
 
     fun deleteItemPermanently(id: Int) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_deleting_item))
-            },
-        ) {
+        launch(handleErrors(R.string.error_deleting_item)) {
             val ids = state.deletedItems.withChildrenOf(id)?.map(Item::id) ?: return@launch
 
             state = state.copy(isLoading = true)
@@ -553,13 +515,7 @@ internal class HomeViewModel(
     }
 
     fun restoreItem(id: Int) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_restoring_item))
-            },
-        ) {
+        launch(handleErrors(R.string.error_restoring_item)) {
             val items = state.deletedItems.withChildrenOf(id)
                 ?.map { it.copy(deleted = false) } ?: return@launch
             val ids = items.map(Item::id)
@@ -578,13 +534,7 @@ internal class HomeViewModel(
     }
 
     fun moveItem(id: Int, newParentId: Int?) {
-        launch(
-            onException = {
-                it.printStackTrace()
-                state = state.copy(isLoading = false)
-                eventChannel.trySend(HomeEvent.ShowSnackbar(R.string.error_moving_item))
-            }
-        ) {
+        launch(handleErrors(R.string.error_moving_item)) {
             state = state.copy(isLoading = true)
             moveItemUseCase(id, newParentId)
             state = state.copy(
@@ -598,5 +548,11 @@ internal class HomeViewModel(
                 }.toSortedTree(state.orderType.comparator),
             )
         }
+    }
+
+    private fun handleErrors(@StringRes errorDescription: Int): (Throwable) -> Unit = {
+        it.printStackTrace()
+        state = state.copy(isLoading = false)
+        eventChannel.trySend(HomeEvent.ShowSnackbar(errorDescription))
     }
 }

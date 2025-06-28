@@ -75,7 +75,6 @@ internal fun DailyNoteButton(
 
         ComposeIcon(
             modifier = Modifier.size(dimensionResource(R.dimen.logo_icon_size)),
-            // TODO
             iconRes = if (exists) RC.drawable.ic_arrow_right else RC.drawable.ic_plus,
             iconStyle = defaultComposeIconStyle().copy(
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,

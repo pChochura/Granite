@@ -1,8 +1,10 @@
 package com.pointlessapps.granite.domain.note.di
 
+import com.pointlessapps.granite.domain.note.usecase.CreateDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.DeleteItemsUseCase
 import com.pointlessapps.granite.domain.note.usecase.DuplicateItemsUseCase
+import com.pointlessapps.granite.domain.note.usecase.GetDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
@@ -20,4 +22,6 @@ internal val noteModule = module {
     factoryOf(::DuplicateItemsUseCase)
     factoryOf(::DeleteItemsUseCase)
     factoryOf(::MoveItemUseCase)
+    factoryOf(::CreateDailyNoteUseCase)
+    factoryOf(::GetDailyNoteUseCase)
 }

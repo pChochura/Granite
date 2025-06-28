@@ -2,6 +2,7 @@ package com.pointlessapps.granite.local.datasource.prefs
 
 import androidx.datastore.core.DataStore
 import com.pointlessapps.granite.local.datasource.prefs.model.Preferences
+import com.pointlessapps.granite.local.datasource.prefs.model.PreferencesDefaults
 import kotlinx.coroutines.flow.firstOrNull
 
 interface LocalPrefsDatasource {
@@ -11,12 +12,17 @@ interface LocalPrefsDatasource {
     suspend fun setItemsOrderTypeIndex(orderTypeIndex: Int)
     suspend fun getItemsOrderTypeIndex(): Int
 
-    suspend fun getDailyNotesEnabled(): Boolean
     suspend fun setDailyNotesEnabled(enabled: Boolean)
-    suspend fun getDailyNotesFolderName(): String
+    suspend fun getDailyNotesEnabled(): Boolean
+
     suspend fun setDailyNotesFolderName(name: String)
-    suspend fun getDailyNotesFolderId(): Int?
+    suspend fun getDailyNotesFolderName(): String
+
     suspend fun setDailyNotesFolderId(id: Int?)
+    suspend fun getDailyNotesFolderId(): Int?
+
+    suspend fun setDailyNotesNameFormat(format: String)
+    suspend fun getDailyNotesNameFormat(): String
 }
 
 internal class LocalPrefsDatasourceImpl(
@@ -38,10 +44,8 @@ internal class LocalPrefsDatasourceImpl(
     }
 
     override suspend fun getItemsOrderTypeIndex() =
-        prefsDataStore.data.firstOrNull()?.itemsOrderTypeIndex ?: 0
-
-    override suspend fun getDailyNotesEnabled() =
-        prefsDataStore.data.firstOrNull()?.dailyNotesEnabled ?: true
+        prefsDataStore.data.firstOrNull()?.itemsOrderTypeIndex
+            ?: PreferencesDefaults.itemsOrderTypeIndex
 
     override suspend fun setDailyNotesEnabled(enabled: Boolean) {
         prefsDataStore.updateData { prefs ->
@@ -49,8 +53,9 @@ internal class LocalPrefsDatasourceImpl(
         }
     }
 
-    override suspend fun getDailyNotesFolderName() =
-        prefsDataStore.data.firstOrNull()?.dailyNotesFolderName ?: "Journal"
+    override suspend fun getDailyNotesEnabled() =
+        prefsDataStore.data.firstOrNull()?.dailyNotesEnabled
+            ?: PreferencesDefaults.dailyNotesEnabled
 
     override suspend fun setDailyNotesFolderName(name: String) {
         prefsDataStore.updateData { prefs ->
@@ -58,12 +63,26 @@ internal class LocalPrefsDatasourceImpl(
         }
     }
 
-    override suspend fun getDailyNotesFolderId() =
-        prefsDataStore.data.firstOrNull()?.dailyNotesFolderId
+    override suspend fun getDailyNotesFolderName() =
+        prefsDataStore.data.firstOrNull()?.dailyNotesFolderName
+            ?: PreferencesDefaults.dailyNotesFolderName
 
     override suspend fun setDailyNotesFolderId(id: Int?) {
         prefsDataStore.updateData { prefs ->
             prefs.copy(dailyNotesFolderId = id)
         }
     }
+
+    override suspend fun getDailyNotesFolderId() =
+        prefsDataStore.data.firstOrNull()?.dailyNotesFolderId
+
+    override suspend fun setDailyNotesNameFormat(format: String) {
+        prefsDataStore.updateData { prefs ->
+            prefs.copy(dailyNotesNameFormat = format)
+        }
+    }
+
+    override suspend fun getDailyNotesNameFormat() =
+        prefsDataStore.data.firstOrNull()?.dailyNotesNameFormat
+            ?: PreferencesDefaults.dailyNotesNameFormat
 }

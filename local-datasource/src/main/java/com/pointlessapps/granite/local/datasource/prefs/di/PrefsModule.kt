@@ -10,6 +10,7 @@ import com.pointlessapps.granite.local.datasource.prefs.LocalPrefsDatasourceImpl
 import com.pointlessapps.granite.local.datasource.prefs.PREFS_FILE
 import com.pointlessapps.granite.local.datasource.prefs.PREFS_FILE_STORAGE
 import com.pointlessapps.granite.local.datasource.prefs.model.Preferences
+import com.pointlessapps.granite.local.datasource.prefs.model.PreferencesDefaults
 import com.pointlessapps.granite.local.datasource.utils.JsonSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
@@ -20,7 +21,7 @@ import java.io.File
 internal val prefsModule = module {
     single<Storage<Preferences>>(named(PREFS_FILE_STORAGE)) {
         FileStorage(
-            serializer = JsonSerializer(Json, serializer(), Preferences()),
+            serializer = JsonSerializer(Json, serializer(), PreferencesDefaults),
             produceFile = { File(get<Context>().filesDir, PREFS_FILE) },
         )
     }
@@ -32,7 +33,7 @@ internal val prefsModule = module {
                 corruptionHandler = ReplaceFileCorruptionHandler {
                     it.printStackTrace()
 
-                    return@ReplaceFileCorruptionHandler Preferences()
+                    return@ReplaceFileCorruptionHandler PreferencesDefaults
                 },
             ),
         )

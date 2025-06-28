@@ -5,6 +5,7 @@ import com.pointlessapps.granite.domain.prefs.usecase.GetDailyNotesEnabledUseCas
 import com.pointlessapps.granite.domain.prefs.usecase.GetDailyNotesFolderUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetLastOpenedFileUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.IsDailyNoteExistingUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetDailyNotesEnabledUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetDailyNotesFolderNameUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetItemsOrderTypeUseCase
@@ -22,4 +23,5 @@ internal val prefsModule = module {
     factoryOf(::GetDailyNotesFolderUseCase)
     factoryOf(::CreateDailyNotesFolderUseCase)
     factoryOf(::SetDailyNotesFolderNameUseCase)
+    factoryOf(::IsDailyNoteExistingUseCase)
 }
