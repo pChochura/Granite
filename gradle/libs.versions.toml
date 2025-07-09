@@ -6,18 +6,19 @@ targetSdk = "36"
 
 #Kotlin
 parcelizePluginName = "kotlin-parcelize"
-kotlinSerialization = "2.1.21"
-kotlinSerializationJson = "1.8.1"
-kotlin = "2.1.21"
+kotlinSerialization = "2.2.0"
+kotlinSerializationJson = "1.9.0"
+kotlin = "2.2.0"
 coroutines = "1.10.2"
 ksp = "2.1.21-2.0.2"
+ksp = "2.2.0-2.0.2"
 
 #Android
 gradlePlugin = "8.11.0-rc02"
 
 #AndroidX
 androidxCore = "1.16.0"
-androidxNavigation = "2.9.0"
+androidxNavigation = "2.9.1"
 androidxSplashscreen = "1.0.1"
 androidxDatastore = "1.1.7"
 
@@ -44,13 +45,13 @@ highlights = "1.0.0"
 coil = "2.7.0"
 
 #Supabase
-supabase = "3.1.4"
+supabase = "3.2.0"
 
 #RoomDB
 roomDb = "2.7.2"
 
 #Ktor
-ktor = "3.1.3"
+ktor = "3.2.1"
 
 #Credentials
 credentials = "1.5.0"
