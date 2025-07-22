@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/local-datasource" />
             <option value="$PROJECT_DIR$/markdown-obsidian-parser" />
             <option value="$PROJECT_DIR$/markdown-renderer" />
+            <option value="$PROJECT_DIR$/relative-datetime-formatter" />
             <option value="$PROJECT_DIR$/supabase-datasource" />
             <option value="$PROJECT_DIR$/ui-components" />
           </set>

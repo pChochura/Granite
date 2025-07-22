@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<dimen name="rounded_corners">4dp</dimen>
+    <dimen name="rounded_corners">4dp</dimen>
 
-	<dimen name="button_padding_vertical">16dp</dimen>
-	<dimen name="button_padding_horizontal">32dp</dimen>
+    <dimen name="button_padding_vertical">16dp</dimen>
+    <dimen name="button_padding_horizontal">32dp</dimen>
 
-	<dimen name="logo_icon_size">32dp</dimen>
-	<dimen name="folder_icon_size">16dp</dimen>
+    <dimen name="logo_icon_size">32dp</dimen>
+    <dimen name="folder_icon_size">16dp</dimen>
 
-	<dimen name="editor_bottom_padding">128dp</dimen>
-    <dimen name="dialog_height">400dp</dimen>
+    <dimen name="editor_bottom_padding">128dp</dimen>
+    <dimen name="dialog_content_height">260dp</dimen>
+
+    <dimen name="fab_icon_size">24dp</dimen>
 </resources>

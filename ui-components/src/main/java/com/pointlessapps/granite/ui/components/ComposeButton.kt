@@ -152,10 +152,10 @@ fun ComposeButton(
 
 @Composable
 fun defaultComposeButtonStyle() = ComposeButtonStyle(
-    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-    disabledContainerColor = MaterialTheme.colorScheme.onSurface,
+    containerColor = MaterialTheme.colorScheme.primary,
+    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
     shape = CircleShape,
-    iconRes = R.drawable.ic_settings,
+    iconRes = null,
     orientation = ComposeButtonOrientation.Horizontal,
     textStyle = defaultComposeButtonTextStyle(),
     enabled = true,
@@ -163,7 +163,7 @@ fun defaultComposeButtonStyle() = ComposeButtonStyle(
 
 @Composable
 fun defaultComposeButtonTextStyle() = defaultComposeTextStyle().copy(
-    textColor = MaterialTheme.colorScheme.primary,
+    textColor = MaterialTheme.colorScheme.onPrimary,
     typography = MaterialTheme.typography.labelLarge,
 )
 

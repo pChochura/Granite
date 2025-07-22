@@ -31,7 +31,7 @@
 
 	<dimen name="margin_nano">4dp</dimen>
 	<dimen name="margin_tiny">8dp</dimen>
-	<dimen name="margin_small">10dp</dimen>
+	<dimen name="margin_small">12dp</dimen>
 	<dimen name="margin_medium">16dp</dimen>
 	<dimen name="margin_semi_big">24dp</dimen>
 	<dimen name="margin_big">32dp</dimen>

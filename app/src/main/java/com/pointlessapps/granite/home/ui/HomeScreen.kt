@@ -1,34 +1,22 @@
 package com.pointlessapps.granite.home.ui
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DrawerDefaults
-import androidx.compose.material3.DrawerValue
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,194 +24,345 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.pointlessapps.granite.LocalBottomSectionState
 import com.pointlessapps.granite.LocalSnackbarHostState
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.home.ui.components.Editor
-import com.pointlessapps.granite.home.ui.components.StartupPage
-import com.pointlessapps.granite.home.ui.components.menu.LeftSideMenu
-import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialog
-import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialogData
+import com.pointlessapps.granite.home.model.Item
+import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertiesBottomSheet
+import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertyAction
+import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialogData
+import com.pointlessapps.granite.home.ui.components.menu.dialog.MoveDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.MoveDialogData
+import com.pointlessapps.granite.home.ui.components.menu.dialog.OrderTypeDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.RenameDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.RenameDialogData
 import com.pointlessapps.granite.navigation.Route
-import com.pointlessapps.granite.ui.components.ComposeIconButton
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result
+import com.pointlessapps.granite.ui.components.ComposeIcon
 import com.pointlessapps.granite.ui.components.ComposeLoader
 import com.pointlessapps.granite.ui.components.ComposeScaffoldLayout
 import com.pointlessapps.granite.ui.components.ComposeText
-import com.pointlessapps.granite.ui.components.defaultComposeIconButtonStyle
+import com.pointlessapps.granite.ui.components.TopBar
+import com.pointlessapps.granite.ui.components.defaultComposeIconStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import com.pointlessapps.granite.utils.plus
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import kotlin.math.roundToInt
+import java.util.Date
 import com.pointlessapps.granite.ui.R as RC
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onNavigateTo: (Route) -> Unit,
 ) {
+    var createFolderDialogData by remember { mutableStateOf<CreateFolderDialogData?>(null) }
+    var renameDialogData by remember { mutableStateOf<RenameDialogData?>(null) }
+    var moveDialogData by remember { mutableStateOf<MoveDialogData?>(null) }
+    var showOrderTypeDialog by remember { mutableStateOf(false) }
+    var itemPropertiesBottomSheetData by remember { mutableStateOf<Item?>(null) }
+    val itemPropertiesBottomSheetState = rememberModalBottomSheetState()
+
     val localSnackbarHostState = LocalSnackbarHostState.current
-    val focusManager = LocalFocusManager.current
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 
-    var confirmationDialogData by remember { mutableStateOf<ConfirmationDialogData?>(null) }
-
     LifecycleResumeEffect(Unit) {
+        viewModel.loadItems()
+
         coroutineScope.launch {
             viewModel.events.collect {
                 when (it) {
-                    is HomeEvent.CloseDrawer -> drawerState.close()
                     is HomeEvent.ShowSnackbar -> localSnackbarHostState.showSnackbar(it.message)
-                    is HomeEvent.ShowConfirmationDialog -> confirmationDialogData = it.data
+                    is HomeEvent.NavigateTo -> onNavigateTo(it.route)
                 }
             }
         }
 
-        onPauseOrDispose {
-            viewModel.saveNote()
-        }
+        onPauseOrDispose {}
     }
 
-    LaunchedEffect(drawerState.isOpen) {
-        focusManager.clearFocus()
-    }
+    ComposeScaffoldLayout(
+        topBar = {
+            TopBar(
+                leftIcon = R.drawable.ic_logo,
+                leftIconTooltip = R.string.app_name,
+                rightIcon = RC.drawable.ic_settings,
+                rightIconTooltip = R.string.settings,
+                title = R.string.app_name,
+                onLeftIconClicked = {},
+                onRightIconClicked = {},
+            )
+        },
+        content = { contentPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(top = dimensionResource(RC.dimen.margin_medium)),
+                contentPadding = contentPadding + LocalBottomSectionState.current.asPaddingValues,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+            ) {
+                items(viewModel.state.filteredItems, key = { it.id }) {
+                    when {
+                        it.isFolder -> FolderNameItem(
+                            item = it,
+                            isOpened = it.id in viewModel.state.openedFolderIds,
+                            onItemClicked = { viewModel.onItemSelected(it) },
+                            onItemLongClicked = {
+                                itemPropertiesBottomSheetData = it
+                                coroutineScope.launch {
+                                    itemPropertiesBottomSheetState.show()
+                                }
+                            },
+                        )
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(drawerState) {
-                LeftSideMenu(viewModel)
+                        else -> NoteItem(
+                            item = it,
+                            onItemClicked = { viewModel.onItemSelected(it) },
+                            onItemLongClicked = {
+                                itemPropertiesBottomSheetData = it
+                                coroutineScope.launch {
+                                    itemPropertiesBottomSheetState.show()
+                                }
+                            },
+                        )
+                    }
+                }
             }
         },
-        content = {
-            ComposeScaffoldLayout(
-                modifier = Modifier.offset {
-                    IntOffset(
-                        x = DrawerDefaults.MaximumDrawerWidth.roundToPx() + when {
-                            !drawerState.currentOffset.isNaN() -> drawerState.currentOffset.roundToInt()
-                            else -> 0
-                        },
-                        y = 0,
-                    )
-                },
-                topBar = { TopBar(onMenuClicked = { coroutineScope.launch { drawerState.open() } }) },
-                content = { contentPadding ->
-                    AnimatedContent(viewModel.state.openedItemId == null) { emptyScreen ->
-                        if (emptyScreen) {
-                            StartupPage(
-                                viewModel = viewModel,
-                                contentPadding = contentPadding,
-                            )
-                        } else {
-                            Editor(
-                                viewModel = viewModel,
-                                contentPadding = contentPadding,
-                                drawerState = drawerState,
-                            )
-                        }
-                    }
-                },
-            )
-
-            ComposeLoader(viewModel.state.isLoading)
-        }
     )
 
-    confirmationDialogData?.let { data ->
-        ConfirmationDialog(
+    ComposeLoader(viewModel.state.isLoading)
+
+    val untitledText = stringResource(R.string.untitled)
+    itemPropertiesBottomSheetData?.let { item ->
+        ItemPropertiesBottomSheet(
+            state = itemPropertiesBottomSheetState,
+            item = item,
+            onPropertyClicked = {
+                when (it) {
+                    ItemPropertyAction.ADD_FILE -> viewModel.onAddFileClicked(item.id)
+                    ItemPropertyAction.ADD_FOLDER ->
+                        createFolderDialogData = CreateFolderDialogData(
+                            name = TextFieldValue(
+                                text = untitledText,
+                                selection = TextRange(0, untitledText.length),
+                            ),
+                            parentId = item.id,
+                        )
+
+                    ItemPropertyAction.MOVE -> moveDialogData = MoveDialogData(
+                        itemId = item.id,
+                        folders = viewModel.state.getFoldersWithParentsExcept(item.id),
+                    )
+
+                    ItemPropertyAction.DUPLICATE -> viewModel.duplicateItem(item.id)
+                    ItemPropertyAction.SHARE -> {
+                        // TODO add share
+                    }
+
+                    ItemPropertyAction.RENAME -> renameDialogData = RenameDialogData(
+                        name = TextFieldValue(
+                            text = item.name,
+                            selection = TextRange(0, item.name.length),
+                        ),
+                        id = item.id,
+                    )
+
+                    ItemPropertyAction.RESTORE -> viewModel.restoreItem(item.id)
+                    ItemPropertyAction.DELETE -> viewModel.deleteItem(item.id)
+                    ItemPropertyAction.DELETE_PERMANENTLY -> viewModel.deleteItemPermanently(item.id)
+                }
+            },
+            onDismissRequest = {
+                coroutineScope.launch {
+                    itemPropertiesBottomSheetState.hide()
+                }.invokeOnCompletion {
+                    itemPropertiesBottomSheetData = null
+                }
+            },
+        )
+    }
+
+    if (showOrderTypeDialog) {
+        OrderTypeDialog(
+            selectedType = viewModel.state.orderType,
+            onOrderTypeSelected = {
+                viewModel.onOrderTypeSelected(it)
+                showOrderTypeDialog = false
+            },
+            onDismissRequest = { showOrderTypeDialog = false },
+        )
+    }
+
+    createFolderDialogData?.let { data ->
+        CreateFolderDialog(
             data = data,
-            onDismissRequest = { confirmationDialogData = null },
+            onNameChanged = { createFolderDialogData = createFolderDialogData?.copy(name = it) },
+            onSaveClicked = {
+                viewModel.createFolder(data.name.text, data.parentId)
+                createFolderDialogData = null
+            },
+            onDismissRequest = { createFolderDialogData = null },
+        )
+    }
+
+    renameDialogData?.let { data ->
+        RenameDialog(
+            data = data,
+            onNameChanged = { renameDialogData = renameDialogData?.copy(name = it) },
+            onSaveClicked = {
+                viewModel.renameItem(data.id, data.name.text)
+                renameDialogData = null
+            },
+            onDismissRequest = { renameDialogData = null },
+        )
+    }
+
+    moveDialogData?.let { data ->
+        MoveDialog(
+            data = data,
+            onInputChanged = { moveDialogData = moveDialogData?.copy(query = it) },
+            onItemClicked = {
+                viewModel.moveItem(data.itemId, it.id)
+                moveDialogData = null
+            },
+            onDismissRequest = { moveDialogData = null },
         )
     }
 }
 
 @Composable
-private fun TopBar(onMenuClicked: () -> Unit) {
-    Row(
+private fun LazyItemScope.FolderNameItem(
+    item: Item,
+    isOpened: Boolean,
+    onItemClicked: () -> Unit,
+    onItemLongClicked: () -> Unit,
+) {
+    Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
-            .statusBarsPadding()
-            .padding(all = dimensionResource(RC.dimen.margin_medium)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_tiny)),
+            .animateItem()
+            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
+            .combinedClickable(
+                role = Role.Button,
+                onClick = onItemClicked,
+                onLongClick = onItemLongClicked,
+            ),
+        onClick = onItemClicked,
+        shape = MaterialTheme.shapes.small,
     ) {
-        ComposeIconButton(
-            iconRes = RC.drawable.ic_move_handle,
-            tooltipLabel = R.string.menu,
-            onClick = onMenuClicked,
-            iconButtonStyle = defaultComposeIconButtonStyle().copy(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                outlineColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface,
+        Row(
+            modifier = Modifier.padding(
+                horizontal = dimensionResource(RC.dimen.margin_semi_big),
+                vertical = dimensionResource(RC.dimen.margin_tiny),
             ),
-        )
-        ComposeText(
-            text = stringResource(R.string.note),
-            modifier = Modifier.weight(1f),
-            textStyle = defaultComposeTextStyle().copy(
-                textColor = MaterialTheme.colorScheme.onSurface,
-                typography = MaterialTheme.typography.titleLarge,
-            ),
-        )
-
-        ComposeIconButton(
-            iconRes = RC.drawable.ic_warning,
-            tooltipLabel = R.string.file_info,
-            onClick = {},
-            iconButtonStyle = defaultComposeIconButtonStyle().copy(
-                containerColor = Color.Transparent,
-                outlineColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+        ) {
+            ComposeText(
+                modifier = Modifier.weight(1f),
+                text = item.name,
+                textStyle = defaultComposeTextStyle().copy(
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    typography = MaterialTheme.typography.labelLarge,
+                )
+            )
+            val rotation by animateFloatAsState(if (isOpened) 90f else 0f)
+            ComposeIcon(
+                modifier = Modifier
+                    .size(dimensionResource(R.dimen.folder_icon_size))
+                    .rotate(rotation),
+                iconRes = RC.drawable.ic_arrow_right,
+                iconStyle = defaultComposeIconStyle().copy(
+                    tint = MaterialTheme.colorScheme.onBackground,
+                ),
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun BottomBar(insertStyle: () -> Unit) {
-    AnimatedVisibility(
-        visible = WindowInsets.isImeVisible,
-        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
-    ) {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(
-                        topStart = dimensionResource(RC.dimen.medium_rounded_corners),
-                        topEnd = dimensionResource(RC.dimen.medium_rounded_corners),
-                    ),
-                )
-                .navigationBarsPadding()
-                .imePadding(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_tiny)),
-            contentPadding = PaddingValues(
-                horizontal = dimensionResource(RC.dimen.margin_tiny),
-                vertical = dimensionResource(RC.dimen.margin_nano),
+private fun LazyItemScope.NoteItem(
+    item: Item,
+    onItemClicked: () -> Unit,
+    onItemLongClicked: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .animateItem()
+            .padding(horizontal = dimensionResource(RC.dimen.margin_semi_big))
+            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
+            .combinedClickable(
+                role = Role.Button,
+                onClick = onItemClicked,
+                onLongClick = onItemLongClicked,
             ),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(
+            width = dimensionResource(RC.dimen.default_border_width),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        ),
+        shape = MaterialTheme.shapes.small,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = dimensionResource(RC.dimen.margin_small),
+                    vertical = dimensionResource(RC.dimen.margin_small),
+                ),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_tiny)),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
-                ComposeIconButton(
-                    iconRes = R.drawable.icon_bold,
-                    tooltipLabel = R.string.bold,
-                    onClick = { },
-                    iconButtonStyle = defaultComposeIconButtonStyle().copy(
-                        containerColor = Color.Transparent,
-                        outlineColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+            ) {
+                ComposeText(
+                    modifier = Modifier.weight(1f),
+                    text = item.name,
+                    textStyle = defaultComposeTextStyle().copy(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                        typography = MaterialTheme.typography.labelLarge,
+                    )
+                )
+                ComposeText(
+                    text = when (val result =
+                        RelativeDatetimeFormatter.formatDateTime(item.updatedAt)) {
+                        Result.LessThanMinuteAgo -> stringResource(R.string.date_less_than_minute_ago)
+                        is Result.MinutesAgo -> stringResource(
+                            R.string.date_minutes_ago,
+                            result.minutes,
+                        )
+
+                        is Result.HoursAgo -> stringResource(R.string.date_hours_ago, result.hours)
+                        Result.Yesterday -> stringResource(R.string.date_yesterday)
+                        is Result.DaysAgo -> stringResource(R.string.date_days_ago, result.days)
+                        Result.LastWeek -> stringResource(R.string.date_last_week)
+                        is Result.Absolute -> stringResource(
+                            R.string.date_absolute,
+                            Date(result.time),
+                        )
+                    },
+                    textStyle = defaultComposeTextStyle().copy(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                        typography = MaterialTheme.typography.labelMedium,
+                        textAlign = TextAlign.End,
+                    )
                 )
             }
+
+            // TODO add tags
         }
     }
 }

@@ -1,8 +1,11 @@
 package com.pointlessapps.granite.home.ui.components.menu.dialog
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,36 +46,43 @@ internal fun ConfirmationDialog(
             ),
         )
 
-        Row(
-            modifier = Modifier.align(Alignment.End),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_tiny)),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_medium)),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ComposeButton(
-                label = stringResource(data.cancelText),
-                onClick = {
-                    data.onCancelClicked()
-                    onDismissRequest()
-                },
-                buttonStyle = defaultComposeButtonStyle().copy(
-                    iconRes = null,
-                    containerColor = Color.Transparent,
-                    textStyle = defaultComposeButtonTextStyle().copy(
-                        textColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                ),
-            )
-            ComposeButton(
+                modifier = Modifier.fillMaxWidth(),
                 label = stringResource(data.confirmText),
                 onClick = {
                     data.onConfirmClicked()
                     onDismissRequest()
                 },
                 buttonStyle = defaultComposeButtonStyle().copy(
-                    iconRes = null,
                     containerColor = MaterialTheme.colorScheme.primary,
                     textStyle = defaultComposeButtonTextStyle().copy(
+                        textAlign = TextAlign.Center,
                         textColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                ),
+            )
+            ComposeButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = dimensionResource(RC.dimen.default_border_width),
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = CircleShape,
+                    ),
+                label = stringResource(data.cancelText),
+                onClick = {
+                    data.onCancelClicked()
+                    onDismissRequest()
+                },
+                buttonStyle = defaultComposeButtonStyle().copy(
+                    containerColor = Color.Transparent,
+                    textStyle = defaultComposeButtonTextStyle().copy(
+                        textAlign = TextAlign.Center,
+                        textColor = MaterialTheme.colorScheme.onSurface,
                     ),
                 ),
             )

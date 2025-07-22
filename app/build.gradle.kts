@@ -65,7 +65,7 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.fromTarget(JavaVersion.VERSION_17.toString())
-            freeCompilerArgs = listOf("-XXLanguage:+WhenGuards")
+            freeCompilerArgs = listOf("-XXLanguage:+WhenGuards", "-Xannotation-default-target=param-property")
         }
     }
 
@@ -115,4 +115,5 @@ dependencies {
     implementation(projects.uiComponents)
     implementation(projects.markdownRenderer)
     implementation(projects.fuzzySearch)
+    implementation(projects.relativeDatetimeFormatter)
 }

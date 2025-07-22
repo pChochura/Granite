@@ -10,7 +10,6 @@ kotlinSerialization = "2.2.0"
 kotlinSerializationJson = "1.9.0"
 kotlin = "2.2.0"
 coroutines = "1.10.2"
-ksp = "2.1.21-2.0.2"
 ksp = "2.2.0-2.0.2"
 
 #Android
@@ -18,13 +17,13 @@ gradlePlugin = "8.11.0-rc02"
 
 #AndroidX
 androidxCore = "1.16.0"
-androidxNavigation = "2.9.1"
+androidxNavigation = "2.9.2"
 androidxSplashscreen = "1.0.1"
 androidxDatastore = "1.1.7"
 
 #Compose
 composeCompiler = "1.5.15"
-composeBom = "2025.06.01"
+composeBom = "2025.07.00"
 composeRuntime = "1.8.3"
 
 #Detekt
@@ -45,13 +44,13 @@ highlights = "1.0.0"
 coil = "2.7.0"
 
 #Supabase
-supabase = "3.2.0"
+supabase = "3.2.1"
 
 #RoomDB
 roomDb = "2.7.2"
 
 #Ktor
-ktor = "3.2.1"
+ktor = "3.2.2"
 
 #Credentials
 credentials = "1.5.0"

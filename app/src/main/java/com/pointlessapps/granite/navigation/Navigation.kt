@@ -5,10 +5,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.pointlessapps.granite.MainViewModel
+import com.pointlessapps.granite.editor.ui.DailyNoteScreen
+import com.pointlessapps.granite.editor.ui.EditorScreen
 import com.pointlessapps.granite.home.ui.HomeScreen
 import com.pointlessapps.granite.login.ui.LoginScreen
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 internal fun Navigation(
@@ -33,6 +37,18 @@ internal fun Navigation(
         }
         composable<Route.Home> {
             HomeScreen(onNavigateTo = navController::navigate)
+        }
+        composable<Route.Editor> {
+            val itemId = it.toRoute<Route.Editor>().itemId
+            EditorScreen(
+                viewModel = koinViewModel { parametersOf(itemId) },
+                onNavigateTo = navController::navigate,
+            )
+        }
+        composable<Route.DailyNote> {
+            DailyNoteScreen(onNavigateTo = navController::navigate)
+        }
+        composable<Route.Search> {
         }
     }
 }

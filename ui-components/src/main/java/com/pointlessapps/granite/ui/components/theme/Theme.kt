@@ -83,12 +83,22 @@ private fun lightColorPalette() = lightColorScheme(
 
 @Composable
 private fun darkColorPalette() = darkColorScheme(
-    primary = colorResource(id = R.color.gray_5),
-    onPrimary = colorResource(id = R.color.gray_1),
-    secondary = colorResource(id = R.color.gray_6),
-    onSecondary = colorResource(id = R.color.gray_1),
-    background = colorResource(id = R.color.gray_7),
-    onBackground = colorResource(id = R.color.gray_1),
+    primary = colorResource(R.color.primary),
+    onPrimary = colorResource(R.color.onPrimary),
+    secondary = colorResource(R.color.secondary),
+    onSecondary = colorResource(R.color.onSecondary),
+    background = colorResource(R.color.background),
+    onBackground = colorResource(R.color.onBackground),
+    surface = colorResource(R.color.surface),
+    onSurface = colorResource(R.color.onSurface),
+    onSurfaceVariant = colorResource(R.color.onSurfaceVariant),
+    error = colorResource(R.color.error),
+    onError = colorResource(R.color.onError),
+    outline = colorResource(R.color.outline),
+    outlineVariant = colorResource(R.color.outlineVariant),
+    surfaceContainer = colorResource(R.color.surfaceContainer),
+    surfaceContainerHigh = colorResource(R.color.surfaceContainerHigh),
+    surfaceContainerLow = colorResource(R.color.surfaceContainerLow),
 )
 
 @Composable
@@ -102,8 +112,8 @@ fun ProjectTheme(
 ) {
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val colorScheme = when {
-        dynamicColor && isDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
-        dynamicColor && !isDarkTheme -> dynamicLightColorScheme(LocalContext.current)
+//        dynamicColor && isDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
+//        dynamicColor && !isDarkTheme -> dynamicLightColorScheme(LocalContext.current)
         isDarkTheme -> darkColorPalette
         else -> lightColorPalette
     }

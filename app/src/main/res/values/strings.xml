@@ -7,13 +7,11 @@
     <string name="create_folder">Create a folder</string>
     <string name="untitled">Untitled</string>
     <string name="save">Save</string>
-    <string name="item_ordering">Item ordering</string>
-    <string name="name_ascending">Name ascending (A-Z)</string>
-    <string name="name_descending">Name descending (Z-A)</string>
-    <string name="created_date_ascending">Created date ascending (oldest first)</string>
-    <string name="created_date_descending">Created date descending (newest first)</string>
-    <string name="updated_date_ascending">Updated date ascending (oldest first)</string>
-    <string name="updated_date_descending">Updated date descending (newest first)</string>
+    <string name="sort_items_by">Sort items by</string>
+    <string name="name_ascending">Name (A-Z)</string>
+    <string name="name_descending">Name (Z-A)</string>
+    <string name="created_date_ascending">Date of creation (oldest first)</string>
+    <string name="created_date_descending">Date of creation (newest first)</string>
     <string name="menu">Menu</string>
     <string name="file_info">File info</string>
     <string name="bold">Bold</string>
@@ -27,8 +25,7 @@
     <string name="move_folder">Move folder</string>
     <string name="delete">Delete</string>
     <string name="rename">Rename</string>
-    <string name="folder_name">Folder name…</string>
-    <string name="new_name">A new name…</string>
+    <string name="new_name">Your new name</string>
     <string name="delete_item_description">Moves the item to the trash</string>
     <string name="duplicate">Duplicate</string>
     <string name="restore">Restore</string>
@@ -54,4 +51,23 @@
     <string name="restore_daily_notes_folder_description">Do you want to restore the existing Daily Notes folder (with all of its notes) or create a new one?</string>
     <string name="create_new">Create new</string>
     <string name="not_implemented_yet">Not implemented yet</string>
+    <string name="hide">Hide</string>
+    <string name="go_to_daily_note">Go to daily note</string>
+    <string name="new_daily_note">New daily note</string>
+    <string name="editor">Editor</string>
+    <string name="daily_note">Daily note</string>
+    <string name="cancel">Cancel</string>
+    <string name="move">Move</string>
+    <string name="move_item_confirmation">Are you sure you want to move the item and its children to the following directory?</string>
+
+    <string name="date_less_than_minute_ago">now</string>
+    <string name="date_minutes_ago">%d mins ago</string>
+    <string name="date_hours_ago">%d hours ago</string>
+    <string name="date_days_ago">%d days ago</string>
+    <string name="date_yesterday">yesterday</string>
+    <string name="date_last_week">last week</string>
+    <string name="date_absolute">%1$tR %1$td.%1$tm.%1$tY</string>
+    <string name="hide_the_button">Hide the button</string>
+    <string name="disable">Disable</string>
+    <string name="disable_daily_note_description">You can enable it in the settings</string>
 </resources>

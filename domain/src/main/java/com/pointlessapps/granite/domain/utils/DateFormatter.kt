@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 
 internal fun String.formatDateAsTimestamp() =
-    DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(this).getLong(ChronoField.OFFSET_SECONDS)
+    DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(this).getLong(ChronoField.INSTANT_SECONDS)
 
 internal fun Long.formatTimestampAsDate() = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(
     OffsetDateTime.of(
