@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,8 +35,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.fuzzy.search.FuzzySearch
 import com.pointlessapps.granite.fuzzy.search.SearchMatch
@@ -54,43 +57,50 @@ import com.pointlessapps.granite.ui.R as RC
 
 @Composable
 internal fun MoveDialog(
-    data: MoveDialogData,
+    dialogData: MoveDialogData,
     onInputChanged: (String) -> Unit,
     onItemClicked: (ItemWithParents) -> Unit,
+    onCreateNewFolderClicked: (ItemWithParents) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    var selectedItem by remember { mutableStateOf<ItemWithParents?>(null) }
+    var confirmationData by remember { mutableStateOf<ConfirmationData?>(null) }
 
     ComposeDialog(
         onDismissRequest = onDismissRequest,
         dialogStyle = defaultComposeDialogStyle().copy(
             label = stringResource(R.string.move_to),
             iconRes = RC.drawable.ic_move,
-            dismissible = if (selectedItem != null) {
+            dismissible = if (confirmationData != null) {
                 ComposeDialogDismissible.None
             } else {
                 ComposeDialogDismissible.OnBackPress
             },
         ),
     ) {
-        BackHandler(selectedItem != null) {
-            selectedItem = null
+        BackHandler(confirmationData != null) {
+            confirmationData = null
         }
 
-        AnimatedContent(selectedItem) { item ->
-            if (item != null) {
+        AnimatedContent(confirmationData) { data ->
+            if (data != null) {
                 Confirmation(
-                    itemWithParents = item,
+                    itemWithParents = data.item,
+                    createNewFolder = data.createNewFolder,
                     onConfirmClicked = {
-                        onItemClicked(item)
+                        if (data.createNewFolder) {
+                            onCreateNewFolderClicked(data.item)
+                        } else {
+                            onItemClicked(data.item)
+                        }
                         onDismissRequest()
                     },
-                    onCancelClicked = { selectedItem = null },
+                    onCancelClicked = { confirmationData = null },
                 )
             } else {
                 ItemTree(
-                    data = data,
-                    onItemClicked = { selectedItem = it },
+                    data = dialogData,
+                    onItemClicked = { confirmationData = ConfirmationData(it, false) },
+                    onCreateFolderClicked = { confirmationData = ConfirmationData(it, true) },
                     onInputChanged = onInputChanged,
                 )
             }
@@ -101,6 +111,7 @@ internal fun MoveDialog(
 @Composable
 private fun Confirmation(
     itemWithParents: ItemWithParents,
+    createNewFolder: Boolean,
     onConfirmClicked: () -> Unit,
     onCancelClicked: () -> Unit,
 ) {
@@ -151,7 +162,7 @@ private fun Confirmation(
         ) {
             ComposeButton(
                 modifier = Modifier.fillMaxWidth(),
-                label = stringResource(R.string.move),
+                label = stringResource(if (createNewFolder) R.string.create else R.string.move),
                 onClick = onConfirmClicked,
                 buttonStyle = defaultComposeButtonStyle().copy(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -187,6 +198,7 @@ private fun Confirmation(
 private fun ItemTree(
     data: MoveDialogData,
     onItemClicked: (ItemWithParents) -> Unit,
+    onCreateFolderClicked: (ItemWithParents) -> Unit,
     onInputChanged: (String) -> Unit,
 ) {
     val nameFocusRequester = remember { FocusRequester() }
@@ -208,16 +220,31 @@ private fun ItemTree(
                     ),
                 ),
             verticalArrangement = Arrangement.spacedBy(
-                space = dimensionResource(RC.dimen.margin_nano),
+                space = 0.dp,
                 alignment = Alignment.Bottom,
             ),
             reverseLayout = true,
         ) {
-            items(data.filteredFolders, key = { it.item.id ?: 0 }) {
+            items(data.filteredFolders, key = { it.item }) {
                 Item(
                     match = it,
                     onItemSelected = onItemClicked,
                 )
+            }
+
+            val showNewFolderName by derivedStateOf {
+                data.query.isNotEmpty() && data.filteredFolders.find {
+                    it.item.toString() == data.query
+                } == null
+            }
+
+            if (showNewFolderName) {
+                item {
+                    Item(
+                        match = searchMatchFromQuery(data.query),
+                        onItemSelected = onCreateFolderClicked,
+                    )
+                }
             }
         }
 
@@ -245,6 +272,7 @@ private fun ItemTree(
                 .padding(dimensionResource(RC.dimen.margin_medium)),
             textFieldStyle = defaultComposeTextFieldStyle().copy(
                 keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Text,
                     showKeyboardOnFocus = true,
                 ),
@@ -252,6 +280,9 @@ private fun ItemTree(
                 textColor = MaterialTheme.colorScheme.onSurface,
                 placeholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
             ),
+            onImeAction = {
+                onCreateFolderClicked(ItemWithParents(null, data.query, ""))
+            },
         )
     }
 }
@@ -306,3 +337,17 @@ internal data class MoveDialogData(
             FuzzySearch.extractPathsSorted(query = query, paths = folders)
         }
 }
+
+private data class ConfirmationData(
+    val item: ItemWithParents,
+    val createNewFolder: Boolean,
+)
+
+private fun searchMatchFromQuery(query: String) = SearchMatch(
+    ItemWithParents(
+        id = null,
+        name = query,
+        parentsNames = "",
+    ),
+    matches = listOf(0..query.length),
+)

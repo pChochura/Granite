@@ -237,7 +237,8 @@ internal class HomeViewModel(
 
             state = state.copy(isLoading = true)
             val updatedItems = markItemsAsDeletedUseCase(ids, deleted = true).map(Note::toItem)
-            val newItems = (state.deletedItems + updatedItems).toSortedTree(state.orderType.comparator)
+            val newItems =
+                (state.deletedItems + updatedItems).toSortedTree(state.orderType.comparator)
             state = state.copy(
                 isLoading = false,
                 items = state.items.filter { it.id !in ids },
@@ -288,6 +289,24 @@ internal class HomeViewModel(
             state = state.copy(
                 isLoading = false,
                 items = state.items.map {
+                    if (it.id == id) {
+                        updatedItem.toItem()
+                    } else {
+                        it
+                    }
+                }.toSortedTree(state.orderType.comparator),
+            )
+        }
+    }
+
+    fun moveItemToNewFolder(id: Int, newFolderName: String) {
+        launch(handleErrors(R.string.error_moving_item)) {
+            state = state.copy(isLoading = true)
+            val newFolders = createItemUseCase(newFolderName, null, null)
+            val updatedItem = requireNotNull(moveItemUseCase(id, newFolders.last().id))
+            state = state.copy(
+                isLoading = false,
+                items = (state.items + newFolders.map(Note::toItem)).map {
                     if (it.id == id) {
                         updatedItem.toItem()
                     } else {

@@ -263,10 +263,14 @@ internal fun HomeScreen(
 
     moveDialogData?.let { data ->
         MoveDialog(
-            data = data,
+            dialogData = data,
             onInputChanged = { moveDialogData = moveDialogData?.copy(query = it) },
             onItemClicked = {
                 viewModel.moveItem(data.itemId, it.id)
+                moveDialogData = null
+            },
+            onCreateNewFolderClicked = {
+                viewModel.moveItemToNewFolder(data.itemId, it.name)
                 moveDialogData = null
             },
             onDismissRequest = { moveDialogData = null },
@@ -291,13 +295,13 @@ private fun LazyItemScope.FolderNameItem(
     Surface(
         modifier = Modifier
             .animateItem()
-            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
+            // FIXME
+//            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
             .combinedClickable(
                 role = Role.Button,
                 onClick = onItemClicked,
                 onLongClick = onItemLongClicked,
             ),
-        onClick = onItemClicked,
         shape = MaterialTheme.shapes.small,
     ) {
         Row(
@@ -340,7 +344,8 @@ private fun LazyItemScope.NoteItem(
         modifier = Modifier
             .animateItem()
             .padding(horizontal = dimensionResource(RC.dimen.margin_semi_big))
-            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
+            // FIXME
+//            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
             .combinedClickable(
                 role = Role.Button,
                 onClick = onItemClicked,
