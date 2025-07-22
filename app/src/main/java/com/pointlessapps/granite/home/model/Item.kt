@@ -20,6 +20,7 @@ internal data class Item(
     val content: String?,
     val indent: Int,
     val deleted: Boolean,
+    val tags: List<Tag>,
 ) : Parcelable {
 
     @IgnoredOnParcel

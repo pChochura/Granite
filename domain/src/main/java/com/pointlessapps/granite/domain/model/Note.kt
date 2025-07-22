@@ -8,4 +8,5 @@ data class Note(
     val createdAt: Long,
     val content: String?,
     val deleted: Boolean,
+    val tags: List<Tag>,
 )

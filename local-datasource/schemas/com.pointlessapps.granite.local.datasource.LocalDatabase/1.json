@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6d2f51d37b15d8dd89a9dfd8161e41fb",
+    "identityHash": "8c700301667a308dc242bd534339fc9d",
     "entities": [
       {
         "tableName": "notes",
@@ -56,11 +56,116 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "tags",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `color` INTEGER NOT NULL, `isBuiltIn` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isBuiltIn",
+            "columnName": "isBuiltIn",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "notes_tags_cross_ref",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`note_id` INTEGER NOT NULL, `tag_id` INTEGER NOT NULL, PRIMARY KEY(`note_id`, `tag_id`), FOREIGN KEY(`note_id`) REFERENCES `notes`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`tag_id`) REFERENCES `tags`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "noteId",
+            "columnName": "note_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tagId",
+            "columnName": "tag_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "note_id",
+            "tag_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_notes_tags_cross_ref_note_id",
+            "unique": false,
+            "columnNames": [
+              "note_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_notes_tags_cross_ref_note_id` ON `${TABLE_NAME}` (`note_id`)"
+          },
+          {
+            "name": "index_notes_tags_cross_ref_tag_id",
+            "unique": false,
+            "columnNames": [
+              "tag_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_notes_tags_cross_ref_tag_id` ON `${TABLE_NAME}` (`tag_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "notes",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "note_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "tags",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "tag_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6d2f51d37b15d8dd89a9dfd8161e41fb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8c700301667a308dc242bd534339fc9d')"
     ]
   }
 }

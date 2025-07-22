@@ -2,16 +2,20 @@ package com.pointlessapps.granite.home.ui
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,7 +28,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -394,7 +401,35 @@ private fun LazyItemScope.NoteItem(
                 )
             }
 
-            // TODO add tags
+            if (item.tags.isNotEmpty()) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    items(item.tags, key = { it.id }) { tag ->
+                        val color = Color(tag.color)
+                        ComposeText(
+                            text = tag.name,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(color)
+                                .padding(
+                                    vertical = dimensionResource(RC.dimen.margin_nano),
+                                    horizontal = dimensionResource(RC.dimen.margin_tiny),
+                                ),
+                            textStyle = defaultComposeTextStyle().copy(
+                                textColor = if (color.luminance() > 0.5) {
+                                    MaterialTheme.colorScheme.onSurface
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimary
+                                },
+                                typography = MaterialTheme.typography.labelSmall,
+                            ),
+                        )
+                    }
+                }
+            }
         }
     }
 }

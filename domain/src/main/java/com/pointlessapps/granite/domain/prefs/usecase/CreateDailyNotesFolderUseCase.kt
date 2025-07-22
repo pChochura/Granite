@@ -17,7 +17,7 @@ class CreateDailyNotesFolderUseCase(
             content = null,
             parentId = null,
         )?.also {
-            localPrefsDatasource.setDailyNotesFolderId(it.id)
+            localPrefsDatasource.setDailyNotesFolderId(it.note.id)
         }?.fromLocal() ?: throw ItemNotCreatedException()
     }
 }

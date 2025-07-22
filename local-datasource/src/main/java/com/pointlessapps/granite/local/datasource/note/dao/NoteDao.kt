@@ -3,24 +3,30 @@ package com.pointlessapps.granite.local.datasource.note.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.pointlessapps.granite.local.datasource.note.entity.NoteEntity
 import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityParentIdPartial
 import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityPartial
+import com.pointlessapps.granite.local.datasource.note.entity.NoteWithTagsEntity
 
 @Dao
 internal interface NoteDao {
+    @Transaction
     @Query("SELECT * FROM notes WHERE id = :id")
-    suspend fun getById(id: Int): NoteEntity?
+    suspend fun getById(id: Int): NoteWithTagsEntity?
 
+    @Transaction
     @Query("SELECT * FROM notes WHERE id IN (:ids)")
-    suspend fun getByIds(ids: List<Int>): List<NoteEntity>
+    suspend fun getByIds(ids: List<Int>): List<NoteWithTagsEntity>
 
+    @Transaction
     @Query("SELECT * FROM notes WHERE name = :name AND parent_id = :folderId")
-    suspend fun findInFolderByName(name: String, folderId: Int?): NoteEntity?
+    suspend fun findInFolderByName(name: String, folderId: Int?): NoteWithTagsEntity?
 
+    @Transaction
     @Query("SELECT * FROM notes")
-    suspend fun getAll(): List<NoteEntity>
+    suspend fun getAll(): List<NoteWithTagsEntity>
 
     @Query("UPDATE notes SET name = :name, updated_at = :currentTimestamp WHERE id = :id")
     suspend fun updateName(id: Int, name: String, currentTimestamp: String)
