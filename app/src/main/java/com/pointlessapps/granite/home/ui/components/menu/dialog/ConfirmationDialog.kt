@@ -58,10 +58,18 @@ internal fun ConfirmationDialog(
                     onDismissRequest()
                 },
                 buttonStyle = defaultComposeButtonStyle().copy(
-                    containerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = if (data.isError) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
                     textStyle = defaultComposeButtonTextStyle().copy(
                         textAlign = TextAlign.Center,
-                        textColor = MaterialTheme.colorScheme.onPrimary,
+                        textColor = if (data.isError) {
+                            MaterialTheme.colorScheme.onError
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        },
                     ),
                 ),
             )
@@ -95,6 +103,7 @@ internal data class ConfirmationDialogData(
     @StringRes val description: Int,
     @StringRes val confirmText: Int,
     @StringRes val cancelText: Int,
+    val isError: Boolean,
     val onConfirmClicked: () -> Unit,
     val onCancelClicked: () -> Unit,
 )

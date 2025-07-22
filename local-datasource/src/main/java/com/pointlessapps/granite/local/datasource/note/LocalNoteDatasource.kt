@@ -16,12 +16,12 @@ interface LocalNoteDatasource {
     suspend fun update(id: Int, name: String, content: String?, parentId: Int?): NoteEntity?
     suspend fun create(name: String, content: String?, parentId: Int?): NoteEntity?
 
-    suspend fun markAsDeleted(ids: List<Int>, deleted: Boolean)
+    suspend fun markAsDeleted(ids: List<Int>, deleted: Boolean): List<NoteEntity>
     suspend fun delete(ids: List<Int>)
 
     suspend fun duplicate(ids: List<Int>): List<NoteEntity>
 
-    suspend fun move(id: Int, newParentId: Int?)
+    suspend fun move(id: Int, newParentId: Int?): NoteEntity?
 }
 
 internal class LocalNoteDatasourceImpl(
@@ -57,8 +57,11 @@ internal class LocalNoteDatasourceImpl(
         return noteDao.getById(noteId)
     }
 
-    override suspend fun markAsDeleted(ids: List<Int>, deleted: Boolean) =
+    override suspend fun markAsDeleted(ids: List<Int>, deleted: Boolean): List<NoteEntity> {
         noteDao.markAsDeleted(ids, deleted, getCurrentTimestamp())
+
+        return noteDao.getByIds(ids)
+    }
 
     override suspend fun delete(ids: List<Int>) {
         noteDao.delete(ids)
@@ -106,6 +109,9 @@ internal class LocalNoteDatasourceImpl(
         return noteDao.getByIds(newIds)
     }
 
-    override suspend fun move(id: Int, newParentId: Int?) =
+    override suspend fun move(id: Int, newParentId: Int?): NoteEntity? {
         noteDao.move(id, newParentId, getCurrentTimestamp())
+
+        return noteDao.getById(id)
+    }
 }

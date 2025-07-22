@@ -51,6 +51,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.DailyNoteButtonBottomSheet
+import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialogData
 import com.pointlessapps.granite.navigation.Navigation
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.ui.components.BottomBar
@@ -122,6 +124,7 @@ class MainActivity : ComponentActivity() {
         val coroutineScope = rememberCoroutineScope()
         var showDailyNoteButtonBottomSheet by remember { mutableStateOf(false) }
         val dailyNoteButtonBottomSheetState = rememberModalBottomSheetState()
+        var confirmationDialogData by remember { mutableStateOf<ConfirmationDialogData?>(null) }
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -188,7 +191,20 @@ class MainActivity : ComponentActivity() {
             DailyNoteButtonBottomSheet(
                 state = dailyNoteButtonBottomSheetState,
                 onHideButtonClicked = {},
-                onDisableClicked = {},
+                onDisableClicked = {
+                    confirmationDialogData = ConfirmationDialogData(
+                        title = R.string.disable_daily_note_question,
+                        description = R.string.disable_daily_note_question_description,
+                        confirmText = R.string.disable,
+                        cancelText = R.string.cancel,
+                        isError = true,
+                        onConfirmClicked = {
+                            // TODO disable daily note
+                            confirmationDialogData = null
+                        },
+                        onCancelClicked = { confirmationDialogData = null },
+                    )
+                },
                 onDismissRequest = {
                     coroutineScope.launch {
                         dailyNoteButtonBottomSheetState.hide()
@@ -196,6 +212,13 @@ class MainActivity : ComponentActivity() {
                         showDailyNoteButtonBottomSheet = false
                     }
                 },
+            )
+        }
+
+        confirmationDialogData?.let { data ->
+            ConfirmationDialog(
+                data = data,
+                onDismissRequest = { confirmationDialogData = null }
             )
         }
     }

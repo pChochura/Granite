@@ -38,6 +38,8 @@ import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertiesBottomSheet
 import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertyAction
+import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialog
+import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialogData
 import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialog
 import com.pointlessapps.granite.home.ui.components.menu.dialog.CreateFolderDialogData
 import com.pointlessapps.granite.home.ui.components.menu.dialog.MoveDialog
@@ -68,6 +70,7 @@ internal fun HomeScreen(
     onNavigateTo: (Route) -> Unit,
 ) {
     var createFolderDialogData by remember { mutableStateOf<CreateFolderDialogData?>(null) }
+    var confirmationDialogData by remember { mutableStateOf<ConfirmationDialogData?>(null) }
     var renameDialogData by remember { mutableStateOf<RenameDialogData?>(null) }
     var moveDialogData by remember { mutableStateOf<MoveDialogData?>(null) }
     var showOrderTypeDialog by remember { mutableStateOf(false) }
@@ -180,7 +183,29 @@ internal fun HomeScreen(
                     )
 
                     ItemPropertyAction.RESTORE -> viewModel.restoreItem(item.id)
-                    ItemPropertyAction.DELETE -> viewModel.deleteItem(item.id)
+                    ItemPropertyAction.DELETE -> {
+                        confirmationDialogData = ConfirmationDialogData(
+                            title = if (item.isFolder) {
+                                R.string.delete_folder_question
+                            } else {
+                                R.string.delete_note_question
+                            },
+                            description = if (item.isFolder) {
+                                R.string.delete_folder_question_description
+                            } else {
+                                R.string.delete_note_question_description
+                            },
+                            confirmText = R.string.delete,
+                            cancelText = R.string.cancel,
+                            isError = true,
+                            onConfirmClicked = {
+                                viewModel.deleteItem(item.id)
+                                confirmationDialogData = null
+                            },
+                            onCancelClicked = { confirmationDialogData = null },
+                        )
+                    }
+
                     ItemPropertyAction.DELETE_PERMANENTLY -> viewModel.deleteItemPermanently(item.id)
                 }
             },
@@ -238,6 +263,13 @@ internal fun HomeScreen(
                 moveDialogData = null
             },
             onDismissRequest = { moveDialogData = null },
+        )
+    }
+
+    confirmationDialogData?.let { data ->
+        ConfirmationDialog(
+            data = data,
+            onDismissRequest = { confirmationDialogData = null },
         )
     }
 }

@@ -196,7 +196,7 @@ internal class HomeViewModel(
         launch(handleErrors(R.string.error_renaming_item)) {
             state = state.copy(isLoading = true)
             val item = state.items.find { it.id == id }
-            updateItemUseCase(
+            val updatedItem = updateItemUseCase(
                 id = id,
                 name = name,
                 content = item?.content,
@@ -206,7 +206,7 @@ internal class HomeViewModel(
                 isLoading = false,
                 items = state.items.map {
                     if (it.id == id) {
-                        it.copy(name = name)
+                        updatedItem.toItem()
                     } else {
                         it
                     }
@@ -236,8 +236,8 @@ internal class HomeViewModel(
             val ids = items.map(Item::id)
 
             state = state.copy(isLoading = true)
-            markItemsAsDeletedUseCase(ids, deleted = true)
-            val newItems = (state.deletedItems + items).toSortedTree(state.orderType.comparator)
+            val updatedItems = markItemsAsDeletedUseCase(ids, deleted = true).map(Note::toItem)
+            val newItems = (state.deletedItems + updatedItems).toSortedTree(state.orderType.comparator)
             state = state.copy(
                 isLoading = false,
                 items = state.items.filter { it.id !in ids },
@@ -269,8 +269,8 @@ internal class HomeViewModel(
             val ids = items.map(Item::id)
 
             state = state.copy(isLoading = true)
-            markItemsAsDeletedUseCase(ids, deleted = false)
-            val newItems = (state.items + items).toSortedTree(state.orderType.comparator)
+            val updatedItems = markItemsAsDeletedUseCase(ids, deleted = false).map(Note::toItem)
+            val newItems = (state.items + updatedItems).toSortedTree(state.orderType.comparator)
             state = state.copy(
                 isLoading = false,
                 items = newItems,
@@ -284,12 +284,12 @@ internal class HomeViewModel(
     fun moveItem(id: Int, newParentId: Int?) {
         launch(handleErrors(R.string.error_moving_item)) {
             state = state.copy(isLoading = true)
-            moveItemUseCase(id, newParentId)
+            val updatedItem = requireNotNull(moveItemUseCase(id, newParentId))
             state = state.copy(
                 isLoading = false,
                 items = state.items.map {
                     if (it.id == id) {
-                        it.copy(parentId = newParentId)
+                        updatedItem.toItem()
                     } else {
                         it
                     }

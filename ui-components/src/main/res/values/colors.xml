@@ -19,8 +19,8 @@
 	<color name="surface">#120914</color>
 	<color name="onSurface">#FDE4FF</color>
 	<color name="onSurfaceVariant">#FBCCFF</color>
-	<color name="error">#C68E84</color>
-	<color name="onError">#19171A</color>
+	<color name="error">#C64832</color>
+	<color name="onError">#FDE4FF</color>
 	<color name="outline">#573B60</color>
 	<color name="outlineVariant">#3C2144</color>
 	<color name="surfaceContainer">#120914</color>

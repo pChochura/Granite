@@ -59,7 +59,6 @@
     <string name="cancel">Cancel</string>
     <string name="move">Move</string>
     <string name="move_item_confirmation">Are you sure you want to move the item and its children to the following directory?</string>
-
     <string name="date_less_than_minute_ago">now</string>
     <string name="date_minutes_ago">%d mins ago</string>
     <string name="date_hours_ago">%d hours ago</string>
@@ -70,4 +69,10 @@
     <string name="hide_the_button">Hide the button</string>
     <string name="disable">Disable</string>
     <string name="disable_daily_note_description">You can enable it in the settings</string>
+    <string name="delete_note_question">Delete the note?</string>
+    <string name="delete_folder_question">Delete the folder?</string>
+    <string name="delete_note_question_description">You will be able to restore the note from the trash for the next 30 days.</string>
+    <string name="delete_folder_question_description">You will be able to restore the folder from the trash for the next 30 days.</string>
+    <string name="disable_daily_note_question">Disable daily note?</string>
+    <string name="disable_daily_note_question_description">It will hide the daily note folder and the button shortcut.\nYou can always enable it in the settings.</string>
 </resources>
