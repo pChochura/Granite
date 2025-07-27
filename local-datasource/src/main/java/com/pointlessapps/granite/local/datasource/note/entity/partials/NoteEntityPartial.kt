@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.local.datasource.note.entity
+package com.pointlessapps.granite.local.datasource.note.entity.partials
 
 import androidx.room.ColumnInfo
 

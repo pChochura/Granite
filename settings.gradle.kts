@@ -29,4 +29,5 @@ include(
     ":markdown-obsidian-parser",
     ":fuzzy-search",
     ":relative-datetime-formatter",
+    ":typemap-processor",
 )

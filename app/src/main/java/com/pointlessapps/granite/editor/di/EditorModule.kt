@@ -9,7 +9,7 @@ internal val editorModule = module {
         EditorViewModel(
             savedStateHandle = get(),
             application = get(),
-            itemId = params.getOrNull(),
+            arg = params.get(),
         )
     }
 }

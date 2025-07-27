@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidVersionGit)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlinComposeCompiler)
     id(libs.versions.parcelizePluginName.get())
 }
@@ -116,4 +117,6 @@ dependencies {
     implementation(projects.markdownRenderer)
     implementation(projects.fuzzySearch)
     implementation(projects.relativeDatetimeFormatter)
+    implementation(projects.typemapProcessor)
+    ksp(projects.typemapProcessor)
 }

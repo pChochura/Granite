@@ -18,6 +18,7 @@
             <option value="$PROJECT_DIR$/markdown-renderer" />
             <option value="$PROJECT_DIR$/relative-datetime-formatter" />
             <option value="$PROJECT_DIR$/supabase-datasource" />
+            <option value="$PROJECT_DIR$/typemap-processor" />
             <option value="$PROJECT_DIR$/ui-components" />
           </set>
         </option>

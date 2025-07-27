@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.domain.note.usecase.CreateDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
@@ -32,22 +33,27 @@ internal data class EditorState(
     val parentId: Int? = null,
     val title: @WriteWith<TextFieldValueParceler> TextFieldValue = TextFieldValue(),
     val content: @WriteWith<TextFieldValueParceler> TextFieldValue = TextFieldValue(),
+    val isDailyNote: Boolean = false,
     val isLoading: Boolean = false,
 ) : Parcelable
 
 internal class EditorViewModel(
     savedStateHandle: SavedStateHandle,
     application: Application,
-    itemId: Int?,
+    arg: Route.Editor.Arg,
 ) : AndroidViewModel(application), KoinComponent {
 
     private val untitledNotePlaceholder = getApplication<Application>().getString(R.string.untitled)
+    private val createDailyNoteUseCase: CreateDailyNoteUseCase by inject()
     private val createItemUseCase: CreateItemUseCase by inject()
     private val updateItemUseCase: UpdateItemUseCase by inject()
     private val getNoteUseCase: GetNoteUseCase by inject()
 
     var state by savedStateHandle.mutableStateOf(
-        EditorState(itemId = itemId),
+        EditorState(
+            itemId = if (arg is Route.Editor.Arg.Note) arg.id else null,
+            isDailyNote = arg is Route.Editor.Arg.NewDailyNote,
+        ),
     )
         private set
 
@@ -59,15 +65,16 @@ internal class EditorViewModel(
             onException = handleErrors(R.string.error_loading_note),
             onShowLoader = { state = state.copy(isLoading = true) },
         ) {
-            val note = if (itemId != null) {
-                requireNotNull(getNoteUseCase(itemId))
-            } else {
-                createItemUseCase(
+            val note = when (arg) {
+                is Route.Editor.Arg.Note -> requireNotNull(getNoteUseCase(arg.id))
+                is Route.Editor.Arg.NewDailyNote -> createDailyNoteUseCase()
+                is Route.Editor.Arg.NewNote -> createItemUseCase(
                     name = untitledNotePlaceholder,
                     content = "",
-                    parentId = null,
+                    parentId = arg.parentId,
                 ).first()
             }
+
             state = state.copy(
                 itemId = note.id,
                 parentId = note.parentId,
@@ -103,6 +110,8 @@ internal class EditorViewModel(
             )
         }
     }
+
+    fun isDailyNote() = state.parentId == null
 
     private fun handleErrors(@StringRes errorDescription: Int): (Throwable) -> Unit = {
         it.printStackTrace()

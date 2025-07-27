@@ -2,13 +2,15 @@ package com.pointlessapps.granite.local.datasource.note.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.pointlessapps.granite.local.datasource.note.entity.NoteEntity
-import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityParentIdPartial
-import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityPartial
+import com.pointlessapps.granite.local.datasource.note.entity.NoteTagCrossRef
 import com.pointlessapps.granite.local.datasource.note.entity.NoteWithTagsEntity
+import com.pointlessapps.granite.local.datasource.note.entity.partials.NoteEntityParentIdPartial
+import com.pointlessapps.granite.local.datasource.note.entity.partials.NoteEntityPartial
 
 @Dao
 internal interface NoteDao {
@@ -72,4 +74,16 @@ internal interface NoteDao {
 
     @Query("UPDATE notes SET parent_id = :newParentId, updated_at = :currentTimestamp WHERE id = :id")
     suspend fun move(id: Int, newParentId: Int?, currentTimestamp: String)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertNoteTagCrossRef(noteTagCrossRef: NoteTagCrossRef)
+
+    @Query("DELETE FROM notes_tags_cross_ref WHERE note_id = :noteId")
+    suspend fun deleteCrossRefsForNote(noteId: Int)
+
+    @Transaction
+    suspend fun updateTags(noteId: Int, tagIds: List<Int>, currentTimestamp: String) {
+        deleteCrossRefsForNote(noteId)
+        tagIds.forEach { tagId -> insertNoteTagCrossRef(NoteTagCrossRef(noteId, tagId)) }
+    }
 }

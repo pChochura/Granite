@@ -141,7 +141,11 @@ internal class HomeViewModel(
             return
         }
 
-        eventChannel.trySend(HomeEvent.NavigateTo(Route.Editor(item.id)))
+        eventChannel.trySend(
+            HomeEvent.NavigateTo(
+                Route.Editor(Route.Editor.Arg.Note(item.id)),
+            ),
+        )
     }
 
     private fun onFolderSelected(item: Item) {
@@ -157,8 +161,11 @@ internal class HomeViewModel(
     }
 
     fun onAddFileClicked(parentId: Int? = null) {
-        // TODO handle parentId
-        eventChannel.trySend(HomeEvent.NavigateTo(Route.Editor()))
+        eventChannel.trySend(
+            HomeEvent.NavigateTo(
+                Route.Editor(Route.Editor.Arg.NewNote(parentId)),
+            ),
+        )
     }
 
     fun onOrderTypeSelected(orderType: ItemOrderType) {

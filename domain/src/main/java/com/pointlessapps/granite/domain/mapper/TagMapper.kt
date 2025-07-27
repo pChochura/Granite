@@ -8,10 +8,12 @@ internal fun LocalTag.fromLocal() = Tag(
     name = name,
     color = color,
     isBuiltIn = isBuiltIn,
+    isAutomatic = isAutomatic,
 )
 internal fun Tag.toLocal() = LocalTag(
     id = id,
     name = name,
     color = color,
     isBuiltIn = isBuiltIn,
+    isAutomatic = isAutomatic,
 )

@@ -22,7 +22,7 @@ import androidx.room.ForeignKey
 )
 data class NoteTagCrossRef(
     @ColumnInfo(name = "note_id", index = true)
-    val noteId: Long,
+    val noteId: Int,
     @ColumnInfo(name = "tag_id", index = true)
-    val tagId: Long,
+    val tagId: Int,
 )

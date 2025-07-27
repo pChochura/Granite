@@ -10,4 +10,5 @@ data class TagEntity(
     val name: String,
     val color: Int,
     val isBuiltIn: Boolean,
+    val isAutomatic: Boolean,
 )

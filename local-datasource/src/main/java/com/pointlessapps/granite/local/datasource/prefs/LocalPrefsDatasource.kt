@@ -15,11 +15,7 @@ interface LocalPrefsDatasource {
     suspend fun setDailyNotesEnabled(enabled: Boolean)
     suspend fun getDailyNotesEnabled(): Boolean
 
-    suspend fun setDailyNotesFolderName(name: String)
-    suspend fun getDailyNotesFolderName(): String
-
-    suspend fun setDailyNotesFolderId(id: Int?)
-    suspend fun getDailyNotesFolderId(): Int?
+    suspend fun getDailyNotesFolderId(): Int
 
     suspend fun setDailyNotesNameFormat(format: String)
     suspend fun getDailyNotesNameFormat(): String
@@ -53,28 +49,13 @@ internal class LocalPrefsDatasourceImpl(
         }
     }
 
+    // Group those notes in a virtual folder preventing them from being displayed with the rest
+    // of the notes
+    override suspend fun getDailyNotesFolderId() = -1
+
     override suspend fun getDailyNotesEnabled() =
         prefsDataStore.data.firstOrNull()?.dailyNotesEnabled
             ?: PreferencesDefaults.dailyNotesEnabled
-
-    override suspend fun setDailyNotesFolderName(name: String) {
-        prefsDataStore.updateData { prefs ->
-            prefs.copy(dailyNotesFolderName = name)
-        }
-    }
-
-    override suspend fun getDailyNotesFolderName() =
-        prefsDataStore.data.firstOrNull()?.dailyNotesFolderName
-            ?: PreferencesDefaults.dailyNotesFolderName
-
-    override suspend fun setDailyNotesFolderId(id: Int?) {
-        prefsDataStore.updateData { prefs ->
-            prefs.copy(dailyNotesFolderId = id)
-        }
-    }
-
-    override suspend fun getDailyNotesFolderId() =
-        prefsDataStore.data.firstOrNull()?.dailyNotesFolderId
 
     override suspend fun setDailyNotesNameFormat(format: String) {
         prefsDataStore.updateData { prefs ->

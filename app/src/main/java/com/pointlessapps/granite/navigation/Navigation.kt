@@ -38,15 +38,12 @@ internal fun Navigation(
         composable<Route.Home> {
             HomeScreen(onNavigateTo = navController::navigate)
         }
-        composable<Route.Editor> {
-            val itemId = it.toRoute<Route.Editor>().itemId
+        composable<Route.Editor>(typeMap = Route.Editor.Arg.typeMap) {
+            val arg = it.toRoute<Route.Editor>().arg
             EditorScreen(
-                viewModel = koinViewModel { parametersOf(itemId) },
+                viewModel = koinViewModel { parametersOf(arg) },
                 onNavigateTo = navController::navigate,
             )
-        }
-        composable<Route.DailyNote> {
-            DailyNoteScreen(onNavigateTo = navController::navigate)
         }
         composable<Route.Search> {
         }

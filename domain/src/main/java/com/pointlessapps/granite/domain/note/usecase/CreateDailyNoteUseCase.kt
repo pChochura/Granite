@@ -15,15 +15,13 @@ class CreateDailyNoteUseCase(
     private val localPrefsDatasource: LocalPrefsDatasource,
 ) {
     suspend operator fun invoke() = withContext(Dispatchers.IO) {
-        localPrefsDatasource.getDailyNotesFolderId()?.let {
-            localNoteDatasource.create(
-                name = SimpleDateFormat(
-                    localPrefsDatasource.getDailyNotesNameFormat(),
-                    Locale.getDefault(),
-                ).format(Date()),
-                content = "",
-                parentId = it,
-            )
-        }?.fromLocal() ?: throw ItemNotCreatedException()
+        localNoteDatasource.create(
+            name = SimpleDateFormat(
+                localPrefsDatasource.getDailyNotesNameFormat(),
+                Locale.getDefault(),
+            ).format(Date()),
+            content = "",
+            parentId = localPrefsDatasource.getDailyNotesFolderId(),
+        )?.fromLocal() ?: throw ItemNotCreatedException()
     }
 }

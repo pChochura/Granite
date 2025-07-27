@@ -1,9 +1,9 @@
 package com.pointlessapps.granite.local.datasource.note
 
 import com.pointlessapps.granite.local.datasource.note.dao.NoteDao
-import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityParentIdPartial
-import com.pointlessapps.granite.local.datasource.note.entity.NoteEntityPartial
 import com.pointlessapps.granite.local.datasource.note.entity.NoteWithTagsEntity
+import com.pointlessapps.granite.local.datasource.note.entity.partials.NoteEntityParentIdPartial
+import com.pointlessapps.granite.local.datasource.note.entity.partials.NoteEntityPartial
 import com.pointlessapps.granite.local.datasource.note.utils.getCurrentTimestamp
 
 interface LocalNoteDatasource {
@@ -22,6 +22,8 @@ interface LocalNoteDatasource {
     suspend fun duplicate(ids: List<Int>): List<NoteWithTagsEntity>
 
     suspend fun move(id: Int, newParentId: Int?): NoteWithTagsEntity?
+
+    suspend fun assignTags(id: Int, tagIds: List<Int>): NoteWithTagsEntity?
 }
 
 internal class LocalNoteDatasourceImpl(
@@ -101,6 +103,7 @@ internal class LocalNoteDatasourceImpl(
                     NoteEntityParentIdPartial(
                         id = newNoteId,
                         parentId = newParentId,
+                        updatedAt = currentTimestamp,
                     ),
                 )
             }
@@ -115,6 +118,12 @@ internal class LocalNoteDatasourceImpl(
 
     override suspend fun move(id: Int, newParentId: Int?): NoteWithTagsEntity? {
         noteDao.move(id, newParentId, getCurrentTimestamp())
+
+        return noteDao.getById(id)
+    }
+
+    override suspend fun assignTags(id: Int, tagIds: List<Int>): NoteWithTagsEntity? {
+        noteDao.updateTags(id, tagIds, getCurrentTimestamp())
 
         return noteDao.getById(id)
     }

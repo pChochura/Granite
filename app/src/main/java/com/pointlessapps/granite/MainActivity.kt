@@ -174,7 +174,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onLongClicked = {
-                                if (it == Route.DailyNote) {
+                                if ((it as? Route.Editor)?.arg is Route.Editor.Arg.NewDailyNote) {
                                     showDailyNoteButtonBottomSheet = true
                                     coroutineScope.launch {
                                         dailyNoteButtonBottomSheetState.show()

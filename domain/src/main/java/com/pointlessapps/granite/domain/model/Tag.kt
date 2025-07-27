@@ -5,4 +5,5 @@ data class Tag(
     val name: String,
     val color: Int,
     val isBuiltIn: Boolean,
+    val isAutomatic: Boolean,
 )
