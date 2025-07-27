@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ffd435d2615931de59923119b7302935",
+    "identityHash": "331e05ed0fe168874b29a143e1bb9340",
     "entities": [
       {
         "tableName": "notes",
@@ -59,7 +59,7 @@
       },
       {
         "tableName": "tags",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `color` INTEGER NOT NULL, `isBuiltIn` INTEGER NOT NULL, `automatic` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `color` INTEGER NOT NULL, `is_built_in` INTEGER NOT NULL, `is_automatic` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -81,13 +81,13 @@
           },
           {
             "fieldPath": "isBuiltIn",
-            "columnName": "isBuiltIn",
+            "columnName": "is_built_in",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "automatic",
-            "columnName": "automatic",
+            "fieldPath": "isAutomatic",
+            "columnName": "is_automatic",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -171,7 +171,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ffd435d2615931de59923119b7302935')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '331e05ed0fe168874b29a143e1bb9340')"
     ]
   }
 }

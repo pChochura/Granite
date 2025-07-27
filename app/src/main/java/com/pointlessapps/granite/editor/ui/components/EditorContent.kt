@@ -41,6 +41,7 @@ internal fun EditorContent(
     onTitleChanged: (TextFieldValue) -> Unit,
     content: TextFieldValue,
     onContentChanged: (TextFieldValue) -> Unit,
+    readOnlyTitle: Boolean,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val editorFocusRequester = remember { FocusRequester() }
@@ -65,6 +66,7 @@ internal fun EditorContent(
             Title(
                 title = title,
                 onTitleChanged = onTitleChanged,
+                readOnly = readOnlyTitle,
             )
 
             // TODO add properties list
@@ -82,6 +84,7 @@ internal fun EditorContent(
 private fun Title(
     title: TextFieldValue,
     onTitleChanged: (TextFieldValue) -> Unit,
+    readOnly: Boolean,
 ) {
     ComposeTextField(
         modifier = Modifier
@@ -105,6 +108,7 @@ private fun Title(
             ),
             placeholder = stringResource(R.string.title),
             placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.5f),
+            readOnly = readOnly,
         ),
     )
 }

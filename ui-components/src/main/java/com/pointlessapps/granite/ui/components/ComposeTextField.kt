@@ -93,6 +93,7 @@ fun ComposeTextField(
             cursorBrush = SolidColor(textFieldStyle.cursorColor),
             maxLines = textFieldStyle.maxLines,
             onTextLayout = onTextLayout,
+            readOnly = textFieldStyle.readOnly,
         )
     }
 }
@@ -120,6 +121,7 @@ fun defaultComposeTextFieldStyle() = ComposeTextFieldStyle(
     maxLines = Int.MAX_VALUE,
     placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
     cursorColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    readOnly = false,
 )
 
 data class ComposeTextFieldStyle(
@@ -132,4 +134,5 @@ data class ComposeTextFieldStyle(
     val maxLines: Int,
     val placeholderColor: Color,
     val cursorColor: Color,
+    val readOnly: Boolean,
 )

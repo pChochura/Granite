@@ -11,6 +11,7 @@ import com.pointlessapps.granite.domain.note.usecase.CreateDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
+import com.pointlessapps.granite.domain.tag.usecase.GetDailyNoteTagIdUseCase
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.launchWithDelayedLoading
@@ -45,6 +46,7 @@ internal class EditorViewModel(
 
     private val untitledNotePlaceholder = getApplication<Application>().getString(R.string.untitled)
     private val createDailyNoteUseCase: CreateDailyNoteUseCase by inject()
+    private val getDailyNoteTagIdUseCase: GetDailyNoteTagIdUseCase by inject()
     private val createItemUseCase: CreateItemUseCase by inject()
     private val updateItemUseCase: UpdateItemUseCase by inject()
     private val getNoteUseCase: GetNoteUseCase by inject()
@@ -80,6 +82,7 @@ internal class EditorViewModel(
                 parentId = note.parentId,
                 title = TextFieldValue(note.name),
                 content = TextFieldValue(note.content.orEmpty()),
+                isDailyNote = note.tags.find { it.id == getDailyNoteTagIdUseCase() } != null,
             )
         }
     }
@@ -110,8 +113,6 @@ internal class EditorViewModel(
             )
         }
     }
-
-    fun isDailyNote() = state.parentId == null
 
     private fun handleErrors(@StringRes errorDescription: Int): (Throwable) -> Unit = {
         it.printStackTrace()

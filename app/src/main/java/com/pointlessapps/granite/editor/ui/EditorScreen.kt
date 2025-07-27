@@ -51,41 +51,14 @@ internal fun EditorScreen(
                 leftIconTooltip = R.string.hide,
                 rightIcon = RC.drawable.ic_warning,
                 rightIconTooltip = R.string.file_info,
-                title = if (viewModel.isDailyNote()) R.string.daily_note else R.string.note,
+                title = if (viewModel.state.isDailyNote) R.string.daily_note else R.string.note,
                 onLeftIconClicked = {},
                 onRightIconClicked = {},
             )
         },
         fab = {
             // TODO Hide the navbar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .systemBarsPadding()
-                    .padding(dimensionResource(id = RC.dimen.margin_semi_big)),
-                contentAlignment = Alignment.Center,
-            ) {
-                BottomBarBackground {
-                    BottomBarButton(
-                        bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_arrow_left),
-                        onClicked = {}, // TODO
-                        onLongClicked = {},
-                    )
-                    BottomBarButton(
-                        bottomBarButton = BottomBarButton.Active(
-                            iconRes = RC.drawable.ic_today,
-                            title = "today",
-                        ),
-                        onClicked = {}, // TODO
-                        onLongClicked = {},
-                    )
-                    BottomBarButton(
-                        bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_arrow_right),
-                        onClicked = {}, // TODO
-                        onLongClicked = {},
-                    )
-                }
-            }
+            if (viewModel.state.isDailyNote) DailyNoteBottomBar()
         },
         content = { contentPadding ->
             EditorContent(
@@ -94,9 +67,42 @@ internal fun EditorScreen(
                 onTitleChanged = viewModel::onTitleChanged,
                 content = viewModel.state.content,
                 onContentChanged = viewModel::onContentChanged,
+                readOnlyTitle = viewModel.state.isDailyNote,
             )
         },
     )
 
     ComposeLoader(viewModel.state.isLoading)
+}
+
+@Composable
+private fun DailyNoteBottomBar() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .systemBarsPadding()
+            .padding(dimensionResource(id = RC.dimen.margin_semi_big)),
+        contentAlignment = Alignment.Center,
+    ) {
+        BottomBarBackground {
+            BottomBarButton(
+                bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_arrow_left),
+                onClicked = {}, // TODO
+                onLongClicked = {},
+            )
+            BottomBarButton(
+                bottomBarButton = BottomBarButton.Active(
+                    iconRes = RC.drawable.ic_today,
+                    title = "today",
+                ),
+                onClicked = {}, // TODO
+                onLongClicked = {},
+            )
+            BottomBarButton(
+                bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_arrow_right),
+                onClicked = {}, // TODO
+                onLongClicked = {},
+            )
+        }
+    }
 }

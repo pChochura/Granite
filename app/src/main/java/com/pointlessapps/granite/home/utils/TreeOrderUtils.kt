@@ -2,7 +2,10 @@ package com.pointlessapps.granite.home.utils
 
 import com.pointlessapps.granite.home.model.Item
 
-internal fun List<Item>.toSortedTree(comparator: Comparator<Item>): List<Item> {
+internal fun List<Item>.toSortedTree(
+    comparator: Comparator<Item>,
+    skipOrphans: Boolean = true,
+): List<Item> {
     val sortedList = mutableListOf<Item>()
     val notesIds = map { it.id }.toSet()
     val notesByParentId = groupBy { it.parentId }
@@ -21,8 +24,11 @@ internal fun List<Item>.toSortedTree(comparator: Comparator<Item>): List<Item> {
 
     addChildrenOf(null, 0)
 
-    // Add orphan notes and folders
-    notesByParentId.keys.filter { it != null && it !in notesIds }.forEach { addChildrenOf(it, 0) }
+    if (!skipOrphans) {
+        notesByParentId.keys
+            .filter { it != null && it !in notesIds }
+            .forEach { addChildrenOf(it, 0) }
+    }
 
     return sortedList
 }

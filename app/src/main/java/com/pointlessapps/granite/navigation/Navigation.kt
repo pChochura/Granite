@@ -7,7 +7,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.pointlessapps.granite.MainViewModel
-import com.pointlessapps.granite.editor.ui.DailyNoteScreen
 import com.pointlessapps.granite.editor.ui.EditorScreen
 import com.pointlessapps.granite.home.ui.HomeScreen
 import com.pointlessapps.granite.login.ui.LoginScreen
