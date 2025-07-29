@@ -20,7 +20,9 @@
     <string name="settings">Settings</string>
     <string name="clear">Clear</string>
     <string name="created_at">Created at: %s</string>
+    <string name="created_at_literal">Created at</string>
     <string name="updated_at">Updated at: %s</string>
+    <string name="modified_at_literal">Modified at</string>
     <string name="move_file">Move file</string>
     <string name="move_folder">Move folder</string>
     <string name="delete">Delete</string>
@@ -65,7 +67,7 @@
     <string name="date_days_ago">%d days ago</string>
     <string name="date_yesterday">yesterday</string>
     <string name="date_last_week">last week</string>
-    <string name="date_absolute">%1$tR %1$td.%1$tm.%1$tY</string>
+    <string name="date_absolute">%1$td.%1$tm.%1$tY %1$tR</string>
     <string name="hide_the_button">Hide the button</string>
     <string name="disable">Disable</string>
     <string name="disable_daily_note_description">You can enable it in the settings</string>
@@ -78,4 +80,5 @@
     <string name="create">Create</string>
     <string name="daily_notes">Daily notes</string>
     <string name="content">Content</string>
+    <string name="tags">Tags</string>
 </resources>

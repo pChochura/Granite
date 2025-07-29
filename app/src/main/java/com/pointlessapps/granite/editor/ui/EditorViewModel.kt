@@ -13,16 +13,23 @@ import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetTodayDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import com.pointlessapps.granite.domain.tag.usecase.GetDailyNoteTagIdUseCase
+import com.pointlessapps.granite.mapper.toTag
+import com.pointlessapps.granite.model.DateProperty
+import com.pointlessapps.granite.model.ListProperty
+import com.pointlessapps.granite.model.Property
+import com.pointlessapps.granite.model.Tag
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.launchWithDelayedLoading
 import com.pointlessapps.granite.utils.mutableStateOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import com.pointlessapps.granite.ui.R as RC
 
 internal sealed interface EditorEvent {
     data class ShowSnackbar(@StringRes val message: Int) : EditorEvent
@@ -35,9 +42,41 @@ internal data class EditorState(
     val parentId: Int? = null,
     val title: @WriteWith<TextFieldValueParceler> TextFieldValue = TextFieldValue(),
     val content: @WriteWith<TextFieldValueParceler> TextFieldValue = TextFieldValue(),
+    val tags: List<Tag> = emptyList(),
+    val createdAt: Long = -1,
+    val updatedAt: Long = -1,
     val isDailyNote: Boolean = false,
     val isLoading: Boolean = false,
-) : Parcelable
+) : Parcelable {
+
+    @IgnoredOnParcel
+    val properties: List<Property> = listOf(
+        DateProperty(
+            id = Property.CREATED_AT_ID,
+            icon = RC.drawable.ic_calendar,
+            name = R.string.created_at_literal,
+            date = createdAt,
+        ),
+        DateProperty(
+            id = Property.UPDATED_AT_ID,
+            icon = RC.drawable.ic_improve,
+            name = R.string.modified_at_literal,
+            date = updatedAt,
+        ),
+        ListProperty(
+            id = Property.TAGS_ID,
+            icon = RC.drawable.ic_tag,
+            name = R.string.tags,
+            items = tags.map {
+                ListProperty.Item(
+                    id = it.id,
+                    name = it.name,
+                    color = it.color,
+                )
+            },
+        ),
+    )
+}
 
 internal class EditorViewModel(
     savedStateHandle: SavedStateHandle,
@@ -87,6 +126,9 @@ internal class EditorViewModel(
                 parentId = note.parentId,
                 title = TextFieldValue(note.name),
                 content = TextFieldValue(note.content.orEmpty()),
+                tags = note.tags.map { it.toTag() },
+                createdAt = note.createdAt,
+                updatedAt = note.updatedAt,
                 isDailyNote = note.tags.find { it.id == getDailyNoteTagIdUseCase() } != null,
             )
         }

@@ -44,7 +44,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.fuzzy.search.FuzzySearch
-import com.pointlessapps.granite.home.model.Item
+import com.pointlessapps.granite.model.Item
 import com.pointlessapps.granite.ui.components.ComposeIcon
 import com.pointlessapps.granite.ui.components.ComposeText
 import com.pointlessapps.granite.ui.components.defaultComposeIconStyle

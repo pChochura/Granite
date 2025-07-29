@@ -2,6 +2,7 @@ package com.pointlessapps.granite.home.model
 
 import androidx.annotation.StringRes
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.model.Item
 
 internal enum class ItemOrderType(
     @StringRes val label: Int,

@@ -65,6 +65,7 @@ internal fun EditorScreen(
                 contentPadding = contentPadding,
                 title = viewModel.state.title,
                 onTitleChanged = viewModel::onTitleChanged,
+                properties = viewModel.state.properties,
                 content = viewModel.state.content,
                 onContentChanged = viewModel::onContentChanged,
                 readOnlyTitle = viewModel.state.isDailyNote,

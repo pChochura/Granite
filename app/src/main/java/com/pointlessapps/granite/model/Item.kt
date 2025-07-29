@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.home.model
+package com.pointlessapps.granite.model
 
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable

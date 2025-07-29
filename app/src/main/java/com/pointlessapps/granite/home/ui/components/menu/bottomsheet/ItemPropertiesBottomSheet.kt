@@ -19,7 +19,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.home.model.Item
+import com.pointlessapps.granite.model.Item
 import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter
 import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result
 import com.pointlessapps.granite.ui.components.ComposeText

@@ -50,7 +50,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.pointlessapps.granite.LocalBottomSectionState
 import com.pointlessapps.granite.LocalSnackbarHostState
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.home.model.Item
+import com.pointlessapps.granite.model.Item
 import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertiesBottomSheet
 import com.pointlessapps.granite.home.ui.components.menu.bottomsheet.ItemPropertyAction
 import com.pointlessapps.granite.home.ui.components.menu.dialog.ConfirmationDialog

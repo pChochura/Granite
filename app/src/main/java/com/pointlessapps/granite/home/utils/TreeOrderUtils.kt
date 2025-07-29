@@ -1,6 +1,6 @@
 package com.pointlessapps.granite.home.utils
 
-import com.pointlessapps.granite.home.model.Item
+import com.pointlessapps.granite.model.Item
 
 internal fun List<Item>.toSortedTree(
     comparator: Comparator<Item>,

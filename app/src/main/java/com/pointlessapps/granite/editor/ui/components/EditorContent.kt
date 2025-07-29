@@ -1,23 +1,34 @@
 package com.pointlessapps.granite.editor.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -28,9 +39,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.home.utils.NoOpBringIntoViewSpec
+import com.pointlessapps.granite.model.DateProperty
+import com.pointlessapps.granite.model.ListProperty
+import com.pointlessapps.granite.model.Property
+import com.pointlessapps.granite.ui.components.ComposeIcon
 import com.pointlessapps.granite.ui.components.ComposeMarkdownTextField
+import com.pointlessapps.granite.ui.components.ComposeText
 import com.pointlessapps.granite.ui.components.ComposeTextField
+import com.pointlessapps.granite.ui.components.defaultComposeIconStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextFieldStyle
+import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import java.util.Date
 import com.pointlessapps.granite.ui.R as RC
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -39,6 +58,7 @@ internal fun EditorContent(
     contentPadding: PaddingValues,
     title: TextFieldValue,
     onTitleChanged: (TextFieldValue) -> Unit,
+    properties: List<Property>,
     content: TextFieldValue,
     onContentChanged: (TextFieldValue) -> Unit,
     readOnlyTitle: Boolean,
@@ -69,7 +89,7 @@ internal fun EditorContent(
                 readOnly = readOnlyTitle,
             )
 
-            // TODO add properties list
+            PropertiesList(properties = properties)
 
             Content(
                 content = content,
@@ -111,6 +131,103 @@ private fun Title(
             readOnly = readOnly,
         ),
     )
+}
+
+@Composable
+private fun PropertiesList(
+    properties: List<Property>,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = dimensionResource(RC.dimen.margin_semi_big),
+                vertical = dimensionResource(RC.dimen.margin_tiny),
+            ),
+    ) {
+        properties.forEach { property ->
+            PropertyItem(property = property)
+        }
+    }
+}
+
+@Composable
+private fun PropertyItem(property: Property) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = dimensionResource(RC.dimen.margin_nano)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_tiny)),
+    ) {
+        ComposeIcon(
+            modifier = Modifier.size(dimensionResource(RC.dimen.caption_icon_size)),
+            iconRes = property.icon,
+            iconStyle = defaultComposeIconStyle().copy(
+                tint = MaterialTheme.colorScheme.onBackground,
+            )
+        )
+
+        ComposeText(
+            modifier = Modifier.weight(1f),
+            text = stringResource(property.name),
+            textStyle = defaultComposeTextStyle().copy(
+                textColor = MaterialTheme.colorScheme.onBackground,
+                typography = MaterialTheme.typography.labelMedium,
+            )
+        )
+
+        when (property) {
+            is DateProperty -> ComposeText(
+                modifier = Modifier.weight(2f),
+                text = stringResource(R.string.date_absolute, Date(property.date)),
+                textStyle = defaultComposeTextStyle().copy(
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    typography = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                )
+            )
+
+            is ListProperty -> LazyRow(
+                modifier = Modifier.weight(2f),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_tiny)),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items(property.items, key = { it.id }) {
+                    val color = Color(it.color)
+                    ComposeText(
+                        text = it.name,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(color)
+                            .padding(
+                                vertical = dimensionResource(RC.dimen.margin_nano),
+                                horizontal = dimensionResource(RC.dimen.margin_tiny),
+                            ),
+                        textStyle = defaultComposeTextStyle().copy(
+                            textColor = if (color.luminance() > 0.5) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                MaterialTheme.colorScheme.onPrimary
+                            },
+                            typography = MaterialTheme.typography.labelSmall,
+                        ),
+                    )
+                }
+
+                item {
+                    ComposeIcon(
+                        modifier = Modifier.size(dimensionResource(RC.dimen.caption_icon_size)),
+                        iconRes = RC.drawable.ic_plus,
+                        iconStyle = defaultComposeIconStyle().copy(
+                            tint = MaterialTheme.colorScheme.onBackground,
+                        )
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable

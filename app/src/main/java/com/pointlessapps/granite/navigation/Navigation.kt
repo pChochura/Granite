@@ -22,7 +22,8 @@ internal fun Navigation(
 
     NavHost(
         navController = navController,
-        startDestination = if (mainViewModel.isSignedIn()) Route.Home else Route.Login,
+        // TODO add auth
+        startDestination = Route.Home,
     ) {
         composable<Route.Login> {
             LoginScreen(
