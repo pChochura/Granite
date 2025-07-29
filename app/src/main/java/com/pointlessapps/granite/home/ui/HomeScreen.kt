@@ -5,10 +5,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,12 +20,14 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -32,6 +38,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -57,11 +65,13 @@ import com.pointlessapps.granite.home.ui.components.menu.dialog.RenameDialogData
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter
 import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result
+import com.pointlessapps.granite.ui.components.ComposeButton
 import com.pointlessapps.granite.ui.components.ComposeIcon
 import com.pointlessapps.granite.ui.components.ComposeLoader
 import com.pointlessapps.granite.ui.components.ComposeScaffoldLayout
 import com.pointlessapps.granite.ui.components.ComposeText
 import com.pointlessapps.granite.ui.components.TopBar
+import com.pointlessapps.granite.ui.components.defaultComposeButtonStyle
 import com.pointlessapps.granite.ui.components.defaultComposeIconStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
 import com.pointlessapps.granite.utils.plus
@@ -115,40 +125,101 @@ internal fun HomeScreen(
             )
         },
         content = { contentPadding ->
-            LazyColumn(
-                modifier = Modifier
-                    .padding(top = dimensionResource(RC.dimen.margin_medium)),
-                contentPadding = contentPadding + LocalBottomSectionState.current.asPaddingValues,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
-            ) {
-                items(viewModel.state.filteredItems, key = { it.id }) {
-                    when {
-                        it.isFolder -> FolderNameItem(
-                            item = it,
-                            isOpened = it.id in viewModel.state.openedFolderIds,
-                            onItemClicked = { viewModel.onItemSelected(it) },
-                            onItemLongClicked = {
-                                itemPropertiesBottomSheetData = it
-                                coroutineScope.launch {
-                                    itemPropertiesBottomSheetState.show()
-                                }
-                            },
-                        )
+            var dailyNotesButtonHeight by remember { mutableIntStateOf(0) }
 
-                        else -> NoteItem(
-                            item = it,
-                            onItemClicked = { viewModel.onItemSelected(it) },
-                            onItemLongClicked = {
-                                itemPropertiesBottomSheetData = it
-                                coroutineScope.launch {
-                                    itemPropertiesBottomSheetState.show()
-                                }
-                            },
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
+            ) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            top = contentPadding.calculateTopPadding() +
+                                    with(LocalDensity.current) { dailyNotesButtonHeight.toDp() } +
+                                    dimensionResource(RC.dimen.large_rounded_corners),
                         )
+                        .background(MaterialTheme.colorScheme.surfaceContainer),
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        .padding(top = contentPadding.calculateTopPadding())
+                        .onSizeChanged { dailyNotesButtonHeight = it.height }
+                        .padding(
+                            vertical = dimensionResource(RC.dimen.margin_semi_big),
+                            horizontal = dimensionResource(RC.dimen.margin_semi_big),
+                        ),
+                ) {
+                    ComposeButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        label = stringResource(R.string.daily_notes),
+                        onClick = {},
+                        buttonStyle = defaultComposeButtonStyle().copy(
+                            iconRes = RC.drawable.ic_calendar,
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            textStyle = defaultComposeTextStyle().copy(
+                                textColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
+                        )
+                    )
+                }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = contentPadding + LocalBottomSectionState.current.asPaddingValues + PaddingValues(
+                        top = with(LocalDensity.current) { dailyNotesButtonHeight.toDp() }
+                    ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top,
+                ) {
+                    item {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(dimensionResource(RC.dimen.large_rounded_corners))
+                                .clip(
+                                    shape = RoundedCornerShape(
+                                        topStart = dimensionResource(RC.dimen.large_rounded_corners),
+                                        topEnd = dimensionResource(RC.dimen.large_rounded_corners)
+                                    ),
+                                )
+                                .background(MaterialTheme.colorScheme.surfaceContainer),
+                        )
+                    }
+
+                    items(viewModel.state.filteredItems, key = { it.id }) {
+                        when {
+                            it.isFolder -> FolderNameItem(
+                                item = it,
+                                isOpened = it.id in viewModel.state.openedFolderIds,
+                                onItemClicked = { viewModel.onItemSelected(it) },
+                                onItemLongClicked = {
+                                    itemPropertiesBottomSheetData = it
+                                    coroutineScope.launch {
+                                        itemPropertiesBottomSheetState.show()
+                                    }
+                                },
+                            )
+
+                            else -> NoteItem(
+                                item = it,
+                                onItemClicked = { viewModel.onItemSelected(it) },
+                                onItemLongClicked = {
+                                    itemPropertiesBottomSheetData = it
+                                    coroutineScope.launch {
+                                        itemPropertiesBottomSheetState.show()
+                                    }
+                                },
+                            )
+                        }
                     }
                 }
             }
+
         },
     )
 
@@ -295,6 +366,7 @@ private fun LazyItemScope.FolderNameItem(
     Surface(
         modifier = Modifier
             .animateItem()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             // FIXME
 //            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))
             .combinedClickable(
@@ -343,6 +415,8 @@ private fun LazyItemScope.NoteItem(
     Surface(
         modifier = Modifier
             .animateItem()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(vertical = dimensionResource(RC.dimen.margin_nano))
             .padding(horizontal = dimensionResource(RC.dimen.margin_semi_big))
             // FIXME
 //            .padding(start = dimensionResource(RC.dimen.margin_medium).times(item.indent))

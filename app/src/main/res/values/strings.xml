@@ -76,4 +76,6 @@
     <string name="disable_daily_note_question">Disable daily note?</string>
     <string name="disable_daily_note_question_description">It will hide the daily note folder and the button shortcut.\nYou can always enable it in the settings.</string>
     <string name="create">Create</string>
+    <string name="daily_notes">Daily notes</string>
+    <string name="content">Content</string>
 </resources>

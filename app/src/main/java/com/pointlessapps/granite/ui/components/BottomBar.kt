@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +23,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.pointlessapps.granite.R
-import com.pointlessapps.granite.home.model.Item
 import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.utils.applyIf
 import com.pointlessapps.granite.ui.R as RC
@@ -61,8 +59,8 @@ internal fun BottomBar(
 
         BottomBarSupportingButton(
             iconRes = RC.drawable.ic_today,
-            onClicked = { onNavigateTo(Route.Editor(Route.Editor.Arg.NewDailyNote)) },
-            onLongClicked = { onLongClicked(Route.Editor(Route.Editor.Arg.NewDailyNote)) }
+            onClicked = { onNavigateTo(Route.Editor(Route.Editor.Arg.DailyNote)) },
+            onLongClicked = { onLongClicked(Route.Editor(Route.Editor.Arg.DailyNote)) }
         )
     }
 }

@@ -6,6 +6,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -140,10 +141,11 @@ class MainActivity : ComponentActivity() {
                     (fadeIn() + slideInVertically(initialOffsetY = { it / 2 }))
                         .togetherWith(fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }))
                 },
-                label = "bottomFabBar visibility",
+                label = "bottomNavBar visibility",
             ) { isBottomBarVisible ->
                 Column(
                     modifier = Modifier
+                        .animateContentSize()
                         .fillMaxWidth()
                         .onSizeChanged { bottomSectionState.currentHeight.intValue = it.height }
                         .wrapContentSize()
@@ -174,7 +176,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onLongClicked = {
-                                if ((it as? Route.Editor)?.arg is Route.Editor.Arg.NewDailyNote) {
+                                if ((it as? Route.Editor)?.arg is Route.Editor.Arg.DailyNote) {
                                     showDailyNoteButtonBottomSheet = true
                                     coroutineScope.launch {
                                         dailyNoteButtonBottomSheetState.show()

@@ -14,6 +14,7 @@ import com.pointlessapps.granite.domain.note.usecase.GetNotesUseCase
 import com.pointlessapps.granite.domain.note.usecase.MarkItemsAsDeletedUseCase
 import com.pointlessapps.granite.domain.note.usecase.MoveItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
+import com.pointlessapps.granite.domain.prefs.usecase.GetDailyNotesEnabledUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.GetItemsOrderTypeUseCase
 import com.pointlessapps.granite.domain.prefs.usecase.SetItemsOrderTypeUseCase
 import com.pointlessapps.granite.home.mapper.fromItemOrderType
@@ -42,6 +43,7 @@ internal data class HomeState(
     val orderType: ItemOrderType = ItemOrderType.NameAscending,
     val items: List<Item> = emptyList(),
     val deletedItems: List<Item> = emptyList(),
+    val isDailyNotesEnabled: Boolean = false,
     val isLoading: Boolean = false,
 ) : Parcelable {
 
@@ -100,6 +102,7 @@ internal class HomeViewModel(
     private val deleteItemsUseCase: DeleteItemsUseCase by inject()
     private val getNotesUseCase: GetNotesUseCase by inject()
     private val getItemsOrderTypeUseCase: GetItemsOrderTypeUseCase by inject()
+    private val getDailyNotesEnabledUseCase: GetDailyNotesEnabledUseCase by inject()
 
     private val eventChannel = Channel<HomeEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -123,6 +126,7 @@ internal class HomeViewModel(
                 items = items.toSortedTree(orderType.comparator),
                 deletedItems = deletedItems.toSortedTree(orderType.comparator),
                 orderType = orderType,
+                isDailyNotesEnabled = getDailyNotesEnabledUseCase(),
             )
         }
     }

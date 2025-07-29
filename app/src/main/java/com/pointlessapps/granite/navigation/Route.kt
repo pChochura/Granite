@@ -25,7 +25,7 @@ internal sealed interface Route {
         @Serializable
         sealed interface Arg {
             @Serializable
-            data object NewDailyNote : Arg
+            data object DailyNote : Arg
 
             @Serializable
             data class NewNote(val parentId: Int?) : Arg

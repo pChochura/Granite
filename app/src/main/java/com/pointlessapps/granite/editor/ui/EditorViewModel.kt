@@ -10,6 +10,7 @@ import com.pointlessapps.granite.R
 import com.pointlessapps.granite.domain.note.usecase.CreateDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
 import com.pointlessapps.granite.domain.note.usecase.GetNoteUseCase
+import com.pointlessapps.granite.domain.note.usecase.GetTodayDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import com.pointlessapps.granite.domain.tag.usecase.GetDailyNoteTagIdUseCase
 import com.pointlessapps.granite.navigation.Route
@@ -45,6 +46,7 @@ internal class EditorViewModel(
 ) : AndroidViewModel(application), KoinComponent {
 
     private val untitledNotePlaceholder = getApplication<Application>().getString(R.string.untitled)
+    private val getTodayDailyNoteUseCase: GetTodayDailyNoteUseCase by inject()
     private val createDailyNoteUseCase: CreateDailyNoteUseCase by inject()
     private val getDailyNoteTagIdUseCase: GetDailyNoteTagIdUseCase by inject()
     private val createItemUseCase: CreateItemUseCase by inject()
@@ -54,7 +56,7 @@ internal class EditorViewModel(
     var state by savedStateHandle.mutableStateOf(
         EditorState(
             itemId = if (arg is Route.Editor.Arg.Note) arg.id else null,
-            isDailyNote = arg is Route.Editor.Arg.NewDailyNote,
+            isDailyNote = arg is Route.Editor.Arg.DailyNote,
         ),
     )
         private set
@@ -69,7 +71,9 @@ internal class EditorViewModel(
         ) {
             val note = when (arg) {
                 is Route.Editor.Arg.Note -> requireNotNull(getNoteUseCase(arg.id))
-                is Route.Editor.Arg.NewDailyNote -> createDailyNoteUseCase()
+                is Route.Editor.Arg.DailyNote -> getTodayDailyNoteUseCase()
+                    ?: createDailyNoteUseCase()
+
                 is Route.Editor.Arg.NewNote -> createItemUseCase(
                     name = untitledNotePlaceholder,
                     content = "",
@@ -78,6 +82,7 @@ internal class EditorViewModel(
             }
 
             state = state.copy(
+                isLoading = false,
                 itemId = note.id,
                 parentId = note.parentId,
                 title = TextFieldValue(note.name),

@@ -129,6 +129,9 @@ private fun Content(
             ),
         value = content,
         onValueChange = onContentChanged,
-        textFieldStyle = defaultComposeTextFieldStyle(),
+        textFieldStyle = defaultComposeTextFieldStyle().copy(
+            placeholder = stringResource(R.string.content),
+            placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.5f),
+        ),
     )
 }
