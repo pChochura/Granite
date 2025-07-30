@@ -47,11 +47,13 @@ internal fun BottomBar(
 
                     else -> BottomBarButton.Empty(iconRes = RC.drawable.ic_color_pallete)
                 },
+                isEnabled = true,
                 onClicked = { onNavigateTo(Route.Editor.NewNote(null)) },
                 onLongClicked = { onLongClicked(Route.Editor.NewNote(null)) },
             )
             BottomBarButton(
                 bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_search),
+                isEnabled = true,
                 onClicked = { onNavigateTo(Route.Search) },
                 onLongClicked = { onLongClicked(Route.Search) },
             )
@@ -86,6 +88,7 @@ internal fun BottomBarBackground(content: @Composable RowScope.() -> Unit) {
 @Composable
 internal fun BottomBarButton(
     bottomBarButton: BottomBarButton,
+    isEnabled: Boolean,
     onClicked: () -> Unit,
     onLongClicked: () -> Unit,
 ) {
@@ -98,6 +101,7 @@ internal fun BottomBarButton(
                     background(MaterialTheme.colorScheme.primary)
                 }
                 .combinedClickable(
+                    enabled = isEnabled,
                     role = Role.Button,
                     onClick = onClicked,
                     onLongClick = onLongClicked,
@@ -117,7 +121,7 @@ internal fun BottomBarButton(
                         MaterialTheme.colorScheme.onPrimary
                     } else {
                         MaterialTheme.colorScheme.onSurface
-                    },
+                    }.copy(alpha = if (isEnabled) 1f else 0.3f),
                 ),
             )
 

@@ -9,11 +9,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.pointlessapps.granite.LocalSnackbarHostState
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.editor.ui.components.EditorContent
 import com.pointlessapps.granite.navigation.Route
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.Absolute
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.DaysAgo
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.HoursAgo
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.LastWeek
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.LessThanMinuteAgo
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.MinutesAgo
+import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.Yesterday
 import com.pointlessapps.granite.ui.components.BottomBarBackground
 import com.pointlessapps.granite.ui.components.BottomBarButton
 import com.pointlessapps.granite.ui.components.ComposeLoader
@@ -21,6 +30,7 @@ import com.pointlessapps.granite.ui.components.ComposeScaffoldLayout
 import com.pointlessapps.granite.ui.components.TopBar
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import java.util.Date
 import com.pointlessapps.granite.ui.R as RC
 
 @Composable
@@ -57,7 +67,27 @@ internal fun EditorScreen(
             )
         },
         fab = {
-            if (viewModel.state.isDailyNote) DailyNoteBottomBar()
+            if (viewModel.state.isDailyNote) {
+                val dateLiteral = when (val result =
+                    RelativeDatetimeFormatter.formatDateTime(viewModel.state.createdAt)) {
+                    LessThanMinuteAgo, is MinutesAgo, is HoursAgo -> stringResource(R.string.date_today)
+                    Yesterday -> stringResource(R.string.date_yesterday)
+                    is DaysAgo -> stringResource(R.string.date_days_ago, result.days)
+                    LastWeek -> stringResource(R.string.date_last_week)
+                    is Absolute -> stringResource(
+                        R.string.date_absolute,
+                        Date(result.time),
+                    )
+                }
+
+                DailyNoteBottomBar(
+                    dateLiteral = dateLiteral,
+                    onPreviousClicked = {},
+                    onNextClicked = {},
+                    isPreviousEnabled = false,
+                    isNextEnabled = false,
+                )
+            }
         },
         content = { contentPadding ->
             EditorContent(
@@ -76,7 +106,13 @@ internal fun EditorScreen(
 }
 
 @Composable
-private fun DailyNoteBottomBar() {
+private fun DailyNoteBottomBar(
+    dateLiteral: String,
+    onPreviousClicked: () -> Unit,
+    onNextClicked: () -> Unit,
+    isPreviousEnabled: Boolean,
+    isNextEnabled: Boolean,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -87,20 +123,23 @@ private fun DailyNoteBottomBar() {
         BottomBarBackground {
             BottomBarButton(
                 bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_arrow_left),
-                onClicked = {}, // TODO
+                isEnabled = isPreviousEnabled,
+                onClicked = onPreviousClicked,
                 onLongClicked = {},
             )
             BottomBarButton(
                 bottomBarButton = BottomBarButton.Active(
                     iconRes = RC.drawable.ic_today,
-                    title = "today",
+                    title = dateLiteral,
                 ),
+                isEnabled = true,
                 onClicked = {}, // TODO
                 onLongClicked = {},
             )
             BottomBarButton(
                 bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_arrow_right),
-                onClicked = {}, // TODO
+                isEnabled = isNextEnabled,
+                onClicked = onNextClicked,
                 onLongClicked = {},
             )
         }
