@@ -1,6 +1,5 @@
 package com.pointlessapps.granite.navigation
 
-import com.pointlessapps.granite.typemap.processor.GenerateTypeMap
 import kotlinx.serialization.Serializable
 
 internal sealed interface Route {
@@ -8,7 +7,8 @@ internal sealed interface Route {
     companion object {
         val routesWithBottomBar = listOf(
             Home::class,
-            Editor::class,
+            Editor.Note::class,
+            Editor.NewNote::class,
         )
     }
 
@@ -19,20 +19,15 @@ internal sealed interface Route {
     data object Home : Route
 
     @Serializable
-    data class Editor(val arg: Arg) : Route {
-
-        @GenerateTypeMap
+    sealed interface Editor : Route {
         @Serializable
-        sealed interface Arg {
-            @Serializable
-            data object DailyNote : Arg
+        data object DailyNote : Editor
 
-            @Serializable
-            data class NewNote(val parentId: Int?) : Arg
+        @Serializable
+        data class Note(val id: Int) : Editor
 
-            @Serializable
-            data class Note(val id: Int) : Arg
-        }
+        @Serializable
+        data class NewNote(val parentId: Int?) : Editor
     }
 
     @Serializable

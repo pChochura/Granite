@@ -147,7 +147,7 @@ internal class HomeViewModel(
 
         eventChannel.trySend(
             HomeEvent.NavigateTo(
-                Route.Editor(Route.Editor.Arg.Note(item.id)),
+                Route.Editor.Note(item.id),
             ),
         )
     }
@@ -167,7 +167,7 @@ internal class HomeViewModel(
     fun onAddFileClicked(parentId: Int? = null) {
         eventChannel.trySend(
             HomeEvent.NavigateTo(
-                Route.Editor(Route.Editor.Arg.NewNote(parentId)),
+                Route.Editor.NewNote(parentId),
             ),
         )
     }

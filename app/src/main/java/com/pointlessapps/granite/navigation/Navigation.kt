@@ -1,6 +1,7 @@
 package com.pointlessapps.granite.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -38,14 +39,23 @@ internal fun Navigation(
         composable<Route.Home> {
             HomeScreen(onNavigateTo = navController::navigate)
         }
-        composable<Route.Editor>(typeMap = Route.Editor.Arg.typeMap) {
-            val arg = it.toRoute<Route.Editor>().arg
-            EditorScreen(
-                viewModel = koinViewModel { parametersOf(arg) },
-                onNavigateTo = navController::navigate,
-            )
-        }
+
+        editorComposable<Route.Editor.Note>(navController)
+        editorComposable<Route.Editor.NewNote>(navController)
+        editorComposable<Route.Editor.DailyNote>(navController)
+
         composable<Route.Search> {
         }
+    }
+}
+
+private inline fun <reified T : Route.Editor> NavGraphBuilder.editorComposable(
+    navController: NavHostController,
+) {
+    composable<T> {
+        EditorScreen(
+            viewModel = koinViewModel { parametersOf(it.toRoute<T>() as Route.Editor) },
+            onNavigateTo = navController::navigate,
+        )
     }
 }

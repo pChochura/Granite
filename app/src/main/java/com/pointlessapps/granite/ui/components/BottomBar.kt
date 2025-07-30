@@ -47,8 +47,8 @@ internal fun BottomBar(
 
                     else -> BottomBarButton.Empty(iconRes = RC.drawable.ic_color_pallete)
                 },
-                onClicked = { onNavigateTo(Route.Editor(Route.Editor.Arg.NewNote(null))) },
-                onLongClicked = { onLongClicked(Route.Editor(Route.Editor.Arg.NewNote(null))) },
+                onClicked = { onNavigateTo(Route.Editor.NewNote(null)) },
+                onLongClicked = { onLongClicked(Route.Editor.NewNote(null)) },
             )
             BottomBarButton(
                 bottomBarButton = BottomBarButton.Empty(iconRes = RC.drawable.ic_search),
@@ -59,8 +59,8 @@ internal fun BottomBar(
 
         BottomBarSupportingButton(
             iconRes = RC.drawable.ic_today,
-            onClicked = { onNavigateTo(Route.Editor(Route.Editor.Arg.DailyNote)) },
-            onLongClicked = { onLongClicked(Route.Editor(Route.Editor.Arg.DailyNote)) }
+            onClicked = { onNavigateTo(Route.Editor.DailyNote) },
+            onLongClicked = { onLongClicked(Route.Editor.DailyNote) }
         )
     }
 }

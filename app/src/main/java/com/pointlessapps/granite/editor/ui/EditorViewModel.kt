@@ -81,7 +81,7 @@ internal data class EditorState(
 internal class EditorViewModel(
     savedStateHandle: SavedStateHandle,
     application: Application,
-    arg: Route.Editor.Arg,
+    arg: Route.Editor,
 ) : AndroidViewModel(application), KoinComponent {
 
     private val untitledNotePlaceholder = getApplication<Application>().getString(R.string.untitled)
@@ -94,8 +94,8 @@ internal class EditorViewModel(
 
     var state by savedStateHandle.mutableStateOf(
         EditorState(
-            itemId = if (arg is Route.Editor.Arg.Note) arg.id else null,
-            isDailyNote = arg is Route.Editor.Arg.DailyNote,
+            itemId = if (arg is Route.Editor.Note) arg.id else null,
+            isDailyNote = arg is Route.Editor.DailyNote,
         ),
     )
         private set
@@ -109,11 +109,11 @@ internal class EditorViewModel(
             onShowLoader = { state = state.copy(isLoading = true) },
         ) {
             val note = when (arg) {
-                is Route.Editor.Arg.Note -> requireNotNull(getNoteUseCase(arg.id))
-                is Route.Editor.Arg.DailyNote -> getTodayDailyNoteUseCase()
+                is Route.Editor.Note -> requireNotNull(getNoteUseCase(arg.id))
+                is Route.Editor.DailyNote -> getTodayDailyNoteUseCase()
                     ?: createDailyNoteUseCase()
 
-                is Route.Editor.Arg.NewNote -> createItemUseCase(
+                is Route.Editor.NewNote -> createItemUseCase(
                     name = untitledNotePlaceholder,
                     content = "",
                     parentId = arg.parentId,

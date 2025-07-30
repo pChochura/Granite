@@ -57,7 +57,6 @@ internal fun EditorScreen(
             )
         },
         fab = {
-            // TODO Hide the navbar
             if (viewModel.state.isDailyNote) DailyNoteBottomBar()
         },
         content = { contentPadding ->
