@@ -1,6 +1,7 @@
 package com.pointlessapps.granite.editor.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -25,6 +26,7 @@ import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFor
 import com.pointlessapps.granite.relative.datetime.formatter.RelativeDatetimeFormatter.Result.Yesterday
 import com.pointlessapps.granite.ui.components.BottomBarBackground
 import com.pointlessapps.granite.ui.components.BottomBarButton
+import com.pointlessapps.granite.ui.components.ComposeButton
 import com.pointlessapps.granite.ui.components.ComposeLoader
 import com.pointlessapps.granite.ui.components.ComposeScaffoldLayout
 import com.pointlessapps.granite.ui.components.TopBar
@@ -99,6 +101,18 @@ internal fun EditorScreen(
                 onContentChanged = viewModel::onContentChanged,
                 readOnlyTitle = viewModel.state.isDailyNote,
             )
+
+            Box(
+                modifier = Modifier.fillMaxSize().padding(contentPadding),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                ComposeButton(
+                    label = "Compile",
+                    onClick = {
+                        viewModel.compile()
+                    }
+                )
+            }
         },
     )
 

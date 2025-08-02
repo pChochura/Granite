@@ -119,4 +119,5 @@ dependencies {
     implementation(projects.relativeDatetimeFormatter)
     implementation(projects.typemapProcessor)
     ksp(projects.typemapProcessor)
+    implementation(projects.mica)
 }
