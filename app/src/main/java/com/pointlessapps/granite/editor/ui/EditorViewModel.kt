@@ -15,6 +15,7 @@ import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import com.pointlessapps.granite.domain.tag.usecase.GetDailyNoteTagIdUseCase
 import com.pointlessapps.granite.mapper.toTag
 import com.pointlessapps.granite.mica.Lexer
+import com.pointlessapps.granite.mica.parser.Parser
 import com.pointlessapps.granite.model.DateProperty
 import com.pointlessapps.granite.model.ListProperty
 import com.pointlessapps.granite.model.Property
@@ -169,9 +170,8 @@ internal class EditorViewModel(
     }
 
     fun compile() {
-        Lexer().parseInput(state.content.text).also {
-            println(it)
-            println(runCatching { it.parse() })
-        }
+        runCatching {
+            Parser(Lexer(state.content.text)).parse()
+        }.also { println(it) }
     }
 }
