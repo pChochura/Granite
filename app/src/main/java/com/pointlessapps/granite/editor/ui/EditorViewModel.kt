@@ -174,6 +174,7 @@ internal class EditorViewModel(
         runCatching {
             Parser(Lexer(state.content.text)).parse()
         }.also {
+            it.exceptionOrNull()?.printStackTrace()
             println(it)
             it.getOrNull()?.let(::SemanticAnalyzer)
         }
