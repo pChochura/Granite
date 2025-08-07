@@ -176,7 +176,7 @@ internal class EditorViewModel(
         }.also {
             it.exceptionOrNull()?.printStackTrace()
             println(it)
-            it.getOrNull()?.let(::SemanticAnalyzer)
+            it.getOrNull()?.let(::SemanticAnalyzer)?.analyze()
         }
     }
 }
