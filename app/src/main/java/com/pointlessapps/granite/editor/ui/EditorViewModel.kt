@@ -16,7 +16,7 @@ import com.pointlessapps.granite.domain.tag.usecase.GetDailyNoteTagIdUseCase
 import com.pointlessapps.granite.mapper.toTag
 import com.pointlessapps.granite.mica.lexer.Lexer
 import com.pointlessapps.granite.mica.parser.Parser
-import com.pointlessapps.granite.mica.semantics.SemanticAnalyzer
+import com.pointlessapps.granite.mica.linter.Linter
 import com.pointlessapps.granite.model.DateProperty
 import com.pointlessapps.granite.model.ListProperty
 import com.pointlessapps.granite.model.Property
@@ -176,7 +176,7 @@ internal class EditorViewModel(
         }.also {
             it.exceptionOrNull()?.printStackTrace()
             println(it)
-            it.getOrNull()?.let(::SemanticAnalyzer)?.analyze()
+            it.getOrNull()?.let(::Linter)?.analyze()
         }
     }
 }
