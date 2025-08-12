@@ -121,6 +121,7 @@ internal fun EditorScreen(
             isLoading = isLoading,
             output = viewModel.consoleOutput,
             onDismissRequest = {
+                viewModel.cancelMicaProcess()
                 coroutineScope.launch {
                     consoleBottomSheetState.hide()
                 }.invokeOnCompletion { showConsole = null }

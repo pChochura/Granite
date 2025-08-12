@@ -25,9 +25,12 @@ import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.launchWithDelayedLoading
 import com.pointlessapps.granite.utils.mutableStateOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -107,6 +110,7 @@ internal class EditorViewModel(
     private val eventChannel = Channel<EditorEvent>()
     val events = eventChannel.receiveAsFlow()
 
+    private var currentMicaProcess: Job? = null
     var consoleOutput by savedStateHandle.mutableStateOf(emptyList<String>())
         private set
 
@@ -174,20 +178,29 @@ internal class EditorViewModel(
         eventChannel.trySend(EditorEvent.ShowSnackbar(errorDescription))
     }
 
+    fun cancelMicaProcess() {
+        currentMicaProcess?.cancel()
+    }
+
     fun onRunCodeBlock(code: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        cancelMicaProcess()
+        currentMicaProcess = viewModelScope.launch(Dispatchers.IO) {
             eventChannel.send(EditorEvent.ShowConsole(loading = true))
             runCatching {
-                consoleOutput = emptyList()
+                withContext(Dispatchers.Main) { consoleOutput = emptyList() }
                 Mica().execute(
                     // Get rid of the code fences
                     input = code.substringAfter("```mica").substringBeforeLast("```"),
                     onOutputCallback = { consoleOutput += "> $it" },
                 )
             }.also { result ->
+                if (!coroutineContext.isActive) return@launch
+
                 eventChannel.send(EditorEvent.ShowConsole(loading = false))
                 result.exceptionOrNull()?.let {
-                    consoleOutput += "> ${it.message}"
+                    withContext(Dispatchers.Main) {
+                        consoleOutput += "> ${it.message}"
+                    }
                 }
             }
         }
