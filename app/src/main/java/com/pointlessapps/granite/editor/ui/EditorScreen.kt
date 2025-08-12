@@ -119,7 +119,9 @@ internal fun EditorScreen(
         ConsoleOutputBottomSheet(
             state = consoleBottomSheetState,
             isLoading = isLoading,
+            acceptsInput = viewModel.consoleAcceptsInput,
             output = viewModel.consoleOutput,
+            onInputCallback = viewModel::onConsoleInput,
             onDismissRequest = {
                 viewModel.cancelMicaProcess()
                 coroutineScope.launch {

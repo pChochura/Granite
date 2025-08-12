@@ -111,8 +111,11 @@ internal class EditorViewModel(
     val events = eventChannel.receiveAsFlow()
 
     private var currentMicaProcess: Job? = null
+    var consoleAcceptsInput by savedStateHandle.mutableStateOf(false)
     var consoleOutput by savedStateHandle.mutableStateOf(emptyList<String>())
         private set
+
+    private val consoleInputChannel = Channel<String>(Channel.CONFLATED)
 
     init {
         launchWithDelayedLoading(
@@ -192,6 +195,12 @@ internal class EditorViewModel(
                     // Get rid of the code fences
                     input = code.substringAfter("```mica").substringBeforeLast("```"),
                     onOutputCallback = { consoleOutput += "> $it" },
+                    onInputCallback = suspend {
+                        withContext(Dispatchers.Main) {
+                            consoleAcceptsInput = true
+                            consoleInputChannel.receive()
+                        }
+                    },
                 )
             }.also { result ->
                 if (!coroutineContext.isActive) return@launch
@@ -204,5 +213,10 @@ internal class EditorViewModel(
                 }
             }
         }
+    }
+
+    fun onConsoleInput(input: String) {
+        consoleAcceptsInput = false
+        consoleInputChannel.trySend(input)
     }
 }

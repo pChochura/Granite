@@ -83,4 +83,5 @@
     <string name="content">Content</string>
     <string name="tags">Tags</string>
     <string name="console_output">Console output</string>
+    <string name="provide_input">Provide the input</string>
 </resources>
