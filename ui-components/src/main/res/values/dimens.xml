@@ -26,6 +26,7 @@
 	<dimen name="dialog_icon_size">24dp</dimen>
 	<dimen name="dialog_item_icon_size">16dp</dimen>
 	<dimen name="placeholder_icon_size">64dp</dimen>
+	<dimen name="code_block_icon_size">32dp</dimen>
 
 	<dimen name="default_border_width">1dp</dimen>
 

@@ -62,6 +62,7 @@ internal fun EditorContent(
     content: TextFieldValue,
     onContentChanged: (TextFieldValue) -> Unit,
     readOnlyTitle: Boolean,
+    onRunCodeBlock: (String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val editorFocusRequester = remember { FocusRequester() }
@@ -94,6 +95,7 @@ internal fun EditorContent(
             Content(
                 content = content,
                 onContentChanged = onContentChanged,
+                onRunCodeBlock = onRunCodeBlock,
                 editorFocusRequester = editorFocusRequester,
             )
         }
@@ -234,6 +236,7 @@ private fun PropertyItem(property: Property) {
 private fun Content(
     content: TextFieldValue,
     onContentChanged: (TextFieldValue) -> Unit,
+    onRunCodeBlock: (String) -> Unit,
     editorFocusRequester: FocusRequester,
 ) {
     ComposeMarkdownTextField(
@@ -246,6 +249,7 @@ private fun Content(
             ),
         value = content,
         onValueChange = onContentChanged,
+        onRunCodeBlock = onRunCodeBlock,
         textFieldStyle = defaultComposeTextFieldStyle().copy(
             placeholder = stringResource(R.string.content),
             placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.5f),

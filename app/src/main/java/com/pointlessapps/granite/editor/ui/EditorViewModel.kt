@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.pointlessapps.granite.R
 import com.pointlessapps.granite.domain.note.usecase.CreateDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.CreateItemUseCase
@@ -23,8 +24,10 @@ import com.pointlessapps.granite.navigation.Route
 import com.pointlessapps.granite.utils.TextFieldValueParceler
 import com.pointlessapps.granite.utils.launchWithDelayedLoading
 import com.pointlessapps.granite.utils.mutableStateOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -104,6 +107,9 @@ internal class EditorViewModel(
     private val eventChannel = Channel<EditorEvent>()
     val events = eventChannel.receiveAsFlow()
 
+    var consoleOutput by savedStateHandle.mutableStateOf(emptyList<String>())
+        private set
+
     init {
         launchWithDelayedLoading(
             onException = handleErrors(R.string.error_loading_note),
@@ -168,12 +174,22 @@ internal class EditorViewModel(
         eventChannel.trySend(EditorEvent.ShowSnackbar(errorDescription))
     }
 
-    fun compile() {
-        runCatching {
-            Mica().execute(state.content.text)
-        }.also {
-            it.exceptionOrNull()?.printStackTrace()
-            println(it)
+    fun onRunCodeBlock(code: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            eventChannel.send(EditorEvent.ShowConsole(loading = true))
+            runCatching {
+                consoleOutput = emptyList()
+                Mica().execute(
+                    // Get rid of the code fences
+                    input = code.substringAfter("```mica").substringBeforeLast("```"),
+                    onOutputCallback = { consoleOutput += "> $it" },
+                )
+            }.also { result ->
+                eventChannel.send(EditorEvent.ShowConsole(loading = false))
+                result.exceptionOrNull()?.let {
+                    consoleOutput += "> ${it.message}"
+                }
+            }
         }
     }
 }

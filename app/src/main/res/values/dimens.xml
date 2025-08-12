@@ -12,4 +12,8 @@
     <dimen name="dialog_content_height">260dp</dimen>
 
     <dimen name="fab_icon_size">24dp</dimen>
+
+    <dimen name="console_min_height">150dp</dimen>
+    <dimen name="console_loader_size">16dp</dimen>
+    <dimen name="console_loader_stroke">1dp</dimen>
 </resources>
