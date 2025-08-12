@@ -78,8 +78,9 @@ internal fun EditorScreen(
         },
         fab = {
             if (viewModel.state.isDailyNote) {
-                val dateLiteral = when (val result =
-                    RelativeDatetimeFormatter.formatDateTime(viewModel.state.createdAt)) {
+                val dateLiteral = when (
+                    val result = RelativeDatetimeFormatter.formatDateTime(viewModel.state.createdAt)
+                ) {
                     LessThanMinuteAgo, is MinutesAgo, is HoursAgo -> stringResource(R.string.date_today)
                     Yesterday -> stringResource(R.string.date_yesterday)
                     is DaysAgo -> stringResource(R.string.date_days_ago, result.days)
