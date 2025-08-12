@@ -2,28 +2,29 @@ package com.pointlessapps.granite.markdown.renderer.styles.spans
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
+import com.pointlessapps.granite.markdown.renderer.styles.CodeBlockSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.utils.getLinesBoundingBox
 
-object CodeBlockMarkdownSpanStyle : MarkdownSpanStyle {
+class CodeBlockMarkdownSpan(
+    private val style: CodeBlockSpanStyle,
+) : MarkdownSpanStyle {
 
-    const val TAG_CONTENT = "CodeBlockMarkdownSpanStyle_Content"
+    companion object {
+        const val TAG_CONTENT = "CodeBlockMarkdownSpanStyle_Content"
+    }
 
     private val path = Path()
-    private val backgroundColor = Color(59, 59, 59, 128)
-    private val backgroundCornerRadius = 4.sp
-    private val backgroundPadding = 4.sp
 
     override fun prepare(
         result: TextLayoutResult,
         text: AnnotatedString,
-    ) = MarkdownSpanStyle.DrawInstruction {
+    ): MarkdownSpanStyle.DrawInstruction {
+        path.reset()
         text.getStringAnnotations(0, text.length).fastForEach { annotation ->
             if (!annotation.tag.startsWith(TAG_CONTENT)) return@fastForEach
 
@@ -31,14 +32,16 @@ object CodeBlockMarkdownSpanStyle : MarkdownSpanStyle {
                 startOffset = annotation.start,
                 endOffset = annotation.end,
             )
-            path.reset()
             path.addRoundRect(
                 RoundRect(
-                    rect = box.inflate(backgroundPadding.toPx()),
-                    cornerRadius = CornerRadius(backgroundCornerRadius.toPx()),
+                    rect = box.inflate(style.backgroundPadding),
+                    cornerRadius = CornerRadius(style.backgroundCornerRadius),
                 ),
             )
-            drawPath(path, backgroundColor)
+        }
+
+        return MarkdownSpanStyle.DrawInstruction {
+            drawPath(path, style.backgroundColor)
         }
     }
 }

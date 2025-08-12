@@ -3,33 +3,32 @@ package com.pointlessapps.granite.markdown.renderer.styles.spans
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
+import com.pointlessapps.granite.markdown.renderer.styles.BlockQuoteSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.MarkdownSpanStyle
 
-object BlockQuoteMarkdownSpanStyle : MarkdownSpanStyle {
+class BlockQuoteMarkdownSpan(
+    private val style: BlockQuoteSpanStyle,
+) : MarkdownSpanStyle {
 
-    const val TAG_CONTENT = "BlockQuoteMarkdownSpanStyle_Content"
-    const val TAG_INDENT = "BlockQuoteMarkdownSpanStyle_Indent"
+    companion object Companion {
+        const val TAG_CONTENT = "BlockQuoteMarkdownSpanStyle_Content"
+        const val TAG_INDENT = "BlockQuoteMarkdownSpanStyle_Indent"
+    }
 
     private val path = Path()
-    private val backgroundColor = Color(51, 51, 51)
-    private val cornerRadius = 4.sp
-    private val width = 2.sp
-    private val horizontalPadding = 12.sp
-    private val verticalPadding = 4.sp
 
     override fun prepare(
         result: TextLayoutResult,
         text: AnnotatedString,
-    ) = MarkdownSpanStyle.DrawInstruction {
-        val cornerRadius = CornerRadius(cornerRadius.toPx())
+    ): MarkdownSpanStyle.DrawInstruction {
+        val cornerRadius = CornerRadius(style.cornerRadius)
         val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
 
+        path.reset()
         annotations.fastForEach { annotation ->
             val indentRegions = text.getStringAnnotations(
                 tag = TAG_INDENT,
@@ -41,26 +40,28 @@ object BlockQuoteMarkdownSpanStyle : MarkdownSpanStyle {
                 val firstLineIndex = result.getLineForOffset(indent.start)
                 val lastLineIndex = result.getLineForOffset(indent.end)
 
-                path.reset()
                 path.addRoundRect(
                     RoundRect(
                         rect = Rect(
-                            top = result.getLineTop(firstLineIndex) - verticalPadding.toPx(),
+                            top = result.getLineTop(firstLineIndex) - style.verticalPadding,
                             left = result.getHorizontalPosition(
                                 offset = indent.start,
                                 usePrimaryDirection = true,
-                            ) - horizontalPadding.toPx(),
-                            bottom = result.getLineBottom(lastLineIndex) + verticalPadding.toPx(),
+                            ) - style.horizontalPadding,
+                            bottom = result.getLineBottom(lastLineIndex) + style.verticalPadding,
                             right = result.getHorizontalPosition(
                                 offset = indent.start,
                                 usePrimaryDirection = true,
-                            ) - horizontalPadding.toPx() + width.toPx(),
+                            ) - style.horizontalPadding + style.width,
                         ),
                         cornerRadius = cornerRadius,
                     ),
                 )
-                drawPath(path, backgroundColor)
             }
+        }
+
+        return MarkdownSpanStyle.DrawInstruction {
+            drawPath(path, style.backgroundColor)
         }
     }
 }

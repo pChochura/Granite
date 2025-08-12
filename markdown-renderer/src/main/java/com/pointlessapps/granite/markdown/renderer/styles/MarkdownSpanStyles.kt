@@ -10,13 +10,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
-import com.pointlessapps.granite.markdown.renderer.styles.spans.BlockQuoteMarkdownSpanStyle
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CalloutMarkdownSpanStyle
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeSpanMarkdownSpanStyle
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HashtagMarkdownSpanStyle
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HighlightMarkdownSpanStyle
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HorizontalRuleMarkdownSpanStyle
+import com.pointlessapps.granite.markdown.renderer.styles.spans.BlockQuoteMarkdownSpan
+import com.pointlessapps.granite.markdown.renderer.styles.spans.CalloutMarkdownSpan
+import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpan
+import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeSpanMarkdownSpan
+import com.pointlessapps.granite.markdown.renderer.styles.spans.HashtagMarkdownSpan
+import com.pointlessapps.granite.markdown.renderer.styles.spans.HighlightMarkdownSpan
+import com.pointlessapps.granite.markdown.renderer.styles.spans.HorizontalRuleMarkdownSpan
 
 /**
  * A helper class to handle preparing and delegating the drawing process to [spanStyles].
@@ -45,20 +45,14 @@ fun Modifier.draw(markdownSpanStyles: MarkdownSpanStyles) = drawWithCache {
 }
 
 @Composable
-fun rememberMarkdownSpanStyles(): MarkdownSpanStyles {
-    val context = LocalContext.current
-
-    return remember {
-        MarkdownSpanStyles(
-            listOf(
-                HighlightMarkdownSpanStyle,
-                CodeSpanMarkdownSpanStyle,
-                CodeBlockMarkdownSpanStyle,
-                HashtagMarkdownSpanStyle,
-                CalloutMarkdownSpanStyle(context),
-                BlockQuoteMarkdownSpanStyle,
-                HorizontalRuleMarkdownSpanStyle,
-            ),
-        )
-    }
-}
+fun rememberMarkdownSpanStyles(
+    spanStyles: List<MarkdownSpanStyle> = listOf(
+        HighlightMarkdownSpan(HighlightSpanStyle.defaultStyle()),
+        BlockQuoteMarkdownSpan(BlockQuoteSpanStyle.defaultStyle()),
+        CodeBlockMarkdownSpan(CodeBlockSpanStyle.defaultStyle()),
+        CodeSpanMarkdownSpan(CodeSpanSpanStyle.defaultStyle()),
+        HashtagMarkdownSpan(HashtagSpanStyle.defaultStyle()),
+        HorizontalRuleMarkdownSpan(HorizontalRuleSpanStyle.defaultStyle()),
+        CalloutMarkdownSpan(CalloutSpanStyle.defaultStyle(), LocalContext.current),
+    )
+): MarkdownSpanStyles = remember { MarkdownSpanStyles(spanStyles) }

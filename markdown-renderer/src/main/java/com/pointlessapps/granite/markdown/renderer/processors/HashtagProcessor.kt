@@ -5,7 +5,7 @@ import androidx.compose.ui.text.SpanStyle
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HashtagMarkdownSpanStyle
+import com.pointlessapps.granite.markdown.renderer.styles.spans.HashtagMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
@@ -29,7 +29,7 @@ internal object HashtagProcessor : NodeProcessor {
         SpanStyle(color = Color.Black).withRange(
             start = node.startOffset,
             end = node.endOffset,
-            tag = HashtagMarkdownSpanStyle.TAG_CONTENT,
+            tag = HashtagMarkdownSpan.TAG_CONTENT,
         ),
     )
 

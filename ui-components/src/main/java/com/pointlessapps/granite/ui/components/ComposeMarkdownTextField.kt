@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.IntOffset
 import com.pointlessapps.granite.markdown.renderer.MarkdownTransformation
 import com.pointlessapps.granite.markdown.renderer.styles.draw
 import com.pointlessapps.granite.markdown.renderer.styles.rememberMarkdownSpanStyles
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
+import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpan
 import com.pointlessapps.granite.ui.R
 
 @Composable
@@ -53,7 +53,7 @@ fun ComposeMarkdownTextField(
         mutableStateOf(
             transformedValue.getStringAnnotations(
                 // Get only the code blocks annotations with Mica lang
-                tag = "${CodeBlockMarkdownSpanStyle.TAG_CONTENT}_mica",
+                tag = "${CodeBlockMarkdownSpan.TAG_CONTENT}_mica",
                 start = 0,
                 end = transformedValue.length,
             )

@@ -16,7 +16,7 @@ import androidx.compose.ui.util.fastMap
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
+import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.utils.atLineEnd
 import com.pointlessapps.granite.markdown.renderer.utils.atLineStart
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
@@ -82,9 +82,9 @@ internal object CodeBlockProcessor : NodeProcessor {
                 start = node.startOffset,
                 end = node.endOffset,
                 tag = if (langMarker != null) {
-                    "${CodeBlockMarkdownSpanStyle.TAG_CONTENT}_$langName"
+                    "${CodeBlockMarkdownSpan.TAG_CONTENT}_$langName"
                 } else {
-                    CodeBlockMarkdownSpanStyle.TAG_CONTENT
+                    CodeBlockMarkdownSpan.TAG_CONTENT
                 },
             ),
             if (langMarker != null) {

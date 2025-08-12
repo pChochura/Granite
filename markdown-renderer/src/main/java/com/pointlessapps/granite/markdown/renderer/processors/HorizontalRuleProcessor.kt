@@ -5,7 +5,7 @@ import androidx.compose.ui.text.SpanStyle
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HorizontalRuleMarkdownSpanStyle
+import com.pointlessapps.granite.markdown.renderer.styles.spans.HorizontalRuleMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
@@ -26,7 +26,7 @@ internal object HorizontalRuleProcessor : NodeProcessor {
         SpanStyle(color = Color.Gray).withRange(
             start = node.startOffset,
             end = node.endOffset,
-            tag = HorizontalRuleMarkdownSpanStyle.TAG_CONTENT,
+            tag = HorizontalRuleMarkdownSpan.TAG_CONTENT,
         ),
     )
 

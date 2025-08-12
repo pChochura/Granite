@@ -11,8 +11,8 @@ import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeSpanMarkdownSpanStyle
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HighlightMarkdownSpanStyle
+import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeSpanMarkdownSpan
+import com.pointlessapps.granite.markdown.renderer.styles.spans.HighlightMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
@@ -71,7 +71,7 @@ internal object BoldProcessor : DelimiterProcessor(
 internal object HighlightProcessor : DelimiterProcessor(
     styles = listOf(SpanStyle(color = Color.Black)),
     delimiter = ObsidianTokenTypes.EQ,
-    tag = HighlightMarkdownSpanStyle.TAG_CONTENT,
+    tag = HighlightMarkdownSpan.TAG_CONTENT,
 )
 
 internal object ItalicProcessor : DelimiterProcessor(
@@ -93,5 +93,5 @@ internal object CommentProcessor : DelimiterProcessor(
 internal object CodeSpanProcessor : DelimiterProcessor(
     styles = listOf(SpanStyle(fontFamily = FontFamily.Monospace)),
     delimiter = MarkdownTokenTypes.BACKTICK,
-    tag = CodeSpanMarkdownSpanStyle.TAG_CONTENT,
+    tag = CodeSpanMarkdownSpan.TAG_CONTENT,
 )
