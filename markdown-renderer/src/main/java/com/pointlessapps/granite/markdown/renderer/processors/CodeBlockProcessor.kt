@@ -15,10 +15,10 @@ import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMap
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
-import com.pointlessapps.granite.markdown.renderer.utils.atLineEnd
-import com.pointlessapps.granite.markdown.renderer.utils.atLineStart
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
 import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpanStyle
+import com.pointlessapps.granite.markdown.renderer.utils.atLineEnd
+import com.pointlessapps.granite.markdown.renderer.utils.atLineStart
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.ColorHighlight
@@ -54,12 +54,11 @@ internal object CodeBlockProcessor : NodeProcessor {
     ): List<AnnotatedString.Range<AnnotatedString.Annotation>> {
         val langMarker = node.children.fastFirstOrNull { it.type == MarkdownTokenTypes.FENCE_LANG }
 
+        val langName = langMarker?.let {
+            textContent.substring(it.startOffset, it.endOffset).lowercase()
+        }
         val highlights = Highlights.Builder()
-            .language(
-                langMarker?.let {
-                    textContent.substring(it.startOffset, it.endOffset)
-                }.toLang(),
-            )
+            .language(langName.toLang())
             .theme(SyntaxThemes.pastel(true))
             .code(textContent.substring(node.startOffset, node.endOffset))
             .build()
@@ -82,7 +81,11 @@ internal object CodeBlockProcessor : NodeProcessor {
             SpanStyle(fontFamily = FontFamily.Monospace).withRange(
                 start = node.startOffset,
                 end = node.endOffset,
-                tag = CodeBlockMarkdownSpanStyle.TAG_CONTENT,
+                tag = if (langMarker != null) {
+                    "${CodeBlockMarkdownSpanStyle.TAG_CONTENT}_$langName"
+                } else {
+                    CodeBlockMarkdownSpanStyle.TAG_CONTENT
+                },
             ),
             if (langMarker != null) {
                 SpanStyle(
