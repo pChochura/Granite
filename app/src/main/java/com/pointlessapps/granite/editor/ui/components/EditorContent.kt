@@ -1,27 +1,50 @@
 package com.pointlessapps.granite.editor.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,13 +55,20 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
 import com.pointlessapps.granite.R
+import com.pointlessapps.granite.editor.ui.components.utils.getEditorToolbarItems
 import com.pointlessapps.granite.home.utils.NoOpBringIntoViewSpec
+import com.pointlessapps.granite.markdown.renderer.assist.EditingAssist
+import com.pointlessapps.granite.markdown.renderer.assist.Style
 import com.pointlessapps.granite.model.DateProperty
 import com.pointlessapps.granite.model.ListProperty
 import com.pointlessapps.granite.model.Property
@@ -49,10 +79,11 @@ import com.pointlessapps.granite.ui.components.ComposeTextField
 import com.pointlessapps.granite.ui.components.defaultComposeIconStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextFieldStyle
 import com.pointlessapps.granite.ui.components.defaultComposeTextStyle
+import com.pointlessapps.granite.utils.applyIf
 import java.util.Date
 import com.pointlessapps.granite.ui.R as RC
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun EditorContent(
     contentPadding: PaddingValues,
@@ -67,38 +98,70 @@ internal fun EditorContent(
     val keyboardController = LocalSoftwareKeyboardController.current
     val editorFocusRequester = remember { FocusRequester() }
 
-    CompositionLocalProvider(LocalBringIntoViewSpec provides NoOpBringIntoViewSpec) {
-        Column(
-            modifier = Modifier
-                .padding(top = dimensionResource(RC.dimen.margin_medium))
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(contentPadding)
-                .clickable(
-                    interactionSource = null,
-                    indication = null,
-                    onClick = {
-                        editorFocusRequester.requestFocus()
-                        keyboardController?.show()
-                    },
+    var transformedText by remember {
+        mutableStateOf(TransformedText(content.annotatedString, OffsetMapping.Identity))
+    }
+    val activeStyles by remember(transformedText) {
+        mutableStateOf(
+            EditingAssist.process(
+                transformedText.text,
+                transformedText.offsetMapping.mapSelection(content.selection),
+            ),
+        )
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        CompositionLocalProvider(LocalBringIntoViewSpec provides NoOpBringIntoViewSpec) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(contentPadding)
+                    .padding(top = dimensionResource(RC.dimen.margin_medium))
+                    .clickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = {
+                            editorFocusRequester.requestFocus()
+                            keyboardController?.show()
+                        },
+                    )
+                    .padding(bottom = dimensionResource(R.dimen.editor_bottom_padding)),
+            ) {
+                Title(
+                    title = title,
+                    onTitleChanged = onTitleChanged,
+                    readOnly = readOnlyTitle,
                 )
-                .padding(bottom = dimensionResource(R.dimen.editor_bottom_padding)),
-        ) {
-            Title(
-                title = title,
-                onTitleChanged = onTitleChanged,
-                readOnly = readOnlyTitle,
-            )
 
-            PropertiesList(properties = properties)
+                PropertiesList(properties = properties)
 
-            Content(
-                content = content,
-                onContentChanged = onContentChanged,
-                onRunCodeBlock = onRunCodeBlock,
-                editorFocusRequester = editorFocusRequester,
-            )
+                Content(
+                    content = content,
+                    onContentChanged = onContentChanged,
+                    onTransformedTextChange = { transformedText = it },
+                    onRunCodeBlock = onRunCodeBlock,
+                    editorFocusRequester = editorFocusRequester,
+                )
+
+            }
         }
+
+        AnimatedVisibility(
+            visible = WindowInsets.isImeVisible,
+            modifier = Modifier.imePadding(),
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+            content = {
+                EditorToolbar(
+                    activeStyles = activeStyles,
+                    onApplyStyle = { onContentChanged(EditingAssist.applyStyle(content, it)) },
+                )
+            },
+        )
     }
 }
 
@@ -236,6 +299,7 @@ private fun PropertyItem(property: Property) {
 private fun Content(
     content: TextFieldValue,
     onContentChanged: (TextFieldValue) -> Unit,
+    onTransformedTextChange: (TransformedText) -> Unit,
     onRunCodeBlock: (String) -> Unit,
     editorFocusRequester: FocusRequester,
 ) {
@@ -249,10 +313,117 @@ private fun Content(
             ),
         value = content,
         onValueChange = onContentChanged,
+        onTransformedTextChange = onTransformedTextChange,
         onRunCodeBlock = onRunCodeBlock,
         textFieldStyle = defaultComposeTextFieldStyle().copy(
             placeholder = stringResource(R.string.content),
             placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.5f),
         ),
+    )
+}
+
+@Composable
+private fun EditorToolbar(
+    activeStyles: List<Style>,
+    onApplyStyle: (String) -> Unit,
+) {
+    val editorToolbarItems = getEditorToolbarItems(activeStyles)
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = MaterialTheme.shapes.medium.copy(
+                    bottomStart = CornerSize(0),
+                    bottomEnd = CornerSize(0),
+                ),
+            )
+            .border(
+                width = dimensionResource(RC.dimen.default_border_width),
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = MaterialTheme.shapes.medium.copy(
+                    bottomStart = CornerSize(0),
+                    bottomEnd = CornerSize(0),
+                ),
+            ),
+        contentPadding = PaddingValues(
+            horizontal = dimensionResource(RC.dimen.margin_medium),
+            vertical = dimensionResource(RC.dimen.margin_tiny),
+        ),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_tiny)),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        items(editorToolbarItems) {
+            if (it is EditorToolbarItem.Separator) {
+                VerticalDivider(
+                    modifier = Modifier
+                        .height(dimensionResource(R.dimen.editor_toolbar_separator_height)),
+                    thickness = dimensionResource(RC.dimen.default_border_width),
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+            } else {
+                EditorToolbarItem(
+                    item = it,
+                    onClicked = { onApplyStyle(it.tag) },
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditorToolbarItem(
+    item: EditorToolbarItem,
+    onClicked: () -> Unit,
+) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(item.tooltip) } },
+        state = rememberTooltipState(),
+        focusable = false,
+    ) {
+        Row(
+            modifier = Modifier
+                .height(dimensionResource(R.dimen.editor_toolbar_item_height))
+                .clip(MaterialTheme.shapes.small)
+                .clickable(
+                    role = Role.Button,
+                    onClickLabel = item.tooltip,
+                    onClick = onClicked,
+                )
+                .applyIf(item.active) {
+                    background(MaterialTheme.colorScheme.outlineVariant)
+                }
+                .padding(horizontal = dimensionResource(RC.dimen.margin_nano)),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(RC.dimen.margin_nano)),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ComposeIcon(
+                modifier = Modifier.size(dimensionResource(R.dimen.editor_toolbar_item_icon_height)),
+                iconRes = item.iconRes,
+                iconStyle = defaultComposeIconStyle().copy(
+                    tint = MaterialTheme.colorScheme.onSurface,
+                ),
+            )
+
+            if (item is EditorToolbarItem.Extended) {
+                ComposeText(
+                    text = item.tooltip,
+                    textStyle = defaultComposeTextStyle().copy(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                        typography = MaterialTheme.typography.labelSmall,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+private fun OffsetMapping.mapSelection(selection: TextRange): TextRange {
+    return TextRange(
+        start = originalToTransformed(selection.start),
+        end = originalToTransformed(selection.end),
     )
 }
