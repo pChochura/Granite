@@ -13,7 +13,6 @@ internal class StructureHighlighter {
             '(' to ')',
             '[' to ']',
             '{' to '}',
-            '<' to '>',
         ).flatMap { listOf(it.key to it.value, it.value to it.key) }.toMap()
     }
 
@@ -59,6 +58,7 @@ internal class StructureHighlighter {
         return null
     }
 
+    // TODO save the positions of the brackets and compute that only when the [text] changes
     fun processCursorPosition(
         text: String,
         cursorPosition: TextRange,
