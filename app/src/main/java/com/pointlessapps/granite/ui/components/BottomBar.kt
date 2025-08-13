@@ -39,8 +39,9 @@ internal fun BottomBar(
     ) {
         BottomBarBackground {
             BottomBarButton(
-                bottomBarButton = when (currentDestination?.hasRoute<Route.Editor>()) {
-                    true -> BottomBarButton.Active(
+                bottomBarButton = when {
+                    currentDestination?.hasRoute<Route.Editor.Note>() == true ||
+                            currentDestination?.hasRoute<Route.Editor.NewNote>() == true -> BottomBarButton.Active(
                         iconRes = RC.drawable.ic_color_pallete,
                         title = stringResource(R.string.editor),
                     )
