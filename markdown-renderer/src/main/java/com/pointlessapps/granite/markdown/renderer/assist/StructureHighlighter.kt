@@ -1,4 +1,4 @@
-package com.pointlessapps.granite.markdown.renderer
+package com.pointlessapps.granite.markdown.renderer.assist
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -18,8 +18,8 @@ internal class StructureHighlighter {
 
     private fun styleBracketAt(index: Int) = AnnotatedString.Range(
         item = SpanStyle(
-            fontWeight = FontWeight.SemiBold,
-            textDecoration = TextDecoration.Underline,
+            fontWeight = FontWeight.Companion.SemiBold,
+            textDecoration = TextDecoration.Companion.Underline,
         ),
         start = index,
         end = index + 1,

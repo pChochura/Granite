@@ -19,7 +19,9 @@ import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal object UnorderedListProcessor : NodeProcessor {
+object UnorderedListProcessor : NodeProcessor {
+
+    const val TAG = "TAG_UnorderedList"
 
     override fun processMarkers(node: ASTNode, textContent: String): List<NodeMarker> {
         val listItemMarkers = node.children.fastFilter {
@@ -60,6 +62,11 @@ internal object UnorderedListProcessor : NodeProcessor {
                 start = node.startOffset.atLineStart(textContent),
                 // Add an additional offset to make the paragraph render smoother
                 end = node.endOffset.atLineEnd(textContent) + 1,
+            ),
+            SpanStyle().withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = TAG,
             ),
         ) + listItemMarkers.fastMap {
             SpanStyle(color = Color.DarkGray).withRange(

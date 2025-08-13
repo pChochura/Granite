@@ -15,7 +15,9 @@ import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal object InternalLinkProcessor : NodeProcessor {
+object InternalLinkProcessor : NodeProcessor {
+
+    const val TAG = "TAG_InternalLink"
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val openingMarkers = node.children.takeWhile { it.type == MarkdownTokenTypes.LBRACKET }
@@ -81,6 +83,11 @@ internal object InternalLinkProcessor : NodeProcessor {
                     end = labelMarker.endOffset,
                 )
             } else null,
+            SpanStyle().withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = TAG,
+            ),
         )
     }
 

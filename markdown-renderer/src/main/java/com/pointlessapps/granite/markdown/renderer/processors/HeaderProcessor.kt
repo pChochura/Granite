@@ -3,6 +3,7 @@ package com.pointlessapps.granite.markdown.renderer.processors
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.StringAnnotation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -10,9 +11,9 @@ import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastLastOrNull
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
+import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
 import com.pointlessapps.granite.markdown.renderer.utils.atLineEnd
 import com.pointlessapps.granite.markdown.renderer.utils.atLineStart
-import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
@@ -21,7 +22,9 @@ import org.intellij.markdown.ast.ASTNode
 import kotlin.math.max
 import kotlin.math.min
 
-internal object HeaderProcessor : NodeProcessor {
+object HeaderProcessor : NodeProcessor {
+
+    const val TAG = "TAG_Header"
 
     private val headerStyles = listOf(
         SpanStyle(
@@ -106,26 +109,32 @@ internal object HeaderProcessor : NodeProcessor {
             it.type == MarkdownTokenTypes.ATX_HEADER
         }?.takeIf { it != openingMarker }
 
+        val headingLevel = node.type.toHeadingLevel()
         return listOfNotNull(
-            headerStyles[node.type.toHeadingLevel()].second.withRange(
+            headerStyles[headingLevel].second.withRange(
                 start = node.startOffset.atLineStart(textContent),
                 // Add an additional offset to make the paragraph render smoother
                 end = node.endOffset.atLineEnd(textContent) + 1,
             ),
-            headerStyles[node.type.toHeadingLevel()].first.withRange(
+            headerStyles[headingLevel].first.withRange(
                 start = min(openingMarker.endOffset + 1, node.endOffset),
                 end = node.endOffset,
             ),
-            headerStyles[node.type.toHeadingLevel()].first.withRange(
+            headerStyles[headingLevel].first.withRange(
                 start = openingMarker.startOffset,
                 end = min(openingMarker.endOffset + 1, node.endOffset),
             ),
             if (closingMarker != null) {
-                headerStyles[node.type.toHeadingLevel()].first.withRange(
+                headerStyles[headingLevel].first.withRange(
                     start = max(node.startOffset, closingMarker.startOffset - 1),
                     end = closingMarker.endOffset,
                 )
             } else null,
+            StringAnnotation("${headingLevel + 1}").withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = TAG,
+            ),
         )
     }
 

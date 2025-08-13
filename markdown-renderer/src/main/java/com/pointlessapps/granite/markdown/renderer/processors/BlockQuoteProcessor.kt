@@ -17,8 +17,6 @@ import androidx.compose.ui.util.fastMapNotNull
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.BlockQuoteMarkdownSpan
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CalloutMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.styles.utils.CalloutTypes
 import com.pointlessapps.granite.markdown.renderer.utils.atLineEnd
 import com.pointlessapps.granite.markdown.renderer.utils.atLineStart
@@ -29,7 +27,11 @@ import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal object BlockQuoteProcessor : NodeProcessor {
+object BlockQuoteProcessor : NodeProcessor {
+
+    const val TAG = "TAG_BlockQuote"
+    const val TAG_CALLOUT = "TAG_Callout"
+    const val TAG_INDENT = "TAG_BlockQuote_indent"
 
     private val markerRegex = Regex("^(?: {0,3}> ?)*")
     private val calloutRegex = Regex("^ {0,3}> ?(\\[!(.*)](?: +|$))(.*)$")
@@ -143,14 +145,14 @@ internal object BlockQuoteProcessor : NodeProcessor {
                 end = node.startOffset.atLineEnd(textContent),
             ),
             StringAnnotation(calloutMatch.groups[2]!!.value).withRange(
-                start = node.startOffset + calloutMatch.groups[1]!!.range.first,
-                end = node.startOffset.atLineEnd(textContent),
-                tag = CalloutMarkdownSpan.TAG_LABEL,
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = TAG_CALLOUT,
             ),
             SpanStyle().withRange(
                 start = node.startOffset,
                 end = node.endOffset,
-                tag = CalloutMarkdownSpan.TAG_CONTENT,
+                tag = TAG,
             )
         ) + openingMarkers.fastMap {
             SpanStyle(color = Color.DarkGray).withRange(
@@ -172,7 +174,7 @@ internal object BlockQuoteProcessor : NodeProcessor {
                 StringAnnotation(indent.toString()).withRange(
                     start = linesOffsets[range.first].atLineStart(textContent),
                     end = linesOffsets[range.last].atLineEnd(textContent),
-                    tag = CalloutMarkdownSpan.TAG_INDENT,
+                    tag = TAG_INDENT,
                 ),
             )
         }
@@ -207,7 +209,7 @@ internal object BlockQuoteProcessor : NodeProcessor {
             SpanStyle(fontStyle = FontStyle.Italic, color = Color.Cyan).withRange(
                 start = node.startOffset,
                 end = node.endOffset,
-                tag = BlockQuoteMarkdownSpan.TAG_CONTENT,
+                tag = TAG,
             )
         ) + openingMarkers.fastMap {
             SpanStyle(fontStyle = FontStyle.Italic, color = Color.DarkGray).withRange(
@@ -229,7 +231,7 @@ internal object BlockQuoteProcessor : NodeProcessor {
                 StringAnnotation(indent.toString()).withRange(
                     start = linesOffsets[range.first].atLineStart(textContent),
                     end = linesOffsets[range.last].atLineEnd(textContent),
-                    tag = BlockQuoteMarkdownSpan.TAG_INDENT,
+                    tag = TAG_INDENT,
                 ),
             )
         }

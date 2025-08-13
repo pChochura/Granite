@@ -14,6 +14,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMapNotNull
+import com.pointlessapps.granite.markdown.renderer.processors.BlockQuoteProcessor
 import com.pointlessapps.granite.markdown.renderer.styles.CalloutSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.utils.CalloutTypes
@@ -24,12 +25,6 @@ class CalloutMarkdownSpan(
     private val style: CalloutSpanStyle,
     private val context: Context,
 ) : MarkdownSpanStyle {
-
-    companion object Companion {
-        const val TAG_CONTENT = "CalloutMarkdownSpanStyle_Content"
-        const val TAG_LABEL = "CalloutMarkdownSpanStyle_Label"
-        const val TAG_INDENT = "CalloutMarkdownSpanStyle_Indent"
-    }
 
     private data class Callout(
         val color: Color,
@@ -43,12 +38,12 @@ class CalloutMarkdownSpan(
         result: TextLayoutResult,
         text: AnnotatedString,
     ): MarkdownSpanStyle.DrawInstruction {
-        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
+        val annotations = text.getStringAnnotations(BlockQuoteProcessor.TAG, 0, text.length)
         prepareIndentationsPath(result, text, annotations)
 
         val callouts = annotations.fastMapNotNull { annotation ->
             val calloutTypeAnnotation = text.getStringAnnotations(
-                tag = TAG_LABEL,
+                tag = BlockQuoteProcessor.TAG_CALLOUT,
                 start = annotation.start,
                 end = annotation.end
             ).singleOrNull()?.item ?: return@fastMapNotNull null
@@ -113,7 +108,7 @@ class CalloutMarkdownSpan(
         val cornerRadius = CornerRadius(style.cornerRadius)
         annotations.fastForEach { annotation ->
             val indentRegions = text.getStringAnnotations(
-                tag = TAG_INDENT,
+                tag = BlockQuoteProcessor.TAG_INDENT,
                 start = annotation.start,
                 end = annotation.end,
             )

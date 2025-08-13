@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
+import com.pointlessapps.granite.markdown.renderer.processors.HorizontalRuleProcessor
 import com.pointlessapps.granite.markdown.renderer.styles.HorizontalRuleSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.utils.getLinesBoundingBox
@@ -15,10 +16,6 @@ class HorizontalRuleMarkdownSpan(
     private val style: HorizontalRuleSpanStyle,
 ) : MarkdownSpanStyle {
 
-    companion object {
-        const val TAG_CONTENT = "HorizontalRuleMarkdownSpanStyle_Content"
-    }
-
     private val path = Path()
 
     override fun prepare(
@@ -26,7 +23,7 @@ class HorizontalRuleMarkdownSpan(
         text: AnnotatedString,
     ): MarkdownSpanStyle.DrawInstruction {
         val cornerRadius = CornerRadius(style.cornerRadius)
-        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
+        val annotations = text.getStringAnnotations(HorizontalRuleProcessor.TAG, 0, text.length)
 
         path.reset()
         annotations.fastForEach { annotation ->

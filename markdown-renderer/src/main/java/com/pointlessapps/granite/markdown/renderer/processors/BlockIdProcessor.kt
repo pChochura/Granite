@@ -10,7 +10,9 @@ import com.pointlessapps.granite.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 
-internal object BlockIdProcessor : NodeProcessor {
+object BlockIdProcessor : NodeProcessor {
+
+    const val TAG = "TAG_BlockId"
 
     override fun processMarkers(node: ASTNode) = emptyList<NodeMarker>()
 
@@ -18,6 +20,7 @@ internal object BlockIdProcessor : NodeProcessor {
         SpanStyle(fontSize = 0.8.em, baselineShift = BaselineShift(0.4f)).withRange(
             start = node.startOffset,
             end = node.endOffset,
+            tag = TAG,
         ),
     )
 

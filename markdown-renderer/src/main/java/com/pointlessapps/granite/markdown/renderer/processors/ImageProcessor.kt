@@ -14,7 +14,9 @@ import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal object ImageProcessor : NodeProcessor {
+object ImageProcessor : NodeProcessor {
+
+    const val TAG = "TAG_Image"
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val linkNode = node.children.fastFirstOrNull { it.type == MarkdownElementTypes.INLINE_LINK }
@@ -99,6 +101,7 @@ internal object ImageProcessor : NodeProcessor {
             ).withRange(
                 start = node.startOffset,
                 end = node.endOffset,
+                tag = TAG,
             ),
         )
     }

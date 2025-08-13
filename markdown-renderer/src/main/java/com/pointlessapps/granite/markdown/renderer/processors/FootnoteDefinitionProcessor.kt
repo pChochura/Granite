@@ -6,17 +6,19 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastMapNotNull
-import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianElementTypes
-import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
+import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianElementTypes
+import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianTokenTypes
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal object FootnoteDefinitionProcessor : NodeProcessor {
+object FootnoteDefinitionProcessor : NodeProcessor {
+
+    const val TAG = "TAG_FootnoteDefinition"
 
     override fun processMarkers(node: ASTNode) = node.children.fastMapNotNull {
         if (
@@ -65,6 +67,11 @@ internal object FootnoteDefinitionProcessor : NodeProcessor {
             SpanStyle(fontSize = 0.95.em).withRange(
                 start = contentMarker.startOffset,
                 end = contentMarker.endOffset,
+            ),
+            SpanStyle().withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = TAG,
             ),
         )
     }

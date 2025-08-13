@@ -5,13 +5,14 @@ import androidx.compose.ui.text.SpanStyle
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HashtagMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 
-internal object HashtagProcessor : NodeProcessor {
+object HashtagProcessor : NodeProcessor {
+
+    const val TAG = "TAG_Hashtag"
 
     override fun processMarkers(node: ASTNode) =
         throw IllegalStateException("Could not process markers for the hashtag without the text content")
@@ -29,7 +30,7 @@ internal object HashtagProcessor : NodeProcessor {
         SpanStyle(color = Color.Black).withRange(
             start = node.startOffset,
             end = node.endOffset,
-            tag = HashtagMarkdownSpan.TAG_CONTENT,
+            tag = TAG,
         ),
     )
 

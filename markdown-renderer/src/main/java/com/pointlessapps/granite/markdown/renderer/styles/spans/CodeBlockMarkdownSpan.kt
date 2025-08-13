@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
+import com.pointlessapps.granite.markdown.renderer.processors.CodeBlockProcessor
 import com.pointlessapps.granite.markdown.renderer.styles.CodeBlockSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.utils.getLinesBoundingBox
@@ -14,10 +15,6 @@ class CodeBlockMarkdownSpan(
     private val style: CodeBlockSpanStyle,
 ) : MarkdownSpanStyle {
 
-    companion object {
-        const val TAG_CONTENT = "CodeBlockMarkdownSpanStyle_Content"
-    }
-
     private val path = Path()
 
     override fun prepare(
@@ -25,20 +22,19 @@ class CodeBlockMarkdownSpan(
         text: AnnotatedString,
     ): MarkdownSpanStyle.DrawInstruction {
         path.reset()
-        text.getStringAnnotations(0, text.length).fastForEach { annotation ->
-            if (!annotation.tag.startsWith(TAG_CONTENT)) return@fastForEach
-
-            val box = result.getLinesBoundingBox(
-                startOffset = annotation.start,
-                endOffset = annotation.end,
-            )
-            path.addRoundRect(
-                RoundRect(
-                    rect = box.inflate(style.backgroundPadding),
-                    cornerRadius = CornerRadius(style.backgroundCornerRadius),
-                ),
-            )
-        }
+        text.getStringAnnotations(CodeBlockProcessor.TAG, 0, text.length)
+            .fastForEach { annotation ->
+                val box = result.getLinesBoundingBox(
+                    startOffset = annotation.start,
+                    endOffset = annotation.end,
+                )
+                path.addRoundRect(
+                    RoundRect(
+                        rect = box.inflate(style.backgroundPadding),
+                        cornerRadius = CornerRadius(style.backgroundCornerRadius),
+                    ),
+                )
+            }
 
         return MarkdownSpanStyle.DrawInstruction {
             drawPath(path, style.backgroundColor)

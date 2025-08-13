@@ -7,17 +7,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
+import com.pointlessapps.granite.markdown.renderer.processors.BlockQuoteProcessor
 import com.pointlessapps.granite.markdown.renderer.styles.BlockQuoteSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.MarkdownSpanStyle
 
 class BlockQuoteMarkdownSpan(
     private val style: BlockQuoteSpanStyle,
 ) : MarkdownSpanStyle {
-
-    companion object Companion {
-        const val TAG_CONTENT = "BlockQuoteMarkdownSpanStyle_Content"
-        const val TAG_INDENT = "BlockQuoteMarkdownSpanStyle_Indent"
-    }
 
     private val path = Path()
 
@@ -26,12 +22,12 @@ class BlockQuoteMarkdownSpan(
         text: AnnotatedString,
     ): MarkdownSpanStyle.DrawInstruction {
         val cornerRadius = CornerRadius(style.cornerRadius)
-        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
+        val annotations = text.getStringAnnotations(BlockQuoteProcessor.TAG, 0, text.length)
 
         path.reset()
         annotations.fastForEach { annotation ->
             val indentRegions = text.getStringAnnotations(
-                tag = TAG_INDENT,
+                tag = BlockQuoteProcessor.TAG_INDENT,
                 start = annotation.start,
                 end = annotation.end,
             )

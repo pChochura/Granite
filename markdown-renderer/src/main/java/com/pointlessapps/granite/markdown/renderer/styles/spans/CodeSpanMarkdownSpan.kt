@@ -7,6 +7,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
+import com.pointlessapps.granite.markdown.renderer.processors.CodeSpanProcessor
 import com.pointlessapps.granite.markdown.renderer.styles.CodeSpanSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.MarkdownSpanStyle
 import com.pointlessapps.granite.markdown.renderer.styles.utils.getBoundingBoxes
@@ -15,10 +16,6 @@ class CodeSpanMarkdownSpan(
     private val style: CodeSpanSpanStyle,
 ) : MarkdownSpanStyle {
 
-    companion object {
-        const val TAG_CONTENT = "CodeSpanMarkdownSpanStyle_Content"
-    }
-
     private val path = Path()
 
     override fun prepare(
@@ -26,7 +23,7 @@ class CodeSpanMarkdownSpan(
         text: AnnotatedString,
     ): MarkdownSpanStyle.DrawInstruction {
         val cornerRadius = CornerRadius(style.cornerRadius)
-        val annotations = text.getStringAnnotations(TAG_CONTENT, 0, text.length)
+        val annotations = text.getStringAnnotations(CodeSpanProcessor.TAG, 0, text.length)
 
         path.reset()
         annotations.fastForEach { annotation ->

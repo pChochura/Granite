@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.fastMapNotNull
+import com.pointlessapps.granite.markdown.renderer.assist.StructureHighlighter
 import com.pointlessapps.granite.markdown.renderer.models.AccumulateStylesResult
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.MarkdownParsingResult
@@ -47,8 +48,9 @@ import org.intellij.markdown.parser.MarkdownParser
 import kotlin.math.max
 import kotlin.math.min
 
-class MarkdownTransformation(private var currentCursorPosition: TextRange) : VisualTransformation {
+class MarkdownTransformation : VisualTransformation {
 
+    private var currentCursorPosition: TextRange = TextRange.Zero
     private var markdownParsingResult: MarkdownParsingResult? = null
 
     private val parser = MarkdownParser(ObsidianFlavourDescriptor())

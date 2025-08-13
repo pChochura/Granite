@@ -16,7 +16,9 @@ import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal object EmbedProcessor : NodeProcessor {
+object EmbedProcessor : NodeProcessor {
+
+    const val TAG = "TAG_Embed"
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val exclamationMark = node.children.fastFirstOrNull {
@@ -95,6 +97,11 @@ internal object EmbedProcessor : NodeProcessor {
                     end = labelMarker.endOffset,
                 )
             } else null,
+            SpanStyle().withRange(
+                start = node.startOffset,
+                end = node.endOffset,
+                tag = TAG,
+            ),
         )
     }
 

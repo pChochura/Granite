@@ -18,9 +18,13 @@ import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 
-internal class InlineLinkProcessor(
+class InlineLinkProcessor(
     private val linkInteractionListener: LinkInteractionListener? = null,
 ) : NodeProcessor {
+
+    companion object {
+        const val TAG = "TAG_InlineLink"
+    }
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val linkTextMarker = node.children.fastFirstOrNull {
@@ -94,6 +98,7 @@ internal class InlineLinkProcessor(
             ).withRange(
                 start = node.startOffset,
                 end = node.endOffset,
+                tag = TAG,
             ),
             LinkAnnotation.Url(
                 url = linkDestinationMarker.getTextInNode(textContent).toString(),

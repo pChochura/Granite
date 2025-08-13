@@ -7,20 +7,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianTokenTypes
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeSpanMarkdownSpan
-import com.pointlessapps.granite.markdown.renderer.styles.spans.HighlightMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
+import com.pointlessapps.markdown.granite.parser.obsidian.ObsidianTokenTypes
 import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
-internal open class DelimiterProcessor(
-    private val styles: List<AnnotatedString.Annotation>,
+open class DelimiterProcessor(
+    private val style: AnnotatedString.Annotation,
     private val delimiter: IElementType,
     private val alwaysShowMarkers: Boolean = false,
     private val tag: String? = null,
@@ -57,41 +55,57 @@ internal open class DelimiterProcessor(
             return emptyList()
         }
 
-        return styles.map { it.withRange(node.startOffset, node.endOffset, tag) }
+        return listOf(style.withRange(node.startOffset, node.endOffset, tag))
     }
 
     override fun processChild(type: IElementType) = ChildrenProcessing.PROCESS_CHILDREN
 }
 
-internal object BoldProcessor : DelimiterProcessor(
-    styles = listOf(SpanStyle(fontWeight = FontWeight.Bold)),
+object BoldProcessor : DelimiterProcessor(
+    style = SpanStyle(fontWeight = FontWeight.Bold),
     delimiter = MarkdownTokenTypes.EMPH,
-)
+    tag = BoldProcessor.TAG,
+) {
+    const val TAG = "TAG_Bold"
+}
 
-internal object HighlightProcessor : DelimiterProcessor(
-    styles = listOf(SpanStyle(color = Color.Black)),
+object HighlightProcessor : DelimiterProcessor(
+    style = SpanStyle(color = Color.Black),
     delimiter = ObsidianTokenTypes.EQ,
-    tag = HighlightMarkdownSpan.TAG_CONTENT,
-)
+    tag = HighlightProcessor.TAG,
+) {
+    const val TAG = "TAG_Highlight"
+}
 
-internal object ItalicProcessor : DelimiterProcessor(
-    styles = listOf(SpanStyle(fontStyle = FontStyle.Italic)),
+object ItalicProcessor : DelimiterProcessor(
+    style = SpanStyle(fontStyle = FontStyle.Italic),
     delimiter = MarkdownTokenTypes.EMPH,
-)
+    tag = ItalicProcessor.TAG,
+) {
+    const val TAG = "TAG_Italic"
+}
 
-internal object StrikethroughProcessor : DelimiterProcessor(
-    styles = listOf(SpanStyle(textDecoration = TextDecoration.LineThrough)),
+object StrikethroughProcessor : DelimiterProcessor(
+    style = SpanStyle(textDecoration = TextDecoration.LineThrough),
     delimiter = GFMTokenTypes.TILDE,
-)
+    tag = StrikethroughProcessor.TAG,
+) {
+    const val TAG = "TAG_Strikethrough"
+}
 
-internal object CommentProcessor : DelimiterProcessor(
-    styles = listOf(SpanStyle(color = Color.Gray)),
+object CommentProcessor : DelimiterProcessor(
+    style = SpanStyle(color = Color.Gray),
     delimiter = ObsidianTokenTypes.PERCENT,
     alwaysShowMarkers = true,
-)
+    tag = CommentProcessor.TAG,
+) {
+    const val TAG = "TAG_Comment"
+}
 
-internal object CodeSpanProcessor : DelimiterProcessor(
-    styles = listOf(SpanStyle(fontFamily = FontFamily.Monospace)),
+object CodeSpanProcessor : DelimiterProcessor(
+    style = SpanStyle(fontFamily = FontFamily.Monospace),
     delimiter = MarkdownTokenTypes.BACKTICK,
-    tag = CodeSpanMarkdownSpan.TAG_CONTENT,
-)
+    tag = CodeSpanProcessor.TAG,
+) {
+    const val TAG = "TAG_CodeSpan"
+}

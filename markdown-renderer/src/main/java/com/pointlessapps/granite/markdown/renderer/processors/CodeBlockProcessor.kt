@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.StringAnnotation
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
@@ -16,7 +17,6 @@ import androidx.compose.ui.util.fastMap
 import com.pointlessapps.granite.markdown.renderer.NodeProcessor
 import com.pointlessapps.granite.markdown.renderer.models.ChildrenProcessing
 import com.pointlessapps.granite.markdown.renderer.models.NodeMarker
-import com.pointlessapps.granite.markdown.renderer.styles.spans.CodeBlockMarkdownSpan
 import com.pointlessapps.granite.markdown.renderer.utils.atLineEnd
 import com.pointlessapps.granite.markdown.renderer.utils.atLineStart
 import com.pointlessapps.granite.markdown.renderer.utils.withRange
@@ -28,7 +28,10 @@ import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
 
-internal object CodeBlockProcessor : NodeProcessor {
+object CodeBlockProcessor : NodeProcessor {
+
+    const val TAG = "TAG_CodeBlock"
+    const val TAG_LANG = "TAG_CodeBlock_lang"
 
     override fun processMarkers(node: ASTNode): List<NodeMarker> {
         val fenceMarkers = node.children.fastFilter {
@@ -81,12 +84,15 @@ internal object CodeBlockProcessor : NodeProcessor {
             SpanStyle(fontFamily = FontFamily.Monospace).withRange(
                 start = node.startOffset,
                 end = node.endOffset,
-                tag = if (langMarker != null) {
-                    "${CodeBlockMarkdownSpan.TAG_CONTENT}_$langName"
-                } else {
-                    CodeBlockMarkdownSpan.TAG_CONTENT
-                },
+                tag = TAG,
             ),
+            if (langName != null) {
+                StringAnnotation(langName).withRange(
+                    start = node.startOffset,
+                    end = node.endOffset,
+                    tag = TAG_LANG,
+                )
+            } else null,
             if (langMarker != null) {
                 SpanStyle(
                     fontSize = 0.6.em,
