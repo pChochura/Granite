@@ -73,32 +73,42 @@ private fun shapes() = Shapes(
 
 @Composable
 private fun lightColorPalette() = lightColorScheme(
-    primary = colorResource(id = R.color.gray_3),
-    onPrimary = colorResource(id = R.color.gray_8),
-    secondary = colorResource(id = R.color.gray_4),
-    onSecondary = colorResource(id = R.color.gray_8),
-    background = colorResource(id = R.color.gray_2),
-    onBackground = colorResource(id = R.color.gray_8),
+    primary = colorResource(R.color.light_primary),
+    onPrimary = colorResource(R.color.light_onPrimary),
+    secondary = colorResource(R.color.light_secondary),
+    onSecondary = colorResource(R.color.light_onSecondary),
+    background = colorResource(R.color.light_background),
+    onBackground = colorResource(R.color.light_onBackground),
+    surface = colorResource(R.color.light_surface),
+    onSurface = colorResource(R.color.light_onSurface),
+    onSurfaceVariant = colorResource(R.color.light_onSurfaceVariant),
+    error = colorResource(R.color.light_error),
+    onError = colorResource(R.color.light_onError),
+    outline = colorResource(R.color.light_outline),
+    outlineVariant = colorResource(R.color.light_outlineVariant),
+    surfaceContainer = colorResource(R.color.light_surfaceContainer),
+    surfaceContainerHigh = colorResource(R.color.light_surfaceContainerHigh),
+    surfaceContainerLow = colorResource(R.color.light_surfaceContainerLow),
 )
 
 @Composable
 private fun darkColorPalette() = darkColorScheme(
-    primary = colorResource(R.color.primary),
-    onPrimary = colorResource(R.color.onPrimary),
-    secondary = colorResource(R.color.secondary),
-    onSecondary = colorResource(R.color.onSecondary),
-    background = colorResource(R.color.background),
-    onBackground = colorResource(R.color.onBackground),
-    surface = colorResource(R.color.surface),
-    onSurface = colorResource(R.color.onSurface),
-    onSurfaceVariant = colorResource(R.color.onSurfaceVariant),
-    error = colorResource(R.color.error),
-    onError = colorResource(R.color.onError),
-    outline = colorResource(R.color.outline),
-    outlineVariant = colorResource(R.color.outlineVariant),
-    surfaceContainer = colorResource(R.color.surfaceContainer),
-    surfaceContainerHigh = colorResource(R.color.surfaceContainerHigh),
-    surfaceContainerLow = colorResource(R.color.surfaceContainerLow),
+    primary = colorResource(R.color.dark_primary),
+    onPrimary = colorResource(R.color.dark_onPrimary),
+    secondary = colorResource(R.color.dark_secondary),
+    onSecondary = colorResource(R.color.dark_onSecondary),
+    background = colorResource(R.color.dark_background),
+    onBackground = colorResource(R.color.dark_onBackground),
+    surface = colorResource(R.color.dark_surface),
+    onSurface = colorResource(R.color.dark_onSurface),
+    onSurfaceVariant = colorResource(R.color.dark_onSurfaceVariant),
+    error = colorResource(R.color.dark_error),
+    onError = colorResource(R.color.dark_onError),
+    outline = colorResource(R.color.dark_outline),
+    outlineVariant = colorResource(R.color.dark_outlineVariant),
+    surfaceContainer = colorResource(R.color.dark_surfaceContainer),
+    surfaceContainerHigh = colorResource(R.color.dark_surfaceContainerHigh),
+    surfaceContainerLow = colorResource(R.color.dark_surfaceContainerLow),
 )
 
 @Composable
@@ -112,8 +122,8 @@ fun ProjectTheme(
 ) {
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val colorScheme = when {
-//        dynamicColor && isDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
-//        dynamicColor && !isDarkTheme -> dynamicLightColorScheme(LocalContext.current)
+        dynamicColor && isDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
+        dynamicColor && !isDarkTheme -> dynamicLightColorScheme(LocalContext.current)
         isDarkTheme -> darkColorPalette
         else -> lightColorPalette
     }
