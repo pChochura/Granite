@@ -92,7 +92,7 @@ internal fun EditorScreen(
                 }
 
                 DailyNoteBottomBar(
-                    dateLiteral = dateLiteral,
+                    dateLiteral = if (viewModel.state.createdAt != -1L) dateLiteral else "",
                     onPreviousClicked = {},
                     onNextClicked = {},
                     isPreviousEnabled = false,

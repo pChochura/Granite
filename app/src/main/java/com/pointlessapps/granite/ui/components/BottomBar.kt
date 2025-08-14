@@ -127,13 +127,15 @@ internal fun BottomBarButton(
             )
 
             if (isActive) {
-                ComposeText(
-                    text = (bottomBarButton as? BottomBarButton.Active)?.title.orEmpty(),
-                    textStyle = defaultComposeTextStyle().copy(
-                        textColor = MaterialTheme.colorScheme.onPrimary,
-                        typography = MaterialTheme.typography.labelMedium,
+                AnimatedContent((bottomBarButton as? BottomBarButton.Active)?.title.orEmpty()) { title ->
+                    ComposeText(
+                        text = title,
+                        textStyle = defaultComposeTextStyle().copy(
+                            textColor = MaterialTheme.colorScheme.onPrimary,
+                            typography = MaterialTheme.typography.labelMedium,
+                        )
                     )
-                )
+                }
             }
         }
     }
