@@ -55,6 +55,7 @@ internal fun EditorScreen(
         coroutineScope.launch {
             viewModel.events.collect {
                 when (it) {
+                    is EditorEvent.ShowConsole -> showConsole = it.loading
                     is EditorEvent.ShowSnackbar -> localSnackbarHostState.showSnackbar(it.message)
                     is EditorEvent.NavigateTo -> onNavigateTo(it.route)
                 }

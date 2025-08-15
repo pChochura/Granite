@@ -39,6 +39,7 @@ import org.koin.core.component.inject
 import com.pointlessapps.granite.ui.R as RC
 
 internal sealed interface EditorEvent {
+    data class ShowConsole(val loading: Boolean) : EditorEvent
     data class ShowSnackbar(@StringRes val message: Int) : EditorEvent
     data class NavigateTo(val route: Route) : EditorEvent
 }
