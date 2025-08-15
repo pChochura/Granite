@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -22,7 +21,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.unit.IntOffset
@@ -31,6 +29,7 @@ import com.pointlessapps.granite.markdown.renderer.processors.CodeBlockProcessor
 import com.pointlessapps.granite.markdown.renderer.styles.draw
 import com.pointlessapps.granite.markdown.renderer.styles.rememberMarkdownSpanStyles
 import com.pointlessapps.granite.ui.R
+import kotlinx.coroutines.FlowPreview
 
 @Composable
 fun ComposeMarkdownTextField(
@@ -55,47 +54,43 @@ fun ComposeMarkdownTextField(
         onTransformedTextChange(transformedText)
     }
 
-    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-    val codeBlocksAnnotations by remember(textLayoutResult, transformedText) {
-        mutableStateOf(
-            transformedText.text.getStringAnnotations(
-                tag = CodeBlockProcessor.TAG_LANG,
-                start = 0,
-                end = transformedText.text.length,
-            ).filter { it.item == "mica" },
-        )
+    var codeBlocksAnnotations: Map<AnnotatedString.Range<String>, Float> by remember {
+        mutableStateOf(emptyMap())
     }
 
-    Box(modifier = Modifier.wrapContentSize()) {
+    Box {
         ComposeTextField(
             modifier = modifier.draw(markdownSpanStyles),
             value = value,
             onValueChange = onValueChange,
             onTextLayout = { result ->
-                textLayoutResult = result
                 markdownSpanStyles.update(result, transformedText.text)
+                codeBlocksAnnotations = transformedText.text.getStringAnnotations(
+                    tag = CodeBlockProcessor.TAG_LANG,
+                    start = 0,
+                    end = transformedText.text.length,
+                ).filter { it.item == "mica" }.associateWith {
+                    result.getLineTop(result.getLineForOffset(it.start))
+                }
             },
             textFieldStyle = textFieldStyle.copy(visualTransformation = transformation),
         )
 
-        if (textLayoutResult != null) {
-            codeBlocksAnnotations.forEach { annotation ->
-                RunMicaButton(
-                    transformedValue = transformedText.text,
-                    textLayoutResult = textLayoutResult,
-                    annotation = annotation,
-                    onRunCodeBlock = onRunCodeBlock,
-                )
-            }
+        codeBlocksAnnotations.forEach { annotation ->
+            RunMicaButton(
+                transformedValue = transformedText.text,
+                annotation = annotation,
+                onRunCodeBlock = onRunCodeBlock,
+            )
         }
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun BoxScope.RunMicaButton(
     transformedValue: AnnotatedString,
-    textLayoutResult: TextLayoutResult?,
-    annotation: AnnotatedString.Range<String>,
+    annotation: Map.Entry<AnnotatedString.Range<String>, Float>,
     onRunCodeBlock: ((String) -> Unit)?,
 ) {
     ComposeIcon(
@@ -105,23 +100,14 @@ private fun BoxScope.RunMicaButton(
                 horizontal = dimensionResource(R.dimen.margin_semi_big),
             )
             .align(Alignment.TopEnd)
-            .offset {
-                textLayoutResult?.let {
-                    IntOffset(
-                        x = 0,
-                        y = it.getLineTop(
-                            it.getLineForOffset(annotation.start),
-                        ).toInt(),
-                    )
-                } ?: IntOffset.Zero
-            }
+            .offset { IntOffset(x = 0, y = annotation.value.toInt()) }
             .clip(CircleShape)
             .clickable(
                 role = Role.Button,
                 onClickLabel = stringResource(R.string.run),
                 onClick = {
                     onRunCodeBlock?.invoke(
-                        transformedValue.substring(annotation.start, annotation.end)
+                        transformedValue.substring(annotation.key.start, annotation.key.end)
                     )
                 },
             )

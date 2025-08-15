@@ -28,8 +28,8 @@ import com.pointlessapps.granite.markdown.renderer.processors.StrikethroughProce
 import com.pointlessapps.granite.markdown.renderer.processors.UnorderedListProcessor
 
 object EditingAssist {
-    private fun getStyleFromTag(tag: String, range: IntRange) = when (tag) {
-        HeaderProcessor.TAG -> Style.Heading(1, range)
+    private fun getStyleFromTag(tag: String, range: IntRange, arg: String) = when (tag) {
+        HeaderProcessor.TAG -> Style.Heading(arg.toIntOrNull() ?: 1, range)
         BoldProcessor.TAG -> Style.Bold(range)
         ItalicProcessor.TAG -> Style.Italic(range)
         StrikethroughProcessor.TAG -> Style.Strikethrough(range)
@@ -38,7 +38,7 @@ object EditingAssist {
         OrderedListProcessor.TAG -> Style.OrderedList(range)
         UnorderedListProcessor.TAG -> Style.UnorderedList(range)
         BlockQuoteProcessor.TAG -> Style.BlockQuote(range)
-        BlockQuoteProcessor.TAG_CALLOUT -> Style.Callout("info", range)
+        BlockQuoteProcessor.TAG_CALLOUT -> Style.Callout(arg, range)
         CodeBlockProcessor.TAG -> Style.CodeBlock(range)
         CommentBlockProcessor.TAG -> Style.CommentBlock(range)
         CodeSpanProcessor.TAG -> Style.CodeSpan(range)
@@ -60,9 +60,7 @@ object EditingAssist {
         return annotations.sortedBy { it.start }.fastMapNotNull { annotation ->
             if (selection.start >= annotation.start && selection.end <= annotation.end) {
                 val range = annotation.start..annotation.end
-                return@fastMapNotNull getStyleFromTag(annotation.tag, range)
-//                HeaderProcessor.TAG -> Style.Heading(annotation.item.toInt(), range)
-//                BlockQuoteProcessor.TAG_CALLOUT -> Style.Callout(annotation.item, range)
+                return@fastMapNotNull getStyleFromTag(annotation.tag, range, annotation.item)
             }
 
             null
@@ -71,9 +69,14 @@ object EditingAssist {
 
     fun applyStyle(
         content: TextFieldValue,
+        isActive: Boolean,
         tag: String,
     ): TextFieldValue {
-        val style = getStyleFromTag(tag, IntRange(content.selection.start, content.selection.end))
+        val style = getStyleFromTag(
+            tag = tag,
+            range = IntRange(content.selection.start, content.selection.end),
+            arg = "",
+        )
         return style?.applyAt(content) ?: content
     }
 }

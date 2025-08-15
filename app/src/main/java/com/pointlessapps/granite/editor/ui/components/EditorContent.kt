@@ -158,7 +158,15 @@ internal fun EditorContent(
             content = {
                 EditorToolbar(
                     activeStyles = activeStyles,
-                    onApplyStyle = { onContentChanged(EditingAssist.applyStyle(content, it)) },
+                    onApplyStyle = {
+                        onContentChanged(
+                            EditingAssist.applyStyle(
+                                content = content,
+                                isActive = it.active,
+                                tag = it.tag,
+                            ),
+                        )
+                    },
                 )
             },
         )
@@ -325,7 +333,7 @@ private fun Content(
 @Composable
 private fun EditorToolbar(
     activeStyles: List<Style>,
-    onApplyStyle: (String) -> Unit,
+    onApplyStyle: (EditorToolbarItem) -> Unit,
 ) {
     val editorToolbarItems = getEditorToolbarItems(activeStyles)
 
@@ -365,7 +373,7 @@ private fun EditorToolbar(
             } else {
                 EditorToolbarItem(
                     item = it,
-                    onClicked = { onApplyStyle(it.tag) },
+                    onClicked = { onApplyStyle(it) },
                 )
             }
         }
