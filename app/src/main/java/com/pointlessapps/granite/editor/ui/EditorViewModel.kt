@@ -184,6 +184,7 @@ internal class EditorViewModel(
 
     fun cancelMicaProcess() {
         currentMicaProcess?.cancel()
+        consoleAcceptsInput = false
     }
 
     fun onRunCodeBlock(code: String) {
@@ -194,7 +195,7 @@ internal class EditorViewModel(
                 withContext(Dispatchers.Main) { consoleOutput = emptyList() }
                 Mica().execute(
                     // Get rid of the code fences
-                    input = code.substringAfter("```mica").substringBeforeLast("```"),
+                    input = code.substringAfter('\n').substringBeforeLast('\n'),
                     onOutputCallback = { consoleOutput += "> $it" },
                     onInputCallback = suspend {
                         withContext(Dispatchers.Main) {
@@ -204,6 +205,7 @@ internal class EditorViewModel(
                     },
                 )
             }.also { result ->
+                result.exceptionOrNull()?.printStackTrace()
                 if (!coroutineContext.isActive) return@launch
 
                 eventChannel.send(EditorEvent.ShowConsole(loading = false))
