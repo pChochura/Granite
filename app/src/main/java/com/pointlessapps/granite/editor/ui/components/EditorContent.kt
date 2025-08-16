@@ -69,6 +69,7 @@ import com.pointlessapps.granite.editor.ui.components.utils.getEditorToolbarItem
 import com.pointlessapps.granite.home.utils.NoOpBringIntoViewSpec
 import com.pointlessapps.granite.markdown.renderer.assist.EditingAssist
 import com.pointlessapps.granite.markdown.renderer.assist.Style
+import com.pointlessapps.granite.markdown.renderer.processors.CodeBlockProcessor
 import com.pointlessapps.granite.model.DateProperty
 import com.pointlessapps.granite.model.ListProperty
 import com.pointlessapps.granite.model.Property
@@ -145,6 +146,7 @@ internal fun EditorContent(
                     onTransformedTextChange = { transformedText = it },
                     onRunCodeBlock = onRunCodeBlock,
                     editorFocusRequester = editorFocusRequester,
+                    activeStyles = activeStyles,
                 )
 
             }
@@ -162,7 +164,7 @@ internal fun EditorContent(
                         onContentChanged(
                             EditingAssist.applyStyle(
                                 content = content,
-                                isActive = it.active,
+                                lastActiveStyle = it.lastActiveStyle,
                                 tag = it.tag,
                             ),
                         )
@@ -310,7 +312,10 @@ private fun Content(
     onTransformedTextChange: (TransformedText) -> Unit,
     onRunCodeBlock: (String) -> Unit,
     editorFocusRequester: FocusRequester,
+    activeStyles: List<Style>,
 ) {
+    val insideCodeBlock = activeStyles.any { it.tag == CodeBlockProcessor.TAG }
+
     ComposeMarkdownTextField(
         modifier = Modifier
             .focusRequester(editorFocusRequester)
@@ -326,6 +331,14 @@ private fun Content(
         textFieldStyle = defaultComposeTextFieldStyle().copy(
             placeholder = stringResource(R.string.content),
             placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.5f),
+            keyboardOptions = KeyboardOptions(
+                autoCorrectEnabled = !insideCodeBlock,
+                capitalization = if (insideCodeBlock) {
+                    KeyboardCapitalization.None
+                } else {
+                    KeyboardCapitalization.Sentences
+                },
+            ),
         ),
     )
 }
@@ -401,7 +414,7 @@ private fun EditorToolbarItem(
                     onClickLabel = item.tooltip,
                     onClick = onClicked,
                 )
-                .applyIf(item.active) {
+                .applyIf(item.lastActiveStyle != null) {
                     background(MaterialTheme.colorScheme.outlineVariant)
                 }
                 .padding(horizontal = dimensionResource(RC.dimen.margin_nano)),

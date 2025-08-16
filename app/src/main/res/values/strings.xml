@@ -24,9 +24,6 @@
     <string name="tag">Insert a hashtag</string>
     <string name="ordered_list">Mark as ordered list</string>
     <string name="unordered_list">Mark as unordered list</string>
-    <string name="brackets">Insert brackets</string>
-    <string name="square_brackets">Insert square brackets</string>
-    <string name="curly_brackets">Insert curly brackets</string>
     <string name="code_block">Insert a code block</string>
     <string name="blockquote">Insert a blockquote</string>
     <string name="lower_indent">Decrease the indentation</string>
