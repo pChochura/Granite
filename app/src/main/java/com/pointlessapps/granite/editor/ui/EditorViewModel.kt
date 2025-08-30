@@ -188,6 +188,7 @@ internal class EditorViewModel(
     }
 
     fun onRunCodeBlock(code: String) {
+        saveNote()
         cancelMicaProcess()
         currentMicaProcess = viewModelScope.launch(Dispatchers.IO) {
             eventChannel.send(EditorEvent.ShowConsole(loading = true))
