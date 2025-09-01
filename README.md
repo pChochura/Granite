@@ -41,6 +41,7 @@ blockBody               = statement | ( '{' statement* '}' )
 
 ifStatement             = 'if' expression blockBody ( 'else if' blockBody )? ( 'else' blockBody )?
 loopIfStatement         = 'loop' ( 'if' expression )? blockBody ( 'else' blockBody )?
+loopInStatement         = 'loop' symbol 'in' expression blockBody
 expressionStatement     = expression
 userInputStatement      = '<' symbol
 userOutputStatement     = '>' expression
