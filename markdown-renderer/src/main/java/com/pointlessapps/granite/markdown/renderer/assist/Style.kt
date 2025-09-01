@@ -56,8 +56,8 @@ data class Style(val range: IntRange, val tag: String, val arg: String? = null) 
         OrderedListProcessor.TAG -> removeFromEveryLine(text, Regex("^\\d+\\. "))
         UnorderedListProcessor.TAG -> removeFromEveryLine(text, Regex("^- "))
         BlockQuoteProcessor.TAG -> removeFromEveryLine(text, Regex("^> "))
-        BlockQuoteProcessor.TAG_CALLOUT -> applyAtEveryLine(text) { if (it == 0) "> [!info] \n> " else "> " } // TODO
-        CodeBlockProcessor.TAG -> applyBlockAt(text, "```") // TODO
+        BlockQuoteProcessor.TAG_CALLOUT -> removeFromEveryLine(text, Regex("^> "))
+        CodeBlockProcessor.TAG -> removeBlock(text, Regex("^```.*"), Regex("```"))
         InternalLinkProcessor.TAG -> removeDelimited(text, Regex("^\\[\\["), Regex("]]$"))
         InlineLinkProcessor.TAG -> removeDelimited(text, Regex("^\\[.*?]\\("), Regex("\\)$"))
         FootnoteLinkProcessor.TAG -> removeDelimited(text, Regex("^\\[\\^"), Regex("]$"))
@@ -71,10 +71,10 @@ data class Style(val range: IntRange, val tag: String, val arg: String? = null) 
         delimiter: (line: Int) -> String,
     ): TextFieldValue {
         val inputText = text.text
-        val lineStart = inputText.substring(0, range.first).lastIndexOf('\n')
+        val lineStart = inputText.substring(0, range.min()).lastIndexOf('\n')
             .takeIf { it != -1 }?.plus(1) ?: 0
-        val lines = listOf(lineStart) + inputText.substring(range.first, range.last)
-            .mapIndexedNotNull { index, c -> if (c != '\n') null else index + range.first + 1 }
+        val lines = listOf(lineStart) + inputText.substring(range.min(), range.max())
+            .mapIndexedNotNull { index, c -> if (c != '\n') null else index + range.min() + 1 }
 
         var addedSize = 0
         return text.copy(
@@ -99,10 +99,10 @@ data class Style(val range: IntRange, val tag: String, val arg: String? = null) 
 
     private fun removeFromEveryLine(text: TextFieldValue, regex: Regex): TextFieldValue {
         val inputText = text.text
-        val lineStart = inputText.substring(0, range.first).lastIndexOf('\n')
+        val lineStart = inputText.substring(0, range.min()).lastIndexOf('\n')
             .takeIf { it != -1 }?.plus(1) ?: 0
-        val lines = listOf(lineStart) + inputText.substring(range.first, range.last)
-            .mapIndexedNotNull { index, c -> if (c != '\n') null else index + range.first + 1 }
+        val lines = listOf(lineStart) + inputText.substring(range.min(), range.max())
+            .mapIndexedNotNull { index, c -> if (c != '\n') null else index + range.min() + 1 }
 
         var removedSize = 0
         return text.copy(
@@ -111,9 +111,9 @@ data class Style(val range: IntRange, val tag: String, val arg: String? = null) 
                 // Insert in a backwards order so that indices are still valid
                 lines.asReversed().forEachIndexed { line, charIndex ->
                     regex.find(inputText.substring(charIndex))?.let {
-                        delete(charIndex, charIndex + it.range.last + 1)
+                        delete(charIndex, charIndex + it.range.max() + 1)
                         if (charIndex <= text.selection.start) {
-                            removedSize += it.range.last + 1
+                            removedSize += it.range.max() + 1
                         }
                     }
                 }
@@ -133,8 +133,8 @@ data class Style(val range: IntRange, val tag: String, val arg: String? = null) 
             text = buildString {
                 append(inputText)
                 // Insert in a backwards order so that indices are still valid
-                if (suffix.isNotEmpty()) insert(range.last, suffix)
-                if (prefix.isNotEmpty()) insert(range.first, prefix)
+                if (suffix.isNotEmpty()) insert(range.max(), suffix)
+                if (prefix.isNotEmpty()) insert(range.min(), prefix)
             },
             selection = text.selection.offset(prefix.length),
         )
@@ -151,15 +151,15 @@ data class Style(val range: IntRange, val tag: String, val arg: String? = null) 
             text = buildString {
                 append(inputText)
                 if (suffix.pattern.isNotEmpty()) {
-                    suffix.find(inputText.substring(range.first, range.last))?.let {
-                        delete(range.first + it.range.first, range.first + it.range.last + 1)
+                    suffix.find(inputText.substring(range.min(), range.max()))?.let {
+                        delete(range.min() + it.range.min(), range.min() + it.range.max() + 1)
                     }
                 }
 
                 if (prefix.pattern.isNotEmpty()) {
-                    prefix.find(inputText.substring(range.first))?.let {
-                        delete(range.first, range.first + it.range.last + 1)
-                        prefixSize += it.range.last + 1
+                    prefix.find(inputText.substring(range.min()))?.let {
+                        delete(range.min(), range.min() + it.range.max() + 1)
+                        prefixSize += it.range.max() + 1
                     }
                 }
             },
@@ -173,19 +173,48 @@ data class Style(val range: IntRange, val tag: String, val arg: String? = null) 
         suffix: String = prefix,
     ): TextFieldValue {
         val inputText = text.text
-        val lineStart = inputText.substring(0, range.first).lastIndexOf('\n')
-            .takeIf { it != -1 } ?: 0
-        val lineEnd = inputText.indexOf('\n', range.last)
-            .takeIf { it != -1 } ?: 0
+        val lineStart = inputText.substring(0, range.min()).lastIndexOf('\n')
+        val lineEnd = inputText.indexOf('\n', range.max())
+            .takeIf { it != -1 } ?: range.max()
 
         return text.copy(
             text = buildString {
                 append(inputText)
                 // Insert in a backwards order so that indices are still valid
                 if (suffix.isNotEmpty()) insert(lineEnd, "\n" + suffix)
-                if (prefix.isNotEmpty()) insert(lineStart, prefix + "\n")
+                if (prefix.isNotEmpty()) insert(lineStart + 1, prefix + "\n")
             },
             selection = text.selection.offset(if (prefix.isNotEmpty()) prefix.length + 1 else 0),
+        )
+    }
+
+    private fun removeBlock(
+        text: TextFieldValue,
+        prefix: Regex,
+        suffix: Regex = prefix,
+    ): TextFieldValue {
+        val inputText = text.text
+        val prefixLength = prefix.find(inputText.substring(range.min()))?.let {
+            it.range.max() - it.range.min() + 1
+        } ?: 0
+
+        val firstLineEnd = inputText.indexOf('\n', range.min())
+            .takeIf { it != -1 } ?: (range.min() + prefixLength)
+        val lastLineStart = inputText.substring(0, range.max()).lastIndexOf('\n')
+            .takeIf { it != -1 } ?: range.max()
+
+        val suffixRange = suffix.find(
+            inputText.substring(lastLineStart, range.max()),
+        )?.range ?: IntRange.EMPTY
+
+        return text.copy(
+            text = buildString {
+                append(inputText.substring(0, range.min()))
+                append(inputText.substring(firstLineEnd + 1, lastLineStart))
+                append(inputText.substring(lastLineStart + 1, suffixRange.min() + lastLineStart))
+                append(inputText.substring(lastLineStart + suffixRange.max() + 1))
+            },
+            selection = text.selection.offset(-prefixLength - 1),
         )
     }
 }

@@ -125,7 +125,8 @@ data class CalloutSpanStyle(
     val backgroundColor: Color,
     val cornerRadius: Float,
     val width: Float,
-    val backgroundPadding: Float,
+    val backgroundHorizontalPadding: Float,
+    val backgroundVerticalPadding: Float,
     val horizontalPadding: Float,
     val verticalPadding: Float,
 ) : ExtendedSpanStyle() {
@@ -136,7 +137,8 @@ data class CalloutSpanStyle(
                 backgroundColor = Color(51, 51, 51),
                 cornerRadius = 4.sp.toPx(),
                 width = 2.sp.toPx(),
-                backgroundPadding = 4.sp.toPx(),
+                backgroundHorizontalPadding = 4.sp.toPx(),
+                backgroundVerticalPadding = 8.sp.toPx(),
                 horizontalPadding = 12.sp.toPx(),
                 verticalPadding = 8.sp.toPx(),
             )

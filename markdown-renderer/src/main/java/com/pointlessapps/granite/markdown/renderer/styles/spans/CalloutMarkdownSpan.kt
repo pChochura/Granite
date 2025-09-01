@@ -67,7 +67,7 @@ class CalloutMarkdownSpan(
                     null
                 },
                 background = result.getLinesBoundingBox(annotation.start, annotation.end)
-                    .inflate(style.backgroundPadding),
+                    .inflate(style.backgroundVerticalPadding, style.backgroundHorizontalPadding),
             )
         }
 
