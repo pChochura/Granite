@@ -51,7 +51,7 @@ statement               = declarationStatement | assignmentStatement | affixatio
                             | loopIfStatement | loopInStatement | expressionStatement
                             | userInputStatement | userOutputStatement
 
-functionDeclaration     = symbol '(' ( symbol ':' type ( ',' symbol ':' type )* )? ')' ( ':' type )? '{' statement* '}'
+functionDeclaration     = symbol '(' ( symbol ':' type ( '=' expression )? ( ',' symbol ':' type ( '=' expression )? )* )? ')' ( ':' type )? '{' statement* '}'
 typeDeclaration         = type symbol '{' ( symbol ':' type )* functionDeclaration* '}'
 
 rootLevelStatement      = statement | functionDeclaration | typeDeclaration
