@@ -2,15 +2,15 @@ Grammar for the *Mica* language:
 
 ```
 symbol                  = [a-zA-Z_] [a-zA-Z0-9_]*
-type                    = int | real | char | string | bool
-                            | intRange | realRange | any
+type                    = 'int' | 'real' | 'char' | 'string' | 'bool'
+                            | 'intRange' | 'realRange' | 'any'
                             | ( '[' type ']' ) | ( '{' type '}' )
 
 boolLiteral             = 'true' | 'false'
 charLiteral             = '\'' . '\''
 stringLiteral           = '"' .* '"'
 intLiteral              = [0-9] [0-9_]*
-realLiteral             = intLiteral '.' [0-9] [0-9_]*
+realLiteral             = intLiteral '.' intLiteral
 hexLiteral              = '0x' [0-9a-fA-F]+
 binaryLiteral           = '0b' [0-1]+
 exponentLiteral         = ( intLiteral | realLiteral ) 'e' '-'? intLiteral
@@ -28,12 +28,12 @@ expression              = boolLiteral | charLiteral | stringLiteral
                             | functionCall
                             | ( expression '[' expression ']' )
                             | ( '(' expression ')' )
-                            | ( '-' | '+' | '!' ) expression
-                            | expression ( '+' | '-' | '*' | '/' | '^' | '&' | '|' ) expression
+                            | ( ( '-' | '+' | '!' ) expression )
+                            | ( expression ( '+' | '-' | '*' | '/' | '^' | '&' | '|' ) expression )
 
 declarationStatement    = symbol ( ':' type )? '=' expression
 assignmentStatement     = symbol ( '=' | '+=' | '-=' ) expression
-affixationStatement     = symbol ( '++' | '--' ) | ( '++' | '--' ) symbol
+affixationStatement     = ( symbol ( '++' | '--' ) ) | ( ( '++' | '--' ) symbol )
 returnStatement         = 'return' expression?
 breakStatement          = 'break'
 
@@ -41,17 +41,18 @@ blockBody               = statement | ( '{' statement* '}' )
 
 ifStatement             = 'if' expression blockBody ( 'else if' blockBody )? ( 'else' blockBody )?
 loopIfStatement         = 'loop' ( 'if' expression )? blockBody ( 'else' blockBody )?
-loopInStatement         = 'loop' symbol 'in' expression blockBody
+loopInStatement         = 'loop' symbol ( ',' symbol )? 'in' expression blockBody
 expressionStatement     = expression
 userInputStatement      = '<' symbol
 userOutputStatement     = '>' expression
 
-statement               = declaration | assignment | returnStatement | breakStatement | ifStatement
+statement               = declarationStatement | assignmentStatement | affixationStatement
+                            | returnStatement | breakStatement | ifStatement
+                            | loopIfStatement | loopInStatement | expressionStatement
+                            | userInputStatement | userOutputStatement
 
 functionDeclaration     = symbol '(' ( symbol ':' type ( ',' symbol ':' type )* )? ')' ( ':' type )? '{' statement* '}'
+typeDeclaration         = type symbol '{' ( symbol ':' type )* functionDeclaration* '}'
 
-propertyDeclaration     = symbol ':' type
-typeDeclaration         = type symbol '{' propertyDeclaration* functionDeclaration* '}'
-
-rootStatement           = statement | functionDeclaration
+rootLevelStatement      = statement | functionDeclaration | typeDeclaration
 ```
