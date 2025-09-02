@@ -16,10 +16,10 @@ binaryLiteral           = '0b' [0-1]+
 exponentLiteral         = ( intLiteral | realLiteral ) 'e' '-'? intLiteral
 intRangeLiteral         = intLiteral '..' intLiteral
 realRangeLiteral        = realLiteral '..' realLiteral
-arrayLiteral            = '[' ( expression ( ',' expression )* )? ']'
-setLiteral              = '{' ( expression ( ',' expression )* )? '}'
+arrayLiteral            = '[' ( expression ( ',' expression )* ','? )? ']'
+setLiteral              = '{' ( expression ( ',' expression )* ','? )? '}'
 
-functionCall            = symbol '(' ( expression ( ',' expression )* )? ')'
+functionCall            = symbol '(' ( expression ( ',' expression )* ','? )? ')'
 
 expression              = boolLiteral | charLiteral | stringLiteral
                             | intLiteral | realLiteral | hexLiteral
@@ -51,7 +51,7 @@ statement               = declarationStatement | assignmentStatement | affixatio
                             | loopIfStatement | loopInStatement | expressionStatement
                             | userInputStatement | userOutputStatement
 
-functionDeclaration     = symbol '(' ( symbol ':' type ( '=' expression )? ( ',' symbol ':' type ( '=' expression )? )* )? ')' ( ':' type )? '{' statement* '}'
+functionDeclaration     = symbol '(' ( symbol ':' type ( '=' expression )? ( ',' symbol ':' type ( '=' expression )? ','? )* )? ')' ( ':' type )? '{' statement* '}'
 typeDeclaration         = type symbol '{' ( symbol ':' type )* functionDeclaration* '}'
 
 rootLevelStatement      = statement | functionDeclaration | typeDeclaration
