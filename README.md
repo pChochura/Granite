@@ -23,6 +23,7 @@ functionCallExpression  = symbol '(' ( expression ( ',' expression )* ','? )? ')
 
 expressionBlockBody     = expressionStatement | ( '{' statement* expressionStatement '}' )
 ifConditionExpression   = 'if' expression expressionBlockBody ( 'else if' expressionBlockBody )? 'else' expressionBlockBody
+affixationExpression    = ( symbol ( '++' | '--' ) ) | ( ( '++' | '--' ) symbol )
 
 expression              = boolLiteral | charLiteral | stringLiteral
                             | intLiteral | realLiteral | hexLiteral
@@ -30,6 +31,7 @@ expression              = boolLiteral | charLiteral | stringLiteral
                             | realRangeLiteral | arrayLiteral | setLiteral
                             | functionCallExpression
                             | ifConditionExpression
+                            | affixationExpression
                             | ( expression '[' expression ']' )
                             | ( '(' expression ')' )
                             | ( ( '-' | '+' | '!' ) expression )
@@ -37,7 +39,6 @@ expression              = boolLiteral | charLiteral | stringLiteral
 
 declarationStatement    = symbol ( ':' type )? '=' expression
 assignmentStatement     = symbol ( '=' | '+=' | '-=' ) expression
-affixationStatement     = ( symbol ( '++' | '--' ) ) | ( ( '++' | '--' ) symbol )
 returnStatement         = 'return' expression?
 breakStatement          = 'break'
 
@@ -50,9 +51,10 @@ expressionStatement     = expression
 userInputStatement      = '<' symbol
 userOutputStatement     = '>' expression
 
-statement               = declarationStatement | assignmentStatement | affixationStatement
-                            | returnStatement | breakStatement | ifConditionStatement
-                            | loopIfStatement | loopInStatement | expressionStatement
+statement               = declarationStatement | assignmentStatement
+                            | returnStatement | breakStatement
+                            | ifConditionStatement | loopIfStatement | loopInStatement
+                            | expressionStatement
                             | userInputStatement | userOutputStatement
 
 functionDeclaration     = symbol '(' ( symbol ':' type ( '=' expression )? ( ',' symbol ':' type ( '=' expression )? ','? )* )? ')' ( ':' type )? '{' statement* '}'
