@@ -19,13 +19,17 @@ realRangeLiteral        = realLiteral '..' realLiteral
 arrayLiteral            = '[' ( expression ( ',' expression )* ','? )? ']'
 setLiteral              = '{' ( expression ( ',' expression )* ','? )? '}'
 
-functionCall            = symbol '(' ( expression ( ',' expression )* ','? )? ')'
+functionCallExpression  = symbol '(' ( expression ( ',' expression )* ','? )? ')'
+
+expressionBlockBody     = expressionStatement | ( '{' statement* expressionStatement '}' )
+ifConditionExpression   = 'if' expression expressionBlockBody ( 'else if' expressionBlockBody )? 'else' expressionBlockBody
 
 expression              = boolLiteral | charLiteral | stringLiteral
                             | intLiteral | realLiteral | hexLiteral
                             | binaryLiteral | exponentLiteral | intRangeLiteral
                             | realRangeLiteral | arrayLiteral | setLiteral
-                            | functionCall
+                            | functionCallExpression
+                            | ifConditionExpression
                             | ( expression '[' expression ']' )
                             | ( '(' expression ')' )
                             | ( ( '-' | '+' | '!' ) expression )
@@ -39,7 +43,7 @@ breakStatement          = 'break'
 
 blockBody               = statement | ( '{' statement* '}' )
 
-ifStatement             = 'if' expression blockBody ( 'else if' blockBody )? ( 'else' blockBody )?
+ifConditionStatement    = 'if' expression blockBody ( 'else if' blockBody )? ( 'else' blockBody )?
 loopIfStatement         = 'loop' ( 'if' expression )? blockBody ( 'else' blockBody )?
 loopInStatement         = 'loop' symbol ( ',' symbol )? 'in' expression blockBody
 expressionStatement     = expression
@@ -47,7 +51,7 @@ userInputStatement      = '<' symbol
 userOutputStatement     = '>' expression
 
 statement               = declarationStatement | assignmentStatement | affixationStatement
-                            | returnStatement | breakStatement | ifStatement
+                            | returnStatement | breakStatement | ifConditionStatement
                             | loopIfStatement | loopInStatement | expressionStatement
                             | userInputStatement | userOutputStatement
 
