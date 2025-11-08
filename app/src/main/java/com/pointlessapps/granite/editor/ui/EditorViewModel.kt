@@ -15,7 +15,7 @@ import com.pointlessapps.granite.domain.note.usecase.GetTodayDailyNoteUseCase
 import com.pointlessapps.granite.domain.note.usecase.UpdateItemUseCase
 import com.pointlessapps.granite.domain.tag.usecase.GetDailyNoteTagIdUseCase
 import com.pointlessapps.granite.mapper.toTag
-import com.pointlessapps.granite.mica.runtime.Mica
+import com.pointlessapps.granite.mica.Mica
 import com.pointlessapps.granite.model.DateProperty
 import com.pointlessapps.granite.model.ListProperty
 import com.pointlessapps.granite.model.Property
