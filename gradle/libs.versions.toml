@@ -57,6 +57,9 @@ ktor = "3.2.3"
 credentials = "1.5.0"
 googleIdentity = "1.1.1"
 
+#Mica
+mica = "0.3.0"
+
 [libraries]
 #Kotlin
 coroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -111,6 +114,9 @@ ktor = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 credentialsPlayServices = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 credentialsGoogleId = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleIdentity" }
+
+#Mica
+mica = { module = "io.github.pchochura:mica", version.ref = "mica" }
 
 [plugins]
 #Kotlin

@@ -30,5 +30,4 @@ include(
     ":fuzzy-search",
     ":relative-datetime-formatter",
     ":typemap-processor",
-    ":mica",
 )

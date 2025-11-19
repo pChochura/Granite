@@ -66,7 +66,8 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.fromTarget(JavaVersion.VERSION_17.toString())
-            freeCompilerArgs = listOf("-XXLanguage:+WhenGuards", "-Xannotation-default-target=param-property")
+            freeCompilerArgs =
+                listOf("-XXLanguage:+WhenGuards", "-Xannotation-default-target=param-property")
         }
     }
 
@@ -110,6 +111,8 @@ dependencies {
     implementation(libs.koinCompose)
     implementation(libs.kotlinSerializationJson)
 
+    implementation(libs.mica)
+
     implementation(projects.domain)
     implementation(projects.supabaseDatasource)
     implementation(projects.localDatasource)
@@ -119,5 +122,4 @@ dependencies {
     implementation(projects.relativeDatetimeFormatter)
     implementation(projects.typemapProcessor)
     ksp(projects.typemapProcessor)
-    implementation(projects.mica)
 }

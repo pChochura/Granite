@@ -117,6 +117,17 @@ internal class EditorViewModel(
         private set
 
     private val consoleInputChannel = Channel<String>(Channel.CONFLATED)
+    private val mica by lazy {
+        Mica(
+            onOutputCallback = { consoleOutput += "> $it" },
+            onInputCallback = suspend {
+                withContext(Dispatchers.Main) {
+                    consoleAcceptsInput = true
+                    consoleInputChannel.receive()
+                }
+            },
+        )
+    }
 
     init {
         launchWithDelayedLoading(
@@ -194,16 +205,9 @@ internal class EditorViewModel(
             eventChannel.send(EditorEvent.ShowConsole(loading = true))
             runCatching {
                 withContext(Dispatchers.Main) { consoleOutput = emptyList() }
-                Mica().execute(
+                mica.execute(
                     // Get rid of the code fences
                     input = code.substringAfter('\n').substringBeforeLast('\n'),
-                    onOutputCallback = { consoleOutput += "> $it" },
-                    onInputCallback = suspend {
-                        withContext(Dispatchers.Main) {
-                            consoleAcceptsInput = true
-                            consoleInputChannel.receive()
-                        }
-                    },
                 )
             }.also { result ->
                 result.exceptionOrNull()?.printStackTrace()
